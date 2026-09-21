@@ -37,7 +37,7 @@ jobs:
             libimage-exiftool-perl imagemagick \
             libheif-plugin-aomenc libheif-plugin-dav1d
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       # The checkout belongs to the runner's user and the container runs as
       # root, so git calls the repository dubiously owned and refuses to read
@@ -47,7 +47,7 @@ jobs:
       - name: Trust the checkout
         run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
 
-      - uses: actions/setup-go@v5
+      - uses: actions/setup-go@v7
         with:
           go-version-file: go.mod
           cache-dependency-path: go.sum
@@ -59,7 +59,7 @@ jobs:
       # this keeps that download between runs. The key is the file holding the
       # pin and its checksums, so a new pin is a new cache entry.
       - name: Cache the pinned Hugo
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ~/.cache/exposer
           key: hugo-${{ hashFiles('cmd/exposer/hugo.go') }}
