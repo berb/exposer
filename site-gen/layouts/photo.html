@@ -60,9 +60,9 @@
     <figure class="viewer" data-fullscreen-viewer style="--ar:{{ $ar }};--tone:{{ .tone }}">
       <span class="frame">
         <picture>
-          {{ with $avifSet }}<source type="image/avif" srcset="{{ delimit . ", " }}" sizes="(max-width:800px) 100vw, 70vw">{{ end }}
+          {{ with $avifSet }}<source type="image/avif" srcset="{{ delimit . ", " }}" sizes="{{ partial "viewersizes.html" $ar }}">{{ end }}
           <img src="{{ relURL $fallback.public }}" srcset="{{ delimit $jpegSet ", " }}"
-               sizes="(max-width:800px) 100vw, 70vw"
+               sizes="{{ partial "viewersizes.html" $ar }}"
                width="{{ .width }}" height="{{ .height }}" alt="{{ .alt }}" decoding="async">
         </picture>
       </span>

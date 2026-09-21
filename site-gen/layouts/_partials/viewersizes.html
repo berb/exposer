@@ -1,0 +1,31 @@
+{{- /* The `sizes` hint for a photo page's photograph (photo.html, scoped.html),
+       from its aspect ratio. A browser chooses from srcset before layout, from
+       this alone, so it has to state the width the CSS in baseof.html will
+       actually draw -- the column, or the height cap (78vh times the aspect
+       ratio), whichever is smaller. The plain 70vw it replaces ignored the cap
+       and fetched about a quarter more than desktops show.
+
+       Each range mirrors a layout rule:
+         <= 600px   one column, 16px either side:        100vw - 32px
+         <= 800px   one column, 5vw margins:              90vw
+         <= 1440px  3/9 grid, 5vw margins, 32px gap:      (90vw - 32px) * 9/12
+         wider      margins stop at 72px:                (100vw - 176px) * 9/12
+
+       A browser that cannot parse min() here skips that entry, so each one is
+       followed by the column width alone under the same condition: the worst
+       case is the old behaviour, never a smaller image than the page needs.
+       Change this with the layout, or the hint lies again. */ -}}
+{{- $cap := printf "calc(78vh * %.4f)" . -}}
+{{- $ranges := slice
+      (slice "(max-width:600px)" "calc(100vw - 32px)")
+      (slice "(max-width:800px)" "90vw")
+      (slice "(max-width:1440px)" "calc((90vw - 32px) * 0.75)")
+      (slice "(min-width:1441px)" "calc((100vw - 176px) * 0.75)") -}}
+{{- $entries := slice -}}
+{{- range $ranges -}}
+  {{- $entries = $entries | append (printf "%s min(%s, %s)" (index . 0) (index . 1) $cap) -}}
+  {{- $entries = $entries | append (printf "%s %s" (index . 0) (index . 1)) -}}
+{{- end -}}
+{{- /* The last entry takes no condition: the widest column, uncapped. */ -}}
+{{- $entries = $entries | append "calc((100vw - 176px) * 0.75)" -}}
+{{- return delimit $entries ", " -}}

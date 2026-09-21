@@ -4,6 +4,10 @@ All notable changes to exposer, newest first. The format follows [Keep a Changel
 
 ## [Unreleased]
 
+### Changed
+
+- A photograph's page tells the browser the width it will really be drawn at, including when the window's height limits it, so desktops download a quarter less for the same picture.
+
 ## [0.1.3] - 2026-09-21
 
 ### Added
