@@ -315,6 +315,30 @@ func TestFooterCarriesTheLineTheImprintAndTheCredit(t *testing.T) {
 	if imprint < 0 || generated < 0 || imprint > generated {
 		t.Errorf("want the imprint link, then the credit:\n%s", both)
 	}
+
+	// The line is inline Markdown, so it can carry a link -- but Hugo drops
+	// raw HTML in it, since it lands on every page of the site.
+	marked := strings.Replace(string(raw), `footer_line: "© 2026 The Test Library"`,
+		`footer_line: "© 2026 [The Test Library](https://example.com/) <script>alert(1)</script>"`, 1)
+	if marked == string(raw) {
+		t.Fatal("the fixture configuration no longer has the footer line to change")
+	}
+	if err := os.WriteFile(config, []byte(marked), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	target = t.TempDir()
+	runBuild([]string{goodLibrary, "--target", target, "--config", config, "--hugo", hugoBinary(t)})
+
+	linked := footer(filepath.Join(target, "site"))
+	if !strings.Contains(linked, `<a href="https://example.com/">The Test Library</a>`) {
+		t.Errorf("the footer line's Markdown link was not rendered:\n%s", linked)
+	}
+	if strings.Contains(linked, "<script>") {
+		t.Errorf("raw HTML in the footer line reached the page:\n%s", linked)
+	}
+	if strings.Contains(linked, "<p>") {
+		t.Errorf("a one-line footer was wrapped in a paragraph:\n%s", linked)
+	}
 }
 
 func TestPhotoSizesFollowTheLayout(t *testing.T) {

@@ -18,8 +18,11 @@ subtitle: ""
 # imprint, by slug. Empty, or a slug with no matching page, hides the link.
 imprint_page: ""
 imprint_label: "Imprint"
-# The line at the left of every page's footer, such as a copyright
-# notice. Empty shows the site's title there instead.
+# The line at the left of every page's footer, such as a copyright notice.
+# Inline Markdown works, so it can link somewhere:
+#   footer_line: "© 2026 [Jane Doe](https://example.com) · CC BY-NC 4.0"
+# Write links to your own pages with the full address: a bare path such as
+# /photos/about/ ignores base_url. Empty shows the site's title instead.
 footer_line: ""
 
 # The publication gate. A photograph rated below this is not published,

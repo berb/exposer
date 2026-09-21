@@ -318,7 +318,10 @@ ul.plain li { border-bottom: 1px solid var(--hair); padding: var(--step) 0; }
      the site. The credit is plain links, so nothing is requested from either
      project until someone follows one (N-2). */}}
 <footer class="colophon label">
-  <span>{{ with site.Params.footerLine }}{{ . }}{{ else }}{{ site.Title }}{{ end }}</span>
+  {{/* Inline Markdown, so the line can carry a link. Hugo drops raw HTML in
+       Markdown unless told otherwise, and exposer never tells it, so a
+       configuration can add links and emphasis to every page but not markup. */}}
+  <span>{{ with site.Params.footerLine }}{{ . | markdownify }}{{ else }}{{ site.Title }}{{ end }}</span>
   <nav aria-label="Site information">
   {{- with site.Params.imprintPage }}
     {{- with site.GetPage (printf "/photos/%s" .) }}

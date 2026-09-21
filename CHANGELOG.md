@@ -4,6 +4,10 @@ All notable changes to exposer, newest first. The format follows [Keep a Changel
 
 ## [Unreleased]
 
+### Added
+
+- The footer line accepts inline Markdown, so it can carry a link: `footer_line: "© 2026 [Jane Doe](https://example.com)"`.
+
 ### Changed
 
 - Release archives carry their version in the name, as in `exposer_0.1.4_linux_amd64.tar.gz`. `SHA256SUMS` keeps its fixed name, and the README's download commands read the current archive's name from it.
