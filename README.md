@@ -131,6 +131,7 @@ The tests build `testdata/library` end to end and assert what the artifact must 
 
 ## Documentation
 
+- `CHANGELOG.md` — what changed in each release.
 - `docs/spec.md` — the numbered specification. The code cites these IDs in its comments, and they are worth reading before changing anything.
 - `AGENTS.md` — the invariants and the decisions behind them. Read it before changing how the build works.
 

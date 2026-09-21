@@ -190,6 +190,11 @@ being fixed. The deviation is recorded in D-4.
 - Plan before implementing.
 - Cite requirement IDs in commit messages. A change that fits no requirement is
   a change to `docs/spec.md` first.
+- A change a user would notice gets a line under `## [Unreleased]` in
+  `CHANGELOG.md`, in the same commit, in plain words and without requirement
+  IDs. Releasing renames that section to the version and date; its text
+  becomes the release notes, and the release workflow refuses a tag it has no
+  section for.
 - Tests come with the change, not after it — the hard-fail paths especially,
   since those are the ones nobody exercises by accident.
 - Ask rather than guess when a requirement is genuinely ambiguous.
