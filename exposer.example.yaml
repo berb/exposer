@@ -18,8 +18,9 @@ subtitle: ""
 # slug with no matching page, hides the link.
 imprint_page: ""
 imprint_label: "Imprint"
-# Shown at the foot of every page. Empty shows nothing.
-footer_note: ""
+# D-10: the line at the left of every page's footer, such as a copyright
+# notice. Empty shows the site's title there instead.
+footer_line: ""
 
 # R-5: the publication gate. A photograph rated below this is not published,
 # and curation happens in darktable rather than here.

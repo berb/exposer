@@ -314,7 +314,7 @@ ul.plain li { border-bottom: 1px solid var(--hair); padding: var(--step) 0; }
 {{ block "main" . }}{{ end }}
 </main>
 <footer class="colophon label">
-  <span>{{ with site.Params.footerNote }}{{ . }}{{ else }}{{ site.Title }}{{ end }}</span>
+  <span>{{ with site.Params.footerLine }}{{ . }}{{ else }}{{ site.Title }}{{ end }}</span>
   {{ with site.Params.imprintPage }}
     {{ with site.GetPage (printf "/photos/%s" .) }}
   <nav aria-label="Site information">

@@ -983,8 +983,8 @@ disableKinds = ["taxonomy", "term", "robotsTXT", "404"]
   subtitle = %q
   imprintPage = %q
   imprintLabel = %q
-  footerNote = %q
-`, cfg.BaseURL, cfg.Title, cfg.Subtitle, cfg.ImprintPage, cfg.ImprintLabel, cfg.FooterNote)
+  footerLine = %q
+`, cfg.BaseURL, cfg.Title, cfg.Subtitle, cfg.ImprintPage, cfg.ImprintLabel, cfg.FooterLine)
 	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
 		fail("cannot create %s: %v", filepath.Dir(path), err)
 	}

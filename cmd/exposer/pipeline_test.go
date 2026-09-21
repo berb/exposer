@@ -386,3 +386,28 @@ func TestJPEGLibraryBuildsWithoutDarktable(t *testing.T) {
 		t.Fatalf("derive failed without darktable on a JPEG library: %s", message)
 	}
 }
+
+func TestConfigRefusesKeysItDoesNotKnow(t *testing.T) {
+	// R-18. An unknown key used to be ignored, so a typo built the site on a
+	// default without a word.
+	write := func(body string) string {
+		t.Helper()
+		path := filepath.Join(t.TempDir(), configFileName)
+		if err := os.WriteFile(path, []byte(body), 0o644); err != nil {
+			t.Fatal(err)
+		}
+		return path
+	}
+
+	if message := catchFail(t, func() { loadConfig(write("base_ulr: \"/photos/\"\n")) }); !strings.Contains(message, "base_ulr") {
+		t.Errorf("a misspelt key gave %q, want it named", message)
+	}
+	// A setting from an earlier release is told its new name.
+	if message := catchFail(t, func() { loadConfig(write("footer_note: \"© me\"\n")) }); !strings.Contains(message, "renamed to footer_line") {
+		t.Errorf("footer_note gave %q, want the rename", message)
+	}
+	// An empty file is still the defaults, not an error.
+	if message := catchFail(t, func() { loadConfig(write("")) }); message != "" {
+		t.Errorf("an empty configuration failed: %s", message)
+	}
+}

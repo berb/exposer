@@ -2,7 +2,7 @@ base_url: "/"
 title: "Test Library"
 subtitle: "The library the tests build"
 imprint_page: ""
-footer_note: ""
+footer_line: "© 2026 The Test Library"
 min_rating: 4
 derivatives:
   widths: [200, 400, 800, 1600, 2400]

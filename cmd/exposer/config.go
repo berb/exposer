@@ -1,7 +1,10 @@
 package main
 
 import (
+	"bytes"
+	"errors"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 
@@ -24,9 +27,16 @@ type config struct {
 	Subtitle     string           `yaml:"subtitle"`
 	ImprintPage  string           `yaml:"imprint_page"`
 	ImprintLabel string           `yaml:"imprint_label"`
-	FooterNote   string           `yaml:"footer_note"`
+	FooterLine   string           `yaml:"footer_line"`
 	MinRating    int              `yaml:"min_rating"`
 	Derivatives  derivativeConfig `yaml:"derivatives"`
+}
+
+// renamedSettings maps a setting's old name to its new one, so a configuration
+// written for an earlier release fails with the fix rather than a bare
+// "field not found".
+var renamedSettings = map[string]string{
+	"footer_note": "footer_line",
 }
 
 // configFileName is where a library keeps the generator's configuration: with
@@ -72,7 +82,17 @@ func loadConfig(path string) config {
 	if err != nil {
 		fail("cannot read config %s: %v", path, err)
 	}
-	if err := yaml.Unmarshal(data, &cfg); err != nil {
+	// Strict: a key exposer does not know fails the build rather than being
+	// ignored, so a typo -- base_ulr -- or a renamed setting cannot silently
+	// leave the site built on a default.
+	decoder := yaml.NewDecoder(bytes.NewReader(data))
+	decoder.KnownFields(true)
+	if err := decoder.Decode(&cfg); err != nil && !errors.Is(err, io.EOF) {
+		for old, renamed := range renamedSettings {
+			if bytes.Contains(data, []byte(old+":")) {
+				fail("%s: %s was renamed to %s", path, old, renamed)
+			}
+		}
 		fail("%s: %v", path, err)
 	}
 	if len(cfg.Derivatives.Widths) == 0 || len(cfg.Derivatives.Formats) == 0 {
