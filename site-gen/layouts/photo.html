@@ -1,0 +1,75 @@
+{{ define "main" }}
+{{ $p := index hugo.Data.photos .Params.id }}
+{{ with $p }}
+  {{/* Square crops are centre-cropped tiles (F-7); the photograph's own
+       srcset must offer its real shape only. */}}
+  {{ $scaled := where .derivatives "square" "!=" true }}
+  {{ $jpeg := where $scaled "format" "jpeg" }}
+  {{ $avif := where $scaled "format" "avif" }}
+  {{ $jpegSet := slice }}
+  {{ range $jpeg }}{{ $jpegSet = $jpegSet | append (printf "%s %.0fw" (relURL .public) .width) }}{{ end }}
+  {{ $avifSet := slice }}
+  {{ range $avif }}{{ $avifSet = $avifSet | append (printf "%s %.0fw" (relURL .public) .width) }}{{ end }}
+  {{ $fallback := index (last 1 $jpeg) 0 }}
+  {{ $ar := 1.5 }}
+  {{ if and .width .height (gt .height 0.0) }}{{ $ar = div .width .height }}{{ end }}
+
+<div class="detail">
+  <aside class="detail-meta">
+    <p class="label">Plate</p>
+    {{ with .title }}<h1>{{ . }}</h1>{{ end }}
+    {{ with .caption }}<p>{{ . }}</p>{{ end }}
+
+    {{ with .captured_at }}
+    <p class="meta">
+      <a href="{{ (printf "photos/%s/%s/" $p.year $p.month) | relURL }}">{{ substr . 0 10 }}</a>
+    </p>
+    {{ end }}
+
+    {{ with .albums }}
+    <p class="meta">In {{ range $i, $a := . }}{{ if $i }} · {{ end }}<a href="{{ (printf "photos/albums/%s/" $a.slug) | relURL }}">{{ $a.title }}</a>{{ end }}</p>
+    {{ end }}
+    {{ with .tags }}
+    <p class="meta tags">{{ range . }}<a href="{{ (printf "photos/tags/%s/" .slug) | relURL }}">{{ .leaf }}</a>{{ end }}</p>
+    {{ end }}
+    {{ with .locations }}
+    <p class="meta">{{ range $i, $l := . }}{{ if $i }} · {{ end }}<a href="{{ (printf "photos/locations/%s/" $l.slug) | relURL }}">{{ $l.title }}</a>{{ end }}</p>
+    {{ end }}
+
+    <div class="tech">
+      <dl>
+        {{ with .camera.model }}<dt>Camera</dt><dd>{{ . }}</dd>{{ end }}
+        {{ with .camera.lens }}<dt>Lens</dt><dd>{{ . }}</dd>{{ end }}
+        {{ with .exposure.focal }}<dt>Focal</dt><dd>{{ . }} mm</dd>{{ end }}
+        {{ with .exposure.f }}<dt>Aperture</dt><dd>f/{{ . }}</dd>{{ end }}
+        {{ with .exposure.shutter }}<dt>Shutter</dt><dd>{{ . }} s</dd>{{ end }}
+        {{ with .exposure.iso }}<dt>ISO</dt><dd>{{ . }}</dd>{{ end }}
+        {{ with .rights.creator }}<dt>Creator</dt><dd>{{ . }}</dd>{{ end }}
+        {{ with .rights.rights }}<dt>Rights</dt><dd>{{ . }}</dd>{{ end }}
+      </dl>
+    </div>
+
+    <p style="margin-top:calc(var(--step) * 2)">
+      <button type="button" class="ghost" data-fullscreen-trigger hidden
+              aria-pressed="false">Full screen</button>
+    </p>
+  </aside>
+
+  <div class="detail-image">
+    {{/* D-11: this figure is what goes full screen. */}}
+    <figure class="viewer" data-fullscreen-viewer style="--ar:{{ $ar }};--tone:{{ .tone }}">
+      <span class="frame">
+        <picture>
+          {{ with $avifSet }}<source type="image/avif" srcset="{{ delimit . ", " }}" sizes="(max-width:800px) 100vw, 70vw">{{ end }}
+          <img src="{{ relURL $fallback.public }}" srcset="{{ delimit $jpegSet ", " }}"
+               sizes="(max-width:800px) 100vw, 70vw"
+               width="{{ .width }}" height="{{ .height }}" alt="{{ .alt }}" decoding="async">
+        </picture>
+      </span>
+    </figure>
+  </div>
+</div>
+{{ end }}
+{{ end }}
+
+{{ define "scripts" }}<script src="{{ "fullscreen.js" | relURL }}" defer></script>{{ end }}

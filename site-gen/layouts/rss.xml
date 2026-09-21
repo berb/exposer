@@ -1,0 +1,25 @@
+{{- /* F-19: a feed of albums, newest first. Hugo's default would list every
+     photo page, which is not what a reader subscribes for. Unlisted albums are
+     excluded (F-18). */ -}}
+{{- /* site.RegularPages leaves out section pages, and every album page is a
+     section (it carries the album-scoped photo pages beneath it), so that
+     filter matched nothing and the feed shipped empty. */ -}}
+{{- $albums := where (where site.Pages "Layout" "album") "Params.unlisted" "!=" true -}}
+{{- $albums = sort $albums "Date" "desc" -}}
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>{{ site.Title }}</title>
+    <link>{{ "" | absURL }}</link>
+    <description>{{ with site.Params.subtitle }}{{ . }}{{ else }}{{ site.Title }}{{ end }}</description>
+    <atom:link href="{{ .Permalink }}" rel="self" type="application/rss+xml"/>
+    {{- range $albums }}
+    <item>
+      <title>{{ .Title }}</title>
+      <link>{{ .Permalink }}</link>
+      <guid>{{ .Permalink }}</guid>
+      {{- with .Date }}<pubDate>{{ .Format "Mon, 02 Jan 2006 15:04:05 -0700" }}</pubDate>{{ end }}
+      {{- with .Params.intro }}<description>{{ . }}</description>{{ end }}
+    </item>
+    {{- end }}
+  </channel>
+</rss>

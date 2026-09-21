@@ -1,0 +1,52 @@
+{{- /* Small square tiles over a list of photo ids, for places that want a sample
+     of the library rather than a listing of it. The squares are F-5's 1:1
+     derivatives; a photograph too small to crop one keeps its own shape.
+
+     The markup is trimmed hard because one page may hold the whole library
+     (F-23): the tiles are the page. Whitespace is chomped, and `sizes` states
+     the tile's real width rather than a share of the viewport. Both grids that
+     use this partial are `.squares`, whose cells are minmax(132px, 1fr), so a
+     tile is ~132-200px wide at every width above one column -- a viewport share
+     made the browser fetch the 400px crop for a 155px box. */ -}}
+{{- $sizes := "(max-width: 300px) 100vw, 200px" -}}
+{{- /* Called with a plain list of ids, or with a dict carrying that list and a
+     "more" cell to close the grid with: F-24 spends the last cell on the way to
+     the rest rather than on one more photograph. */ -}}
+{{- $ids := . -}}
+{{- $more := false -}}
+{{- if reflect.IsMap . -}}
+  {{- $ids = .ids -}}
+  {{- $more = .more -}}
+{{- end -}}
+<div class="squares">
+{{- range $ids }}
+{{- with index hugo.Data.photos . }}
+{{- $square := where .derivatives "square" true }}
+{{- $ar := 1.0 }}
+{{- $pool := $square }}
+{{- if not $square }}
+{{- $pool = where .derivatives "square" "!=" true }}
+{{- if and .width .height (gt .height 0.0) }}{{ $ar = div .width .height }}{{ end }}
+{{- end }}
+{{- $jpeg := where $pool "format" "jpeg" }}
+{{- $avif := where $pool "format" "avif" }}
+{{- $jpegSet := slice }}
+{{- range $jpeg }}{{ $jpegSet = $jpegSet | append (printf "%s %.0fw" (relURL .public) .width) }}{{ end }}
+{{- $avifSet := slice }}
+{{- range $avif }}{{ $avifSet = $avifSet | append (printf "%s %.0fw" (relURL .public) .width) }}{{ end }}
+{{- $fallback := index (first 1 $jpeg) 0 }}
+{{- /* D-9: the link needs a name. A photograph the library says nothing about
+     falls back to its id for alt text, which names nothing, so say when it was
+     taken instead. */ -}}
+{{- $label := .alt }}
+{{- if eq $label .id }}{{ $label = printf "Photograph from %s" (substr .captured_at 0 10) }}{{ end }}
+{{- /* D-7: the box is sized and toned before the bytes arrive. */ -}}
+<a href="{{ (printf "photos/p/%s/" .id) | relURL }}" aria-label="{{ $label }}"><span class="frame" style="--ar:{{ $ar }};--tone:{{ .tone }}"><picture>
+{{- with $avifSet }}<source type="image/avif" srcset="{{ delimit . ", " }}" sizes="{{ $sizes }}">{{ end -}}
+<img src="{{ relURL $fallback.public }}" srcset="{{ delimit $jpegSet ", " }}" sizes="{{ $sizes }}" width="{{ $fallback.width }}" height="{{ $fallback.height }}" alt="" loading="lazy" decoding="async"></picture></span></a>
+{{- end }}
+{{- end }}
+{{- with $more }}
+<a class="squares-more" href="{{ .href | relURL }}"><span>{{ .label }}</span></a>
+{{- end }}
+</div>

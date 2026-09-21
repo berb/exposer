@@ -1,0 +1,63 @@
+{{/* The photograph seen inside a listing — an album, a tag, a place, a year or a
+     month. Same picture as the album-independent page, plus that listing's
+     context and neighbours. Canonical points at /photos/p/<id>/, so the two are
+     not read as duplicates. */}}
+{{ define "main" }}
+{{ $p := index hugo.Data.photos .Params.id }}
+{{ with $p }}
+  {{/* Square crops are centre-cropped tiles (F-7); the photograph's own
+       srcset must offer its real shape only. */}}
+  {{ $scaled := where .derivatives "square" "!=" true }}
+  {{ $jpeg := where $scaled "format" "jpeg" }}
+  {{ $avif := where $scaled "format" "avif" }}
+  {{ $jpegSet := slice }}
+  {{ range $jpeg }}{{ $jpegSet = $jpegSet | append (printf "%s %.0fw" (relURL .public) .width) }}{{ end }}
+  {{ $avifSet := slice }}
+  {{ range $avif }}{{ $avifSet = $avifSet | append (printf "%s %.0fw" (relURL .public) .width) }}{{ end }}
+  {{ $fallback := index (last 1 $jpeg) 0 }}
+  {{ $ar := 1.5 }}
+  {{ if and .width .height (gt .height 0.0) }}{{ $ar = div .width .height }}{{ end }}
+
+<div class="detail">
+  <aside class="detail-meta">
+    <p class="label">
+      <a href="{{ $.Params.contextPath | relURL }}">{{ $.Params.contextTitle }}</a>
+      · {{ $.Params.position }} / {{ $.Params.total }}
+    </p>
+    {{ with .title }}<h1>{{ . }}</h1>{{ end }}
+    {{ with .caption }}<p>{{ . }}</p>{{ end }}
+
+    {{/* F-25: the neighbours are shown, not just named. A thumbnail says what
+         the next photograph is before the reader commits to it, which a word
+         never did. */}}
+    <nav class="pager" aria-label="Within this listing">
+      {{ partial "pagerthumb.html" (dict "id" $.Params.prevId "href" $.Params.prev "rel" "prev" "label" "← Previous") }}
+      {{ partial "pagerthumb.html" (dict "id" $.Params.nextId "href" $.Params.next "rel" "next" "label" "Next →") }}
+    </nav>
+
+    {{/* Both of these leave this listing's view of the photograph, so they look
+         alike: the same ghost frame, side by side. */}}
+    <p class="actions">
+      <a class="ghost" href="{{ (printf "photos/p/%s/" .id) | relURL }}">All details</a>
+      <button type="button" class="ghost" data-fullscreen-trigger hidden
+              aria-pressed="false">Full screen</button>
+    </p>
+  </aside>
+
+  <div class="detail-image">
+    <figure class="viewer" data-fullscreen-viewer style="--ar:{{ $ar }};--tone:{{ .tone }}">
+      <span class="frame">
+        <picture>
+          {{ with $avifSet }}<source type="image/avif" srcset="{{ delimit . ", " }}" sizes="(max-width:800px) 100vw, 70vw">{{ end }}
+          <img src="{{ relURL $fallback.public }}" srcset="{{ delimit $jpegSet ", " }}"
+               sizes="(max-width:800px) 100vw, 70vw"
+               width="{{ .width }}" height="{{ .height }}" alt="{{ .alt }}" decoding="async">
+        </picture>
+      </span>
+    </figure>
+  </div>
+</div>
+{{ end }}
+{{ end }}
+
+{{ define "scripts" }}<script src="{{ "fullscreen.js" | relURL }}" defer></script>{{ end }}

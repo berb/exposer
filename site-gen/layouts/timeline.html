@@ -1,0 +1,16 @@
+{{/* F-10 as a single page: everything published, newest first, under a heading
+     per year. Each year's grid links into that year's own listing, which is
+     where the scoped pages for these photographs already live. */}}
+{{ define "main" }}
+<div class="split">
+  <div><p class="label">Timeline</p></div>
+  <div>
+    <h1>{{ .Title }}</h1>
+    <p class="meta">{{ partial "count.html" .Params.total }}</p>
+  </div>
+</div>
+{{ range .Params.groups }}
+<h2><a href="{{ (printf "photos/%s/" .year) | relURL }}">{{ .year }}</a></h2>
+{{ partial "grid.html" (dict "ids" .ids "base" .base) }}
+{{ end }}
+{{ end }}

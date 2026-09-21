@@ -1,0 +1,58 @@
+{{/* Justified rows over a list of photo ids. Details come from data/photos.json,
+     so a photo is described once rather than once per listing it appears in.
+     Plate numbers are D-6's only ornament besides the hairlines. */}}
+{{ $base := .base }}
+<div class="grid">
+{{ range $i, $id := .ids }}
+  {{ with index hugo.Data.photos $id }}
+    {{ $ar := 1.5 }}
+    {{ if and .width .height (gt .height 0.0) }}{{ $ar = div .width .height }}{{ end }}
+    {{/* D-4 prefers the whole photograph, and all but the tallest get it. A
+         frame narrower than 2:3 cannot hold its place in a justified row: it
+         contributes almost nothing to the row's growth while taking a slot, so
+         it stretches every photograph beside it, and below the caption's width
+         it stops shrinking altogether and hangs out of the line. Those are laid
+         out at 2:3 and centre-cropped by object-fit. 2:3 itself is a portrait
+         frame the library is full of, so the clamp sits just under it and
+         leaves it alone. The photograph's own page always shows it whole. */}}
+    {{ $box := $ar }}
+    {{ if lt $ar 0.66 }}{{ $box = 0.66 }}{{ end }}
+    {{/* Square crops are centre-cropped tiles (F-7); the photograph's own
+         srcset must offer its real shape only. */}}
+    {{ $scaled := where .derivatives "square" "!=" true }}
+    {{ $jpeg := where $scaled "format" "jpeg" }}
+    {{ $avif := where $scaled "format" "avif" }}
+    {{ $jpegSet := slice }}
+    {{ range $jpeg }}{{ $jpegSet = $jpegSet | append (printf "%s %.0fw" (relURL .public) .width) }}{{ end }}
+    {{ $avifSet := slice }}
+    {{ range $avif }}{{ $avifSet = $avifSet | append (printf "%s %.0fw" (relURL .public) .width) }}{{ end }}
+    {{ $fallback := index (last 1 $jpeg) 0 }}
+    {{ $sizes := "(max-width:600px) 100vw, (max-width:1200px) 45vw, 30vw" }}
+    <figure style="--ar:{{ $box }};--tone:{{ .tone }}">
+            {{/* Every listing that composed a sequence links into it; a derived one
+           (R-15 gear) has no such page, so it links to the canonical photo. */}}
+      {{ $href := printf "photos/p/%s/" $id }}
+      {{ with $base }}{{ $href = printf "%s/%s/" . $id }}{{ end }}
+      <a href="{{ $href | relURL }}" aria-label="{{ .alt }}">
+        <span class="frame">
+          <picture>
+            {{ with $avifSet }}<source type="image/avif" srcset="{{ delimit . ", " }}" sizes="{{ $sizes }}">{{ end }}
+            <img src="{{ relURL $fallback.public }}"
+                 srcset="{{ delimit $jpegSet ", " }}"
+                 sizes="{{ $sizes }}"
+                 width="{{ .width }}" height="{{ .height }}"
+                 alt="{{ .alt }}" loading="lazy" decoding="async">
+          </picture>
+        </span>
+      </a>
+      <figcaption>
+        <span class="plate">{{ printf "%02d" (add $i 1) }}</span>
+        {{/* A photograph the library gave no title keeps its id here: the date
+             repeats what the listing already says, and in a year or month
+             listing it repeated itself on every plate. */}}
+        <span>{{ with .title }}{{ . }}{{ else }}{{ .id }}{{ end }}</span>
+      </figcaption>
+    </figure>
+  {{ end }}
+{{ end }}
+</div>

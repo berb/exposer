@@ -1,0 +1,14 @@
+{{/* F-23: every published photograph on one page, newest first, as F-5's square
+     tiles. No years, no albums, no grouping — the one view that shows the size
+     of the library at a glance. Tiles link to each photograph's own page, the
+     way every other square grid on the site does. */}}
+{{ define "main" }}
+<div class="split">
+  <div><p class="label">All</p></div>
+  <div>
+    <h1>{{ .Title }}</h1>
+    <p class="meta">{{ partial "count.html" .Params.total | chomp }}, newest first</p>
+  </div>
+</div>
+{{ partial "squares.html" .Params.ids }}
+{{ end }}

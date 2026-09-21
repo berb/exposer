@@ -1,0 +1,70 @@
+# CI runs what `make lint` and `make test` run locally, on the tools the
+# pipeline actually shells out to. Nothing here is generated: the fixtures are
+# committed images (testdata/README.md says why), so a run only needs exiftool,
+# ImageMagick and the pinned Hugo, which the binary fetches itself (B-8).
+name: build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    # Debian rather than the runner's Ubuntu, for ImageMagick: Ubuntu's apt
+    # still ships ImageMagick 6, which has no `magick` command, and the tests
+    # that need it would skip rather than run. Debian trixie ships 7.
+    container: debian:trixie
+    env:
+      # A missing tool fails the run instead of skipping the tests that need
+      # it, so a green run means every test ran.
+      EXPOSER_REQUIRE_TOOLS: "1"
+    steps:
+      # Before checkout: without git in the image, actions/checkout falls back
+      # to downloading an archive, which is not a repository. The two libheif
+      # plugins are ImageMagick's AVIF encoder and decoder; Debian installs
+      # them only as recommendations, and without them every AVIF derivative
+      # fails with "no encode delegate".
+      - name: Install the tools the pipeline drives
+        run: |
+          apt-get update
+          apt-get install -y --no-install-recommends \
+            git ca-certificates make \
+            libimage-exiftool-perl imagemagick \
+            libheif-plugin-aomenc libheif-plugin-dav1d
+
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache-dependency-path: go.sum
+
+      - name: Formatting and vet
+        run: make lint
+
+      # The binary fetches its own pinned Hugo into the user cache (B-8), and
+      # this keeps that download between runs. The key is the file holding the
+      # pin and its checksums, so a new pin is a new cache entry.
+      - name: Cache the pinned Hugo
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/exposer
+          key: hugo-${{ hashFiles('cmd/exposer/hugo.go') }}
+
+      - name: Every test, including the ones that build a site
+        run: make test
+
+      # The way a user runs it: an installed binary, from a directory that is
+      # not the repository, so nothing can be found by accident in site-gen/ or
+      # schema/. The tests cover the stages; this covers B-8's promise.
+      - name: Build the test library from outside the repository
+        run: |
+          go build -o "$RUNNER_TEMP/exposer" ./cmd/exposer
+          cd "$RUNNER_TEMP"
+          ./exposer build "$GITHUB_WORKSPACE/testdata/library" --target out
+          ./exposer validate --document out/index.json

@@ -1,0 +1,48 @@
+{{/* The index of everything published: albums, years, tags, places. It is the
+     site's front page and also answers /photos/, so it lives in one partial
+     rather than in two templates that would drift apart. */}}
+<div class="split">
+  <div><p class="label">Index</p></div>
+  <div>
+    <h1>{{ .Title }}</h1>
+    {{ with .Params.subtitle }}<p>{{ . }}</p>{{ end }}
+  </div>
+</div>
+
+{{/* Below the header the page splits in half: a sample of the library on the
+     left, every way into it on the right. */}}
+<div class="index-split">
+  <div class="index-sample">
+    {{/* Only a list the photographer wrote is "Featured" (R-16); the fallback
+         sample is the library talking, not them. */}}
+    <h2>{{ if .Params.curated }}Featured{{ else }}From the library{{ end }}</h2>
+    {{ partial "squares.html" .Params.sample }}
+  </div>
+  <div class="index-ways">
+<h2><a href="{{ "photos/albums/" | relURL }}">Albums</a></h2>
+{{/* Names only, like the years and the places below. The covers are the album
+     index's own business (F-7), and it is one link away. */}}
+<p>{{ range $i, $a := .Params.albums }}{{ if $i }} · {{ end }}<a href="{{ (printf "photos/albums/%s/" $a.slug) | relURL }}">{{ $a.title }}</a>{{ end }}</p>
+<p class="meta"><a href="{{ "photos/albums/" | relURL }}">All albums →</a></p>
+
+<h2><a href="{{ "photos/timeline/" | relURL }}">Years</a></h2>
+{{/* The years are the way into one year; the timeline is the way into all of
+     them at once (F-10), so it sits with them rather than in its own section. */}}
+<p>{{ range $i, $y := .Params.years }}{{ if $i }} · {{ end }}<a href="{{ (printf "photos/%s/" $y) | relURL }}">{{ $y }}</a>{{ end }}</p>
+<p class="meta"><a href="{{ "photos/timeline/" | relURL }}">Whole timeline →</a></p>
+
+<h2>Tags</h2>
+<p class="tags">{{ range .Params.tags }}<a href="{{ (printf "photos/tags/%s/" .slug) | relURL }}">{{ .title }}</a>{{ end }}</p>
+
+{{/* R-15's gear tags are derived from the file, not written by the
+     photographer, so they keep their own heading rather than crowding the tags
+     that were chosen. */}}
+{{ with .Params.gear }}
+<h2>Gear</h2>
+<p class="tags">{{ range . }}<a href="{{ (printf "photos/tags/%s/" .slug) | relURL }}">{{ .title }}</a>{{ end }}</p>
+{{ end }}
+
+<h2>Locations</h2>
+<p>{{ range $i, $l := .Params.locations }}{{ if $i }} · {{ end }}<a href="{{ (printf "photos/locations/%s/" $l.slug) | relURL }}">{{ $l.title }}</a>{{ end }}</p>
+  </div>
+</div>

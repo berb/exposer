@@ -1,0 +1,36 @@
+{{/* F-20: Open Graph per album and per photo page. Scrapers need absolute URLs,
+     so everything here goes through absURL and therefore depends on B-4's
+     configured base_url being correct. */}}
+{{ $photo := "" }}
+{{ with .Params.id }}{{ $photo = index hugo.Data.photos . }}{{ end }}
+{{ with .Params.cover }}{{ $photo = index hugo.Data.photos . }}{{ end }}
+
+{{ $description := "" }}
+{{ with .Params.intro }}{{ $description = . }}{{ end }}
+{{ if and (not $description) $photo }}{{ $description = $photo.caption }}{{ end }}
+{{ if and (not $description) $photo }}{{ $description = $photo.alt }}{{ end }}
+{{ if not $description }}{{ $description = site.Params.subtitle }}{{ end }}
+
+<meta property="og:site_name" content="{{ site.Title }}">
+<meta property="og:title" content="{{ if .Title }}{{ .Title }}{{ else }}{{ site.Title }}{{ end }}">
+<meta property="og:type" content="{{ if .Params.id }}article{{ else }}website{{ end }}">
+{{ $ogURL := .Permalink }}
+{{ with .Params.canonical }}{{ $ogURL = absURL . }}{{ end }}
+<meta property="og:url" content="{{ $ogURL }}">
+{{ with $description }}
+  {{/* Intros are multi-line YAML; a raw newline inside an attribute is not
+       something a scraper should have to cope with. */}}
+  {{ $flat := trim (replaceRE "\\s+" " " .) " " | truncate 200 }}
+<meta property="og:description" content="{{ $flat }}">
+<meta name="description" content="{{ $flat }}">
+{{ end }}
+{{ with $photo }}
+  {{/* The 1600 JPEG rather than the AVIF: scrapers are unreliable with AVIF. */}}
+  {{ $jpeg := where (where .derivatives "square" "!=" true) "format" "jpeg" }}
+  {{ $big := index (last 1 $jpeg) 0 }}
+  <meta property="og:image" content="{{ absURL $big.public }}">
+  <meta property="og:image:width" content="{{ $big.width }}">
+  <meta property="og:image:height" content="{{ $big.height }}">
+  <meta property="og:image:alt" content="{{ .alt }}">
+  <meta name="twitter:card" content="summary_large_image">
+{{ end }}

@@ -1,0 +1,735 @@
+{
+  "schema_version": 4,
+  "library_root": "LIBRARY",
+  "tooling": {
+    "exiftool": "PINNED",
+    "extractor": 1
+  },
+  "photos": [
+    {
+      "id": "502998c2765e425d",
+      "source": "2022/05/rejected.jpg",
+      "published": false,
+      "rating": 3,
+      "label": null,
+      "captured_at": "2022-05-09T12:00:00",
+      "title": "Not good enough",
+      "caption": null,
+      "alt": "Not good enough",
+      "tags": [
+        {
+          "slug": "gear-camera-testcam-b2",
+          "path": [
+            "Gear",
+            "Camera",
+            "TESTCAM B2"
+          ],
+          "leaf": "TESTCAM B2"
+        },
+        {
+          "slug": "gear-lens-test-35mm-f2-0",
+          "path": [
+            "Gear",
+            "Lens",
+            "TEST 35mm F2.0"
+          ],
+          "leaf": "TEST 35mm F2.0"
+        },
+        {
+          "slug": "subject-street",
+          "path": [
+            "Subject",
+            "Street"
+          ],
+          "leaf": "Street"
+        }
+      ],
+      "albums": [],
+      "locations": [],
+      "camera": {
+        "make": "Testmaker",
+        "model": "TESTCAM B2",
+        "lens": "TEST 35mm F2.0"
+      },
+      "exposure": {
+        "f": null,
+        "shutter": null,
+        "iso": null,
+        "focal": null
+      },
+      "rights": {
+        "creator": "A. Photographer",
+        "rights": null
+      },
+      "file": {
+        "bytes": 6509,
+        "width": 900,
+        "height": 600,
+        "mime": "image/jpeg",
+        "sha256": "502998c2765e425dc33e9ec80d18dd5c4a4157f4a6cf4e9250aeb48c8da22645"
+      }
+    },
+    {
+      "id": "881bd98e3079e5bc",
+      "source": "2022/05/untouched.jpg",
+      "published": false,
+      "rating": 0,
+      "label": null,
+      "captured_at": "2022-05-09T12:30:00",
+      "title": null,
+      "caption": null,
+      "alt": "881bd98e3079e5bc",
+      "tags": [
+        {
+          "slug": "gear-camera-testcam-b2",
+          "path": [
+            "Gear",
+            "Camera",
+            "TESTCAM B2"
+          ],
+          "leaf": "TESTCAM B2"
+        },
+        {
+          "slug": "gear-lens-test-35mm-f2-0",
+          "path": [
+            "Gear",
+            "Lens",
+            "TEST 35mm F2.0"
+          ],
+          "leaf": "TEST 35mm F2.0"
+        }
+      ],
+      "albums": [],
+      "locations": [],
+      "camera": {
+        "make": "Testmaker",
+        "model": "TESTCAM B2",
+        "lens": "TEST 35mm F2.0"
+      },
+      "exposure": {
+        "f": null,
+        "shutter": null,
+        "iso": null,
+        "focal": null
+      },
+      "rights": {
+        "creator": "A. Photographer",
+        "rights": null
+      },
+      "file": {
+        "bytes": 8956,
+        "width": 900,
+        "height": 600,
+        "mime": "image/jpeg",
+        "sha256": "881bd98e3079e5bc51d0c146950adad9a98c1e2bb5fb9cc1eb5f662a142e1dc8"
+      }
+    },
+    {
+      "id": "ad6140681df31ed3",
+      "source": "2023/11/street-lamp.jpg",
+      "published": true,
+      "rating": 4,
+      "label": null,
+      "captured_at": "2023-11-02T21:15:00",
+      "title": "Lamp",
+      "caption": null,
+      "alt": "Lamp",
+      "tags": [
+        {
+          "slug": "gear-camera-testcam-b2",
+          "path": [
+            "Gear",
+            "Camera",
+            "TESTCAM B2"
+          ],
+          "leaf": "TESTCAM B2"
+        },
+        {
+          "slug": "gear-lens-test-35mm-f2-0",
+          "path": [
+            "Gear",
+            "Lens",
+            "TEST 35mm F2.0"
+          ],
+          "leaf": "TEST 35mm F2.0"
+        },
+        {
+          "slug": "subject-street",
+          "path": [
+            "Subject",
+            "Street"
+          ],
+          "leaf": "Street"
+        }
+      ],
+      "albums": [],
+      "locations": [],
+      "camera": {
+        "make": "Testmaker",
+        "model": "TESTCAM B2",
+        "lens": "TEST 35mm F2.0"
+      },
+      "exposure": {
+        "f": null,
+        "shutter": null,
+        "iso": null,
+        "focal": null
+      },
+      "rights": {
+        "creator": "A. Photographer",
+        "rights": null
+      },
+      "file": {
+        "bytes": 10555,
+        "width": 900,
+        "height": 600,
+        "mime": "image/jpeg",
+        "sha256": "ad6140681df31ed357ca308396996a64a4448661ad7083fe682ef44aa6968ae2"
+      }
+    },
+    {
+      "id": "e7a82ee2493d05a7",
+      "source": "2024/03/harbour-dawn.jpg",
+      "published": true,
+      "rating": 5,
+      "label": null,
+      "captured_at": "2024-03-04T07:12:00",
+      "title": "Harbour at dawn",
+      "caption": "The first light over the container cranes.",
+      "alt": "The first light over the container cranes.",
+      "tags": [
+        {
+          "slug": "gear-camera-testcam-a1",
+          "path": [
+            "Gear",
+            "Camera",
+            "TESTCAM A1"
+          ],
+          "leaf": "TESTCAM A1"
+        },
+        {
+          "slug": "gear-lens-test-12-40mm-f2-8",
+          "path": [
+            "Gear",
+            "Lens",
+            "TEST 12-40mm F2.8"
+          ],
+          "leaf": "TEST 12-40mm F2.8"
+        },
+        {
+          "slug": "places-harbour",
+          "path": [
+            "Places",
+            "Harbour"
+          ],
+          "leaf": "Harbour"
+        }
+      ],
+      "albums": [
+        "harbour"
+      ],
+      "locations": [
+        "norway-bergen"
+      ],
+      "camera": {
+        "make": "Testmaker",
+        "model": "TESTCAM A1",
+        "lens": "TEST 12-40mm F2.8"
+      },
+      "exposure": {
+        "f": null,
+        "shutter": null,
+        "iso": null,
+        "focal": null
+      },
+      "rights": {
+        "creator": "A. Photographer",
+        "rights": null
+      },
+      "file": {
+        "bytes": 10650,
+        "width": 900,
+        "height": 600,
+        "mime": "image/jpeg",
+        "sha256": "e7a82ee2493d05a7af2c7ac91be0f8740762a96cac8f41e034df44b3ab16dab3"
+      }
+    },
+    {
+      "id": "59e0d7e226601c17",
+      "source": "2024/03/harbour-boats.jpg",
+      "published": true,
+      "rating": 4,
+      "label": null,
+      "captured_at": "2024-03-04T09:40:00",
+      "title": null,
+      "caption": null,
+      "alt": "59e0d7e226601c17",
+      "tags": [
+        {
+          "slug": "gear-camera-testcam-a1",
+          "path": [
+            "Gear",
+            "Camera",
+            "TESTCAM A1"
+          ],
+          "leaf": "TESTCAM A1"
+        },
+        {
+          "slug": "gear-lens-test-7-14-f4-0",
+          "path": [
+            "Gear",
+            "Lens",
+            "TEST 7-14/F4.0"
+          ],
+          "leaf": "TEST 7-14/F4.0"
+        },
+        {
+          "slug": "places-harbour",
+          "path": [
+            "Places",
+            "Harbour"
+          ],
+          "leaf": "Harbour"
+        }
+      ],
+      "albums": [
+        "harbour"
+      ],
+      "locations": [
+        "norway-bergen"
+      ],
+      "camera": {
+        "make": "Testmaker",
+        "model": "TESTCAM A1",
+        "lens": "TEST 7-14/F4.0"
+      },
+      "exposure": {
+        "f": null,
+        "shutter": null,
+        "iso": null,
+        "focal": null
+      },
+      "rights": {
+        "creator": "A. Photographer",
+        "rights": null
+      },
+      "file": {
+        "bytes": 10183,
+        "width": 900,
+        "height": 600,
+        "mime": "image/jpeg",
+        "sha256": "59e0d7e226601c1795339687c29ddde6762f3229c34b54fe2732a74a3cef2c78"
+      }
+    },
+    {
+      "id": "9e5d22c16423d73e",
+      "source": "2024/03/harbour-crane.jpg",
+      "published": true,
+      "rating": 4,
+      "label": null,
+      "captured_at": "2024-03-04T11:05:00",
+      "title": "Crane",
+      "caption": null,
+      "alt": "Crane",
+      "tags": [
+        {
+          "slug": "gear-camera-testcam-a1",
+          "path": [
+            "Gear",
+            "Camera",
+            "TESTCAM A1"
+          ],
+          "leaf": "TESTCAM A1"
+        },
+        {
+          "slug": "gear-lens-test-45mm-f1-8",
+          "path": [
+            "Gear",
+            "Lens",
+            "TEST 45mm F1.8"
+          ],
+          "leaf": "TEST 45mm F1.8"
+        },
+        {
+          "slug": "subject-industry",
+          "path": [
+            "Subject",
+            "Industry"
+          ],
+          "leaf": "Industry"
+        }
+      ],
+      "albums": [
+        "harbour"
+      ],
+      "locations": [],
+      "camera": {
+        "make": "Testmaker",
+        "model": "TESTCAM A1",
+        "lens": "TEST 45mm F1.8"
+      },
+      "exposure": {
+        "f": null,
+        "shutter": null,
+        "iso": null,
+        "focal": null
+      },
+      "rights": {
+        "creator": "A. Photographer",
+        "rights": null
+      },
+      "file": {
+        "bytes": 6834,
+        "width": 900,
+        "height": 300,
+        "mime": "image/jpeg",
+        "sha256": "9e5d22c16423d73e96ed1cd2a5b3de517c5bbad9407348a74389dc6926999693"
+      }
+    },
+    {
+      "id": "b1f943e3a9f94343",
+      "source": "2024/07/fjord-wall.jpg",
+      "published": true,
+      "rating": 4,
+      "label": null,
+      "captured_at": "2024-07-18T16:20:00",
+      "title": "Rock wall",
+      "caption": null,
+      "alt": "Rock wall",
+      "tags": [
+        {
+          "slug": "gear-camera-testcam-b2",
+          "path": [
+            "Gear",
+            "Camera",
+            "TESTCAM B2"
+          ],
+          "leaf": "TESTCAM B2"
+        },
+        {
+          "slug": "gear-lens-test-35mm-f2-0",
+          "path": [
+            "Gear",
+            "Lens",
+            "TEST 35mm F2.0"
+          ],
+          "leaf": "TEST 35mm F2.0"
+        }
+      ],
+      "albums": [
+        "private-set"
+      ],
+      "locations": [
+        "norway"
+      ],
+      "camera": {
+        "make": "Testmaker",
+        "model": "TESTCAM B2",
+        "lens": "TEST 35mm F2.0"
+      },
+      "exposure": {
+        "f": null,
+        "shutter": null,
+        "iso": null,
+        "focal": null
+      },
+      "rights": {
+        "creator": "A. Photographer",
+        "rights": null
+      },
+      "file": {
+        "bytes": 5713,
+        "width": 506,
+        "height": 900,
+        "mime": "image/jpeg",
+        "sha256": "b1f943e3a9f94343e857dbcd08c365f1b3e55eaec2cd10f3bf696a1571461cf9"
+      }
+    },
+    {
+      "id": "b8274fcf7dd01d14",
+      "source": "2024/07/fjord-water.jpg",
+      "published": true,
+      "rating": 5,
+      "label": null,
+      "captured_at": "2024-07-18T17:02:00",
+      "title": "Still water",
+      "caption": "Nothing moved for an hour.",
+      "alt": "Nothing moved for an hour.",
+      "tags": [
+        {
+          "slug": "gear-camera-testcam-b2",
+          "path": [
+            "Gear",
+            "Camera",
+            "TESTCAM B2"
+          ],
+          "leaf": "TESTCAM B2"
+        },
+        {
+          "slug": "gear-lens-test-35mm-f2-0",
+          "path": [
+            "Gear",
+            "Lens",
+            "TEST 35mm F2.0"
+          ],
+          "leaf": "TEST 35mm F2.0"
+        }
+      ],
+      "albums": [
+        "private-set"
+      ],
+      "locations": [
+        "norway"
+      ],
+      "camera": {
+        "make": "Testmaker",
+        "model": "TESTCAM B2",
+        "lens": "TEST 35mm F2.0"
+      },
+      "exposure": {
+        "f": null,
+        "shutter": null,
+        "iso": null,
+        "focal": null
+      },
+      "rights": {
+        "creator": "A. Photographer",
+        "rights": null
+      },
+      "file": {
+        "bytes": 10555,
+        "width": 900,
+        "height": 600,
+        "mime": "image/jpeg",
+        "sha256": "b8274fcf7dd01d140102b63b8046d923d20f0689f176740dd80d2f14551ec3ad"
+      }
+    },
+    {
+      "id": "2a7e45939e8cc2b3",
+      "source": "2024/12/square-window.jpg",
+      "published": true,
+      "rating": 4,
+      "label": null,
+      "captured_at": "2024-12-01T13:45:00",
+      "title": "Window",
+      "caption": null,
+      "alt": "Window",
+      "tags": [
+        {
+          "slug": "gear-camera-testcam-b2",
+          "path": [
+            "Gear",
+            "Camera",
+            "TESTCAM B2"
+          ],
+          "leaf": "TESTCAM B2"
+        },
+        {
+          "slug": "gear-lens-test-12-40mm-f2-8",
+          "path": [
+            "Gear",
+            "Lens",
+            "TEST 12-40mm F2.8"
+          ],
+          "leaf": "TEST 12-40mm F2.8"
+        },
+        {
+          "slug": "shapes-square",
+          "path": [
+            "Shapes",
+            "Square"
+          ],
+          "leaf": "Square"
+        }
+      ],
+      "albums": [],
+      "locations": [
+        "norway-bergen"
+      ],
+      "camera": {
+        "make": "Testmaker",
+        "model": "TESTCAM B2",
+        "lens": "TEST 12-40mm F2.8"
+      },
+      "exposure": {
+        "f": null,
+        "shutter": null,
+        "iso": null,
+        "focal": null
+      },
+      "rights": {
+        "creator": "A. Photographer",
+        "rights": null
+      },
+      "file": {
+        "bytes": 9590,
+        "width": 700,
+        "height": 700,
+        "mime": "image/jpeg",
+        "sha256": "2a7e45939e8cc2b36b1179c88e0bce0fd14f9bb5f4e91b9260171246b6ed70bf"
+      }
+    },
+    {
+      "id": "2e2d8e42959ed213",
+      "source": "2025/01/dock-detail.jpg",
+      "published": true,
+      "rating": 4,
+      "label": null,
+      "captured_at": "2025-01-22T10:10:00",
+      "title": "Bollard",
+      "caption": null,
+      "alt": "Bollard",
+      "tags": [
+        {
+          "slug": "gear-camera-testcam-a1",
+          "path": [
+            "Gear",
+            "Camera",
+            "TESTCAM A1"
+          ],
+          "leaf": "TESTCAM A1"
+        },
+        {
+          "slug": "gear-lens-test-12-40mm-f2-8",
+          "path": [
+            "Gear",
+            "Lens",
+            "TEST 12-40mm F2.8"
+          ],
+          "leaf": "TEST 12-40mm F2.8"
+        },
+        {
+          "slug": "places-harbour-dock",
+          "path": [
+            "Places",
+            "Harbour",
+            "Dock"
+          ],
+          "leaf": "Dock"
+        }
+      ],
+      "albums": [],
+      "locations": [
+        "norway-bergen"
+      ],
+      "camera": {
+        "make": "Testmaker",
+        "model": "TESTCAM A1",
+        "lens": "TEST 12-40mm F2.8"
+      },
+      "exposure": {
+        "f": null,
+        "shutter": null,
+        "iso": null,
+        "focal": null
+      },
+      "rights": {
+        "creator": "A. Photographer",
+        "rights": null
+      },
+      "file": {
+        "bytes": 10432,
+        "width": 900,
+        "height": 600,
+        "mime": "image/jpeg",
+        "sha256": "2e2d8e42959ed213686f9249cac5fb281e562da100e9a95c30f7142933964596"
+      }
+    },
+    {
+      "id": "fd95755cb1959ee0",
+      "source": "2025/01/scanned-print.jpg",
+      "published": true,
+      "rating": 4,
+      "label": null,
+      "captured_at": "2025-01-30T15:00:00",
+      "title": "From a print",
+      "caption": null,
+      "alt": "From a print",
+      "tags": [],
+      "albums": [
+        "harbour"
+      ],
+      "locations": [],
+      "camera": {
+        "make": null,
+        "model": null,
+        "lens": null
+      },
+      "exposure": {
+        "f": null,
+        "shutter": null,
+        "iso": null,
+        "focal": null
+      },
+      "rights": {
+        "creator": "A. Photographer",
+        "rights": null
+      },
+      "file": {
+        "bytes": 10331,
+        "width": 900,
+        "height": 600,
+        "mime": "image/jpeg",
+        "sha256": "fd95755cb1959ee080acc7c2323b3d61f9faf44a4c39e43177d459ed96b99c2f"
+      }
+    }
+  ],
+  "albums": [
+    {
+      "slug": "harbour",
+      "tag": "Album|Harbour",
+      "title": "Harbour",
+      "date": "2024-03-04",
+      "cover": "e7a82ee2493d05a7",
+      "first_year": "2024",
+      "last_year": "2025",
+      "intro": "A morning spent walking the working edge of the port, before anyone\nelse was awake.",
+      "photo_count": 4,
+      "unlisted": false
+    },
+    {
+      "slug": "private-set",
+      "tag": "Album|Private Set",
+      "title": "Private Set",
+      "date": "2024-07-18",
+      "cover": "b1f943e3a9f94343",
+      "first_year": "2024",
+      "last_year": "2024",
+      "intro": "Reachable by its address, absent from every listing (F-18).",
+      "photo_count": 2,
+      "unlisted": true
+    }
+  ],
+  "locations": [
+    {
+      "slug": "norway",
+      "tag": "Location|Norway",
+      "title": "Norway",
+      "path": [
+        "Norway"
+      ],
+      "lat": null,
+      "lon": null,
+      "description": "A place described without coordinates stays off the map (R-11).",
+      "photo_count": 6
+    },
+    {
+      "slug": "norway-bergen",
+      "tag": "Location|Norway|Bergen",
+      "title": "Bergen",
+      "path": [
+        "Norway",
+        "Bergen"
+      ],
+      "lat": 60.3913,
+      "lon": 5.3221,
+      "description": null,
+      "photo_count": 4
+    }
+  ],
+  "featured": [
+    "e7a82ee2493d05a7",
+    "b8274fcf7dd01d14",
+    "2e2d8e42959ed213"
+  ]
+}

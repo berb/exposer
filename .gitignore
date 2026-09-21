@@ -1,0 +1,22 @@
+# Build output. B-3: target/site is what deploys, target/cache never does.
+# The glob covers a second library built beside the first (target-archive/, …).
+target*/
+
+# Your own library, which does not belong in the tool's repository. Anchored
+# to the root: an unanchored pattern would also swallow the fixture library's
+# testdata/library/_data/exposer.yaml, and did once -- every clone then built
+# the fixtures on defaults while the machine that wrote them did not.
+/exposer.yaml
+/source/
+/source-*/
+
+# Scratch directories. A stray build of the binary lands here easily, and an
+# ignore rule is the only reliable defence against `git add -A`.
+tmp/
+
+# Editors and local scratch.
+.vscode/
+.idea/
+*.swp
+.DS_Store
+.hugo_build.lock

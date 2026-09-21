@@ -1,0 +1,37 @@
+{{/* F-26: the tag index, reached from the menu. One section per curated tag,
+     laid out the way the gear page lays out a camera: that tag's most recent
+     photographs on one side of the rail, its name on the other. Gear tags are
+     not here -- they have F-24's page -- and locations and albums are their own
+     namespaces rather than tags. Each section ends at the tag page, which is the
+     complete listing; this page is a way in, not an index. */}}
+{{ define "main" }}
+<div class="split">
+  <div><p class="label">Tags</p></div>
+  <div>
+    <h1>{{ .Title }}</h1>
+    <p class="meta">{{ len .Params.tags }} tags</p>
+  </div>
+</div>
+
+{{ range .Params.tags }}
+<div class="index-split" id="{{ .slug }}">
+  {{/* The grid's last cell is the way to the full listing when the sample does
+       not exhaust it, so the tiles and the way past them are one block. */}}
+  {{ $more := false }}
+  {{ if gt .total (len .ids) }}
+    {{ $more = dict "href" (printf "photos/tags/%s/" .slug) "label" (printf "All %s →" (partial "count.html" .total | chomp)) }}
+  {{ end }}
+  <div>{{ partial "squares.html" (dict "ids" .ids "more" $more) }}</div>
+  <div>
+    {{/* The chip the tag wears everywhere else, and nothing more: the grid's
+         last cell already says how many photographs there are and leads to the
+         listing, so a heading and a count beside it would say it twice. */}}
+    {{/* R-19 is optional; most tags have nothing written about them. The
+         wrapper earns its place: markdownify drops the paragraph tags around a
+         single-paragraph note, which would leave the text with no spacing. */}}
+    <p class="tags"><a href="{{ (printf "photos/tags/%s/" .slug) | relURL }}">{{ .title }}</a></p>
+    {{ with .description }}<div class="note">{{ . | markdownify }}</div>{{ end }}
+  </div>
+</div>
+{{ end }}
+{{ end }}

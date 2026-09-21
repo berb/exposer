@@ -1,0 +1,42 @@
+{{/* F-24: what the photographs were made with. One section per camera and per
+     lens, cameras first (R-15 records which is which). The split is the index's:
+     the photographs on one side, the words on the other — the name included, so
+     the whole of what is said about one camera sits in one column. Each section
+     ends at the tag page, which is the complete listing — this page is an
+     introduction, not an index. */}}
+{{ define "main" }}
+<div class="split">
+  <div><p class="label">Gear</p></div>
+  <div>
+    <h1>{{ .Title }}</h1>
+    <p>Every camera and lens the library has a photograph from.</p>
+  </div>
+</div>
+
+{{ range .Params.groups }}
+<h2>{{ .kind }}</h2>
+{{ range .sections }}
+<div class="index-split" id="{{ .slug }}">
+  {{/* The grid's last cell is the way to the full listing when the sample does
+       not exhaust it, so the tiles and the way past them are one block. */}}
+  {{ $more := false }}
+  {{ if gt .total (len .ids) }}
+    {{ $more = dict "href" (printf "photos/tags/%s/" .slug) "label" (printf "All %s →" (partial "count.html" .total | chomp)) }}
+  {{ end }}
+  <div>{{ partial "squares.html" (dict "ids" .ids "more" $more) }}</div>
+  <div>
+    <h3>{{ .title }}</h3>
+    {{/* R-17 is optional; most gear has nothing written about it. The wrapper
+         earns its place: markdownify drops the paragraph tags around a
+         single-paragraph note, which would leave the text with no spacing and
+         no measure. */}}
+    {{ with .description }}<div class="note">{{ . | markdownify }}</div>{{ end }}
+    {{/* The same chip this gear wears on the index, so the tag looks the same
+         wherever the reader meets it. The way to the full listing is in the
+         grid, not here. */}}
+    <p class="tags"><a href="{{ (printf "photos/tags/%s/" .slug) | relURL }}">{{ .title }}</a></p>
+  </div>
+</div>
+{{ end }}
+{{ end }}
+{{ end }}

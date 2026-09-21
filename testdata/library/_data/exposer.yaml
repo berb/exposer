@@ -1,0 +1,12 @@
+base_url: "/"
+title: "Test Library"
+subtitle: "The library the tests build"
+imprint_page: ""
+footer_note: ""
+min_rating: 4
+derivatives:
+  widths: [200, 400, 800, 1600, 2400]
+  square_widths: [200, 400]
+  formats: ["jpeg", "avif"]
+  jpeg_quality: 82
+  avif_quality: 50

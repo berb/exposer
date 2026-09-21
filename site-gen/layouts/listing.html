@@ -1,0 +1,17 @@
+{{ define "main" }}
+<div class="split">
+  <div>
+    <p class="label">{{ .Params.kind }}</p>
+  </div>
+  <div>
+    <h1>{{ .Title }}</h1>
+    <p class="meta">{{ partial "count.html" (len .Params.ids) }}</p>
+    {{ with .Params.description }}<p>{{ . }}</p>{{ end }}
+    {{/* R-19's tag prose, which is Markdown -- unlike a location's description
+         (R-10), which is one line of YAML and prints as it stands. */}}
+    {{ with .Params.note }}<div class="note">{{ . | markdownify }}</div>{{ end }}
+    {{ if .Params.lat }}<p class="meta tech">{{ .Params.lat }}, {{ .Params.lon }}</p>{{ end }}
+  </div>
+</div>
+{{ partial "grid.html" (dict "ids" .Params.ids "base" .Params.scopeBase) }}
+{{ end }}

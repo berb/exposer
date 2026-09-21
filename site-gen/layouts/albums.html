@@ -1,0 +1,28 @@
+{{/* F-7's album index, reached from the menu. One section per album, laid out
+     the way the gear page lays out a camera: the photographs on one side of the
+     rail, what the library says about them on the other. The last tile is always
+     the way into the album, however few photographs it holds — this page is an
+     invitation, and every album has more to it than eleven frames in a row. */}}
+{{ define "main" }}
+<div class="split">
+  <div><p class="label">Albums</p></div>
+  <div>
+    <h1>{{ .Title }}</h1>
+    <p class="meta">{{ len .Params.albums }} albums</p>
+  </div>
+</div>
+
+{{ range .Params.albums }}
+<div class="index-split" id="{{ .slug }}">
+  <div>
+    {{ $more := dict "href" (printf "photos/albums/%s/" .slug) "label" (printf "All %s →" (partial "count.html" .count | chomp)) }}
+    {{ partial "squares.html" (dict "ids" .sample "more" $more) }}
+  </div>
+  <div>
+    <h3><a href="{{ (printf "photos/albums/%s/" .slug) | relURL }}">{{ .title }}</a></h3>
+    {{ with .years }}<p class="meta">{{ . }}</p>{{ end }}
+    {{ with .intro }}<div class="note">{{ . | markdownify }}</div>{{ end }}
+  </div>
+</div>
+{{ end }}
+{{ end }}

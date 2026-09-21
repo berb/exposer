@@ -1,0 +1,13 @@
+{{ define "main" }}
+<div class="split">
+  <div>
+    <p class="label">Album{{ with .Params.years }} · {{ . }}{{ end }}</p>
+  </div>
+  <div>
+    <h1>{{ .Title }}</h1>
+    <p class="meta">{{ partial "count.html" (len .Params.ids) }}</p>
+    {{ with .Params.intro }}<p>{{ . }}</p>{{ end }}
+  </div>
+</div>
+{{ partial "grid.html" (dict "ids" .Params.ids "base" .Params.scopeBase) }}
+{{ end }}

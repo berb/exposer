@@ -1,0 +1,6 @@
+{{- /* "1 photograph", "2 photographs". Every listing counts the same thing, so
+       the plural rule lives here rather than in each template that prints it.
+       The cast matters: a count that arrived through data/photos.json is a
+       float, and a float never equals the integer 1. */ -}}
+{{- $n := int . -}}
+{{- $n }} photograph{{ if ne $n 1 }}s{{ end }}

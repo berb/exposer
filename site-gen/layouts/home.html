@@ -1,0 +1,4 @@
+{{/* The site root carries the index itself (§11 Q6 keeps every generated URL
+     under /photos/, but the way in should not be a page with one link on it).
+     /photos/ still answers, pointing here with rel=canonical. */}}
+{{ define "main" }}{{ partial "overview.html" . }}{{ end }}

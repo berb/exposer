@@ -1,0 +1,26 @@
+{{- /* F-25: one neighbour in a listing, as a square thumbnail with its
+     direction written under it. The square is F-5's 1:1 crop; a photograph too
+     small to have one keeps its own shape, exactly as the square grids do.
+     The link goes to that neighbour's scoped page, not to its own page, so
+     paging stays inside the listing the reader is in. */ -}}
+{{- $p := index hugo.Data.photos .id -}}
+{{- with $p -}}
+{{- $square := where .derivatives "square" true -}}
+{{- $ar := 1.0 -}}
+{{- $pool := $square -}}
+{{- if not $square -}}
+  {{- $pool = where .derivatives "square" "!=" true -}}
+  {{- if and .width .height (gt .height 0.0) }}{{ $ar = div .width .height }}{{ end -}}
+{{- end -}}
+{{- $jpeg := where $pool "format" "jpeg" -}}
+{{- $avif := where $pool "format" "avif" -}}
+{{- $fallback := index (first 1 $jpeg) 0 -}}
+{{- $small := index (first 1 $avif) 0 -}}
+<a class="pager-step" href="{{ $.href | relURL }}" rel="{{ $.rel }}">
+  <span class="frame" style="--ar:{{ $ar }};--tone:{{ .tone }}"><picture>
+    {{- with $small }}<source type="image/avif" srcset="{{ relURL .public }}">{{ end -}}
+    <img src="{{ relURL $fallback.public }}" width="{{ $fallback.width }}" height="{{ $fallback.height }}"
+         alt="" loading="lazy" decoding="async"></picture></span>
+  <span class="pager-label">{{ $.label }}</span>
+</a>
+{{- end -}}

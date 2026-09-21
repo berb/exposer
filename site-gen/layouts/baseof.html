@@ -1,0 +1,328 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{ if .Title }}{{ .Title }} — {{ end }}{{ site.Title }}</title>
+{{/* An album-scoped photo page points at the album-independent one, so the
+     two are not read as duplicate content. */}}
+{{ $canonical := .Permalink }}
+{{/* An empty value is a real answer here — it means the site root — so this
+     tests for the parameter rather than for its truthiness. */}}
+{{ if isset .Params "canonical" }}{{ $canonical = absURL .Params.canonical }}{{ end }}
+{{/* D-7: the text face is discovered inside the inlined stylesheet, which is
+     late enough that it swaps in after first paint and moves every line of text
+     under it. Measured before this preload: 0.179 layout shift on an album,
+     0.367 on the index, attributed by Lighthouse to this exact file. Announcing
+     it in the head starts the fetch with the document instead. The mono face is
+     not preloaded: it sets only the technical data on a photo page, so most
+     pages never use it. */}}
+<link rel="preload" href="{{ "fonts/inter-tight-latin.woff2" | relURL }}" as="font" type="font/woff2" crossorigin>
+<link rel="canonical" href="{{ $canonical }}">
+<link rel="alternate" type="application/rss+xml" title="{{ site.Title }}" href="{{ "index.xml" | absURL }}">
+{{ partial "og.html" . }}
+<style>
+/* D-3: self-hosted and subset. N-2 forbids a request leaving the browser, so
+   these are served from our own origin and never linked to a font CDN. */
+@font-face {
+  font-family: "Inter Tight";
+  src: url({{ "fonts/inter-tight-latin.woff2" | relURL }}) format("woff2");
+  font-weight: 100 900; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: "IBM Plex Mono";
+  src: url({{ "fonts/ibm-plex-mono-latin.woff2" | relURL }}) format("woff2");
+  font-weight: 400; font-style: normal; font-display: swap;
+}
+
+/* D-1: light only, no accent colour. The photograph is the colour on the page. */
+:root {
+  --ground: #FAFAFA;
+  --ink: #111111;
+  --hair: #E5E5E5;
+  --quiet: #595959;          /* 7.0:1 on the ground — AA for small text (D-9) */
+  --chip: #ECECEC;           /* tag ground; --quiet keeps 6.6:1 on it (D-9) */
+  --gutter: 6px;             /* D-4: 4–8px */
+  --measure: 34rem;
+  --step: 8px;               /* D-5: everything vertical is a multiple of this */
+  --ui: "Inter Tight", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, monospace;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--ground);
+  color: var(--ink);
+  font: 400 16px/1.5 var(--ui);
+  font-synthesis-weight: none;
+  /* D-5: generous margins. */
+  padding: calc(var(--step) * 6) clamp(16px, 5vw, 72px) calc(var(--step) * 12);
+}
+
+/* D-2: no shadows, no radii, no gradients. Opacity only, and never for motion
+   a reader has asked us not to make. */
+a { color: inherit; text-decoration-thickness: 1px; text-underline-offset: 3px; }
+a:hover { opacity: 0.62; transition: opacity 160ms linear; }
+a:focus-visible, button:focus-visible {
+  outline: 2px solid var(--ink); outline-offset: 3px;   /* D-9 */
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition: none !important; animation: none !important; }
+}
+
+.skip {
+  position: absolute; left: -9999px;
+}
+.skip:focus { left: 8px; top: 8px; background: var(--ground); padding: 8px; z-index: 10; }
+
+/* D-6: hairline rules and plate numbers are the only ornament. */
+.masthead {
+  display: flex; justify-content: space-between; align-items: baseline;
+  gap: 16px; flex-wrap: wrap;
+  border-bottom: 1px solid var(--hair);
+  padding-bottom: var(--step);
+  margin-bottom: calc(var(--step) * 5);
+}
+.wordmark { font-weight: 500; letter-spacing: -0.01em; text-decoration: none; }
+
+.label, .masthead nav, figcaption, .meta {
+  font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--quiet);
+}
+.masthead nav { display: flex; gap: 20px; }
+.masthead nav a { text-decoration: none; }
+
+/* A tag is a label, not a sentence: it reads as a chip on its own ground rather
+   than as an underlined run of words. D-2 still holds — no radius, no shadow,
+   no gradient, and no colour beyond the greys D-1 allows. The gap replaces the
+   middot separators, so the list needs no punctuation to be read as a list. */
+.tags { display: flex; flex-wrap: wrap; gap: 4px; margin: 0 0 var(--step); }
+.tags a {
+  display: inline-block;
+  padding: 3px 7px;
+  background: var(--chip);
+  color: var(--quiet);
+  text-decoration: none;
+}
+.tags a:hover { background: var(--hair); color: var(--ink); opacity: 1; }
+/* In a .meta rail the chips are already 11px uppercase; on a body-text page
+   (the library overview) they carry that treatment themselves. */
+p.tags:not(.meta) a { font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; }
+
+h1 { font-size: clamp(22px, 3vw, 30px); font-weight: 500; letter-spacing: -0.015em;
+     margin: 0 0 var(--step); }
+h2 { font-size: 13px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase;
+     color: var(--quiet); margin: calc(var(--step) * 5) 0 var(--step);
+     border-bottom: 1px solid var(--hair); padding-bottom: 4px; }
+/* Under an h2 that names a kind of thing, an h3 names one of them (F-24). It
+   carries no rule and no uppercase: the h2 above it already said where the
+   reader is, so this only has to be a name. It heads a column, so it starts at
+   the top of one rather than clearing space above itself. */
+h3 { font-size: 15px; font-weight: 500; letter-spacing: -0.005em;
+     margin: 0 0 var(--step); }
+p { margin: 0 0 var(--step); max-width: var(--measure); }
+/* A note the library wrote (R-17). Markdown of one paragraph arrives without
+   its paragraph tags, so the spacing and the measure live on the wrapper. */
+.note { margin: 0 0 var(--step); max-width: var(--measure); }
+.note > :last-child { margin-bottom: 0; }
+
+/* D-5: a 3/9 split for pages that carry text beside the photograph. */
+.split { display: grid; grid-template-columns: 3fr 9fr; gap: calc(var(--step) * 4); }
+@media (max-width: 800px) { .split { grid-template-columns: 1fr; } }
+
+/* The detail pages use the same 3/9 rhythm as everything else (D-5): the details
+   in the narrow rail, the photograph in the wide column beside them. */
+.detail { display: grid; grid-template-columns: 3fr 9fr; gap: calc(var(--step) * 4);
+          align-items: start; }
+.detail-meta > :first-child { margin-top: 0; }
+.detail-meta h1 { font-size: 20px; }
+.detail-meta p { max-width: none; }
+.detail-meta .tech { margin-top: calc(var(--step) * 2); }
+@media (max-width: 800px) {
+  .detail { grid-template-columns: 1fr; }
+  /* Stacked, the photograph comes first — it is the point of the page. */
+  .detail-image { order: -1; }
+}
+
+/* D-4: justified rows. Each figure grows in proportion to its aspect ratio, so
+   a row fills the width exactly. Row heights vary — see the deviation recorded
+   in D-4. How much they vary is set by how many photographs land in a row, not
+   by the packing: a row of two swings by 100px when one photograph moves in or
+   out, a row of four barely moves. The basis below is that lever. Measured over
+   a 102-photograph album at a 1280px viewport: 210px gave 2.9 photographs per
+   row and 27px of spread, 180px gives 3.3 and 32px, 150px gives 4.1 and 12px.
+
+   A photograph taller than 2:3 is laid out at 2:3 and centre-cropped to fit
+   (grid.html clamps the ratio it reports here). Everything else is shown
+   whole, panoramas included — a wide frame costs a row nothing, a very narrow
+   one cannot hold its place in the line. */
+.grid { display: flex; flex-wrap: wrap; gap: var(--gutter); margin: calc(var(--step) * 3) 0 0; }
+.grid::after { content: ""; flex-grow: 1e4; }          /* keeps the last row honest */
+.grid figure {
+  margin: 0; position: relative;
+  flex-grow: var(--ar); flex-basis: calc(var(--ar) * 180px);
+  /* A flex item will not shrink below its min-content width unless told to,
+     and a caption holding an untitled photograph's 16-character id is wider
+     than a narrow portrait's justified width. Without this the portrait keeps
+     the caption's width, its frame grows taller than the row, and it hangs out
+     of the line. */
+  min-width: 0;
+}
+.grid figure a { display: block; text-decoration: none; }
+/* D-7: the box exists at its final size before the photo arrives, filled with
+   the image's own average tone, so nothing reflows. */
+.grid figure .frame { display: block; aspect-ratio: var(--ar); background: var(--tone, var(--hair)); }
+.grid figure img { display: block; width: 100%; height: 100%; object-fit: cover; }
+figcaption { padding-top: 6px; display: flex; gap: 8px; }
+/* The plate keeps its width; the name gives way, since the photograph is the
+   link and a clipped id still reads as an id. */
+figcaption > span:last-child { min-width: 0; overflow: hidden;
+                               text-overflow: ellipsis; white-space: nowrap; }
+.plate { font-variant-numeric: tabular-nums; color: var(--ink); }
+
+/* D-8: one column, full bleed, at phone widths. */
+@media (max-width: 600px) {
+  body { padding: calc(var(--step) * 3) 0 calc(var(--step) * 8); }
+  .masthead, .colophon, main > :not(.grid) { padding-left: 16px; padding-right: 16px; }
+  .grid { gap: 0; }
+  .grid figure { flex-basis: 100%; }
+  figcaption { padding: 6px 16px 16px; }
+}
+
+.tech { font-family: var(--mono); font-size: 12px; }
+.tech dl { display: grid; grid-template-columns: max-content 1fr; gap: 2px 20px; margin: 0; }
+.tech dt { color: var(--quiet); }
+.tech dd { margin: 0; }
+
+ul.plain { list-style: none; padding: 0; margin: 0; }
+/* The index splits below its header: the library on one side, the ways into it
+   on the other. Equal halves, because neither is the lesser of the two. */
+.index-split { display: grid; grid-template-columns: 1fr 1fr;
+               gap: calc(var(--step) * 4); margin-top: calc(var(--step) * 5); }
+.index-split > * > :first-child { margin-top: 0; }
+.squares { display: grid; grid-template-columns: repeat(auto-fill, minmax(132px, 1fr));
+           gap: var(--gutter); }
+.squares a { display: block; text-decoration: none; }
+.squares .frame { display: block; aspect-ratio: var(--ar);
+                  background: var(--tone, var(--hair)); }
+.squares img { display: block; width: 100%; height: 100%; object-fit: cover; }
+/* F-24: a cell that is a way out rather than a photograph. It keeps the grid's
+   square so the row it closes stays a row, and centres its label in it. The
+   selector carries the element too: `.squares a` above is more specific than a
+   lone class, and would otherwise keep this display: block with the label
+   stranded at the top. */
+.squares a.squares-more {
+  display: flex; align-items: center; justify-content: center;
+  aspect-ratio: 1; padding: 8px; text-align: center;
+  border: 1px solid var(--hair);
+  font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--quiet);
+}
+@media (max-width: 800px) {
+  .index-split { grid-template-columns: 1fr; }
+  /* Stacked, the ways in come first: the sample is an invitation, not an index. */
+  .index-sample { order: 1; }
+}
+
+ul.plain li { border-bottom: 1px solid var(--hair); padding: var(--step) 0; }
+
+/* D-6: the hairline is the separator; nothing else marks the foot of the page. */
+.colophon {
+  display: flex; justify-content: space-between; align-items: baseline;
+  gap: 16px; flex-wrap: wrap;
+  border-top: 1px solid var(--hair);
+  margin-top: calc(var(--step) * 8);
+  padding-top: var(--step);
+}
+.colophon nav { display: flex; gap: 20px; }
+
+/* F-25: the two neighbours as thumbnails, each with its direction under it.
+   The cells are the square grids' (F-22), so a tile is the same size wherever
+   the reader meets one; in a rail too narrow for two of them they stack rather
+   than shrinking below that size. The cap belongs on the tile, not on the
+   track: auto-fill counts columns at the track's maximum, so capping the track
+   at 200px would fit one column in a 276px rail and stack the pair at widths
+   where they comfortably sat side by side. */
+.pager { display: grid; grid-template-columns: repeat(auto-fill, minmax(132px, 1fr));
+         gap: var(--gutter); margin-bottom: calc(var(--step) * 2); }
+.pager-step { display: block; text-decoration: none; max-width: 200px; }
+/* D-7 again: the box is sized and toned before the thumbnail arrives. */
+.pager-step .frame { display: block; aspect-ratio: var(--ar);
+                     background: var(--tone, var(--hair)); }
+.pager-step img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.pager-label { display: block; padding-top: 6px;
+               font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase;
+               color: var(--quiet); }
+
+/* Both leave this page, so both look the same, whether the markup is a link or
+   a button the script un-hides. */
+.actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.ghost {
+  font: inherit; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--ink); background: none; border: 1px solid var(--hair);
+  padding: 6px 10px; cursor: pointer; text-decoration: none;
+}
+.ghost[hidden] { display: none; }
+
+/* D-11: the photo page's figure, and what it becomes full screen. */
+.viewer { margin: 0; }
+/* Cap the height without breaking D-7's reserved box: constrain the width to
+   whatever that height implies at this aspect ratio, so a tall portrait cannot
+   push its own details off the screen. A capped photograph is left-aligned in
+   its column, so it sits against the details rail to its left and the slack
+   joins the page margin (D-5) rather than opening a gap between the two. */
+.viewer .frame {
+  display: block; max-width: min(100%, calc(78vh * var(--ar)));
+  aspect-ratio: var(--ar); background: var(--tone, var(--hair));
+}
+.viewer img { display: block; width: 100%; height: 100%; object-fit: cover; }
+
+/* D-1 holds here too: full screen keeps the site's own ground, so the surround
+   is the same off-white as every other page rather than a dark field. */
+.viewer:fullscreen { background: var(--ground); width: 100vw; height: 100vh; margin: 0; }
+.viewer:fullscreen .frame {
+  /* Drop the page layout entirely: no aspect box, no height cap, and no
+     margin-left:auto, which would otherwise hold the photograph off-centre. */
+  aspect-ratio: auto; background: none; max-width: none; margin: 0;
+  display: block; width: 100%; height: 100%;
+}
+.viewer:fullscreen picture { display: block; width: 100%; height: 100%; }
+/* contain scales the photograph up or down to the largest size the screen
+   allows without altering its ratio, and centres what is left over. */
+.viewer:fullscreen img {
+  width: 100%; height: 100%;
+  object-fit: contain; object-position: center;
+}
+
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="masthead">
+  <a class="wordmark" href="{{ "" | relURL }}">{{ site.Title }}</a>
+  {{/* The wordmark is the way back to the index, so the nav carries only the
+       standalone pages (F-21) rather than repeating it. */}}
+  <nav aria-label="Sections">
+    {{ range site.Menus.main }}<a href="{{ .URL }}">{{ .Name }}</a>{{ end }}
+  </nav>
+</header>
+<main id="main">
+{{ block "main" . }}{{ end }}
+</main>
+<footer class="colophon label">
+  <span>{{ with site.Params.footerNote }}{{ . }}{{ else }}{{ site.Title }}{{ end }}</span>
+  {{ with site.Params.imprintPage }}
+    {{ with site.GetPage (printf "/photos/%s" .) }}
+  <nav aria-label="Site information">
+    <a href="{{ .RelPermalink }}">{{ with site.Params.imprintLabel }}{{ . }}{{ else }}{{ $.Title }}{{ end }}</a>
+  </nav>
+    {{ end }}
+  {{ end }}
+</footer>
+{{ block "scripts" . }}{{ end }}
+</body>
+</html>

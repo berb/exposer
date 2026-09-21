@@ -1,0 +1,39 @@
+# Generator configuration. Nothing here describes a photograph: per-photo
+# content comes only from sidecars and EXIF (R-2), and the library's own
+# _data/ directory carries what a photograph cannot say about itself.
+#
+# Copy this to <your library>/_data/exposer.yaml and edit. It lives in the
+# library with the rest of what the library says about itself (R-18), so the
+# directory you hand someone is the whole site, and a build needs no second
+# argument. --config overrides it for a build that wants different settings
+# from the same photographs.
+
+# The base path the site is published at. Every link and image path is built
+# from it, so a build under the wrong one is wrong everywhere (B-4).
+base_url: "/"
+title: "Photographs"
+subtitle: ""
+
+# D-10: which library page (R-13) the footer links to, by slug. Empty, or a
+# slug with no matching page, hides the link.
+imprint_page: ""
+imprint_label: "Imprint"
+# Shown at the foot of every page. Empty shows nothing.
+footer_note: ""
+
+# R-5: the publication gate. A photograph rated below this is not published,
+# and curation happens in darktable rather than here.
+min_rating: 4
+
+derivatives:
+  # F-5: srcset widths, as long-edge pixels. A width larger than the original
+  # is skipped rather than upscaled.
+  widths: [200, 400, 800, 1600, 2400]
+  # Centre-cropped 1:1 tiles, for the places that want a uniform square
+  # rather than the photograph's own shape.
+  square_widths: [200, 400]
+  # Both formats are generated; the page offers AVIF first and JPEG as the
+  # fallback.
+  formats: ["jpeg", "avif"]
+  jpeg_quality: 82
+  avif_quality: 50

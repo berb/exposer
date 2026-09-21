@@ -1,0 +1,11 @@
+{{/* F-21: a standalone page from the library (R-13). Named "prose" rather than
+     "page" so it cannot collide with Hugo's own lookup for regular pages. */}}
+{{ define "main" }}
+<div class="split">
+  <div><p class="label">Page</p></div>
+  <div class="prose">
+    <h1>{{ .Title }}</h1>
+    {{ .Content }}
+  </div>
+</div>
+{{ end }}

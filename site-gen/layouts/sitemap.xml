@@ -1,0 +1,11 @@
+{{- /* F-19: sitemap for the whole photo section, minus anything unlisted (F-18). */ -}}
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  {{- range site.Pages }}
+  {{- if and .Permalink (ne .Params.unlisted true) (ne .Params.sitemap false) }}
+  <url>
+    <loc>{{ .Permalink }}</loc>
+    {{- with .Date }}{{ if not .IsZero }}<lastmod>{{ .Format "2006-01-02" }}</lastmod>{{ end }}{{ end }}
+  </url>
+  {{- end }}
+  {{- end }}
+</urlset>
