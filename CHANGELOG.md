@@ -6,6 +6,7 @@ All notable changes to exposer, newest first. The format follows [Keep a Changel
 
 ### Changed
 
+- Release archives carry their version in the name, as in `exposer_0.1.4_linux_amd64.tar.gz`. `SHA256SUMS` keeps its fixed name, and the README's download commands read the current archive's name from it.
 - A photograph's page tells the browser the width it will really be drawn at, including when the window's height limits it, so desktops download a quarter less for the same picture.
 
 ## [0.1.3] - 2026-09-21

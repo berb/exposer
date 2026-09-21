@@ -54,9 +54,10 @@ jobs:
       # version is read back with `go version -m`, which works on a binary for
       # any platform, and must be exactly the tag.
       #
-      # Archive names carry no version, so the README's download commands can
-      # use releases/latest/download/<name> and stay correct for every release;
-      # `exposer --version` says which one it is.
+      # Archive names carry the version -- exposer_0.1.3_linux_amd64.tar.gz --
+      # so a download says what it is. SHA256SUMS keeps a fixed name: the
+      # README fetches it from releases/latest/download/ and reads the current
+      # archive's name out of it, so its commands never go stale.
       #
       # The output goes outside the checkout: Go counts untracked files as a
       # modified tree, so writing into it would stamp every binary after the
@@ -68,7 +69,7 @@ jobs:
           mkdir "$dist"
           for target in linux/amd64 linux/arm64 darwin/amd64 darwin/arm64; do
             os="${target%/*}" arch="${target#*/}"
-            name="exposer_${os}_${arch}"
+            name="exposer_${version#v}_${os}_${arch}"
             mkdir "$dist/$name"
             CGO_ENABLED=0 GOOS="$os" GOARCH="$arch" \
               go build -trimpath -o "$dist/$name/exposer" ./cmd/exposer

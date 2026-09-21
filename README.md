@@ -33,15 +33,17 @@ The output is plain files. No server runtime, no database, no request leaving th
 Download a binary from the [latest release](https://github.com/berb/exposer/releases/latest), check it, and put it on your `PATH`. For Linux on amd64:
 
 ```sh
-curl -LO https://github.com/berb/exposer/releases/latest/download/exposer_linux_amd64.tar.gz
-curl -LO https://github.com/berb/exposer/releases/latest/download/SHA256SUMS
-grep exposer_linux_amd64.tar.gz SHA256SUMS | sha256sum -c    # on macOS: … | shasum -a 256 -c
-tar xzf exposer_linux_amd64.tar.gz
-sudo install exposer_linux_amd64/exposer /usr/local/bin/
+base=https://github.com/berb/exposer/releases/latest/download
+curl -LO "$base/SHA256SUMS"
+file=$(grep linux_amd64 SHA256SUMS | awk '{print $2}')    # e.g. exposer_0.1.4_linux_amd64.tar.gz
+curl -LO "$base/$file"
+grep "$file" SHA256SUMS | sha256sum -c                    # on macOS: … | shasum -a 256 -c
+tar xzf "$file"
+sudo install "${file%.tar.gz}/exposer" /usr/local/bin/
 exposer --version    # the release, and the Hugo version it renders with
 ```
 
-Replace `linux_amd64` with `linux_arm64`, `darwin_amd64` or `darwin_arm64` as needed. Every archive is also attested by the workflow that built it: `gh attestation verify exposer_linux_amd64.tar.gz --repo berb/exposer` proves it came from this repository's release build. The macOS binaries are not signed by Apple: downloaded with `curl` as above they run as they are, but a copy downloaded in a browser has to be released from quarantine first with `xattr -d com.apple.quarantine exposer`.
+Replace `linux_amd64` with `linux_arm64`, `darwin_amd64` or `darwin_arm64` as needed. Every archive is also attested by the workflow that built it: `gh attestation verify "$file" --repo berb/exposer` proves it came from this repository's release build. The macOS binaries are not signed by Apple: downloaded with `curl` as above they run as they are, but a copy downloaded in a browser has to be released from quarantine first with `xattr -d com.apple.quarantine exposer`.
 
 Or, with Go 1.27 or newer:
 
