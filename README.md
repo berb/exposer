@@ -24,7 +24,7 @@ The output is plain files. No server runtime, no database, no request leaving th
 ## Requirements
 
 - [exiftool](https://exiftool.org/): for reading the library
-- [ImageMagick](https://imagemagick.org/) 7 (`magick`), built with AVIF support: renders derivatives. On Debian that requires installing `libheif-plugin-aomenc` as well, which apt treats as optional; without it every AVIF fails with "no encode delegate"
+- [ImageMagick](https://imagemagick.org/) 7 (`magick`), built with AVIF support: renders derivatives. On Debian that requires installing `libheif-plugin-aomenc` as well, which apt treats as optional; without it every AVIF fails with "no encode delegate". Ubuntu 24.04 LTS ships only ImageMagick 6, which has no `magick` command, so the build stops with "magick is required but did not run"; install ImageMagick 7 from [imagemagick.org](https://imagemagick.org/script/download.php) instead of apt
 - [darktable](https://www.darktable.org/) (`darktable-cli`): only if your library holds RAW files
 - [Hugo](https://gohugo.io/): for rendering the site. exposer requires Hugo 0.166.0. Under Linux, exposer pins the version it renders with, downloads it into your cache directory on first use, and checks it against a hash compiled into the binary. Otherwise, you must have Hugo 0.166.0 installed on `PATH` or you need to pass `--hugo <path>` (also for offline builds). Windows is currently not supported.
 
