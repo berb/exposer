@@ -20,6 +20,7 @@ const logo = `  ___  __ __  _ __   ___   ___  ___   _ _
 const usage = logo + `
 exposer <command> [flags]
 
+  init      write a default configuration: exposer init <library>
   build     the whole pipeline: exposer build <library>, artifact in target/site
   serve     serve the assembled artifact for local preview (B-7)
 
@@ -40,6 +41,8 @@ func main() {
 	}
 	args := os.Args[2:]
 	switch os.Args[1] {
+	case "init":
+		runInit(args)
 	case "build":
 		runBuild(args)
 	case "index":

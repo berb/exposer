@@ -11,7 +11,7 @@ import (
 type derivativeConfig struct {
 	Widths []int `yaml:"widths"`
 	// Square crops for the places that need a uniform tile rather than the
-	// photograph's own shape (F-7's album covers). Long-edge pixels, as above.
+	// photograph's own shape (F-5). Long-edge pixels, as above.
 	SquareWidths []int    `yaml:"square_widths"`
 	Formats      []string `yaml:"formats"`
 	JPEGQuality  int      `yaml:"jpeg_quality"`

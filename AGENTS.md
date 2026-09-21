@@ -35,6 +35,7 @@ target/        build output (site/) and caches (cache/); never committed
 
 ## Commands
 
+`exposer init <library>` writes a default configuration into `_data/`.
 `exposer build <library>` is the whole pipeline, into `target/site`
 (`--target` moves it). `exposer serve` previews it. Each stage is also a
 subcommand, for running one at a time.

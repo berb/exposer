@@ -1,12 +1,12 @@
-# Generator configuration. Nothing here describes a photograph: per-photo
-# content comes only from sidecars and EXIF (R-2), and the library's own
-# _data/ directory carries what a photograph cannot say about itself.
+# exposer's configuration for one library. It lives at
+# <library>/_data/exposer.yaml, beside everything else the library says about
+# itself (R-18), so the directory you hand someone is the whole site.
+# `exposer init <library>` writes this file there; --config overrides it for a
+# build that wants different settings from the same photographs.
 #
-# Copy this to <your library>/_data/exposer.yaml and edit. It lives in the
-# library with the rest of what the library says about itself (R-18), so the
-# directory you hand someone is the whole site, and a build needs no second
-# argument. --config overrides it for a build that wants different settings
-# from the same photographs.
+# Every value below is the default, so this file changes nothing until you
+# edit it. Nothing here describes a photograph: that comes only from sidecars
+# and EXIF (R-2).
 
 # The base path the site is published at. Every link and image path is built
 # from it, so a build under the wrong one is wrong everywhere (B-4).
