@@ -14,7 +14,7 @@ func TestEmbeddedThemeKeepsItsPartials(t *testing.T) {
 	for _, name := range []string{
 		"site-gen/layouts/baseof.html",
 		"site-gen/layouts/_partials/squares.html",
-		"site-gen/static/fullscreen.js",
+		"site-gen/assets/fullscreen.js",
 		"schema/index.schema.json",
 	} {
 		if _, err := fs.Stat(exposer.Files, name); err != nil {

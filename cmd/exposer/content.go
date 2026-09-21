@@ -125,8 +125,10 @@ func runContent(args []string) {
 	writeHugoConfig(filepath.Join(*out, "hugo.toml"), cfg)
 	themeFiles := themeFS(*theme)
 	copyTree(themeFiles, "layouts", filepath.Join(*out, "layouts"))
-	// Fonts and fullscreen.js live here; without this they never reach the site.
+	// Fonts live here; without this they never reach the site.
 	copyTree(themeFiles, "static", filepath.Join(*out, "static"))
+	// fullscreen.js lives here, so Hugo can minify it on its way out.
+	copyTree(themeFiles, "assets", filepath.Join(*out, "assets"))
 	for _, p := range pages {
 		writePage(filepath.Join(*out, "content", p.path), p)
 	}

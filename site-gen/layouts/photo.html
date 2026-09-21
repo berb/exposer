@@ -72,4 +72,4 @@
 {{ end }}
 {{ end }}
 
-{{ define "scripts" }}<script src="{{ "fullscreen.js" | relURL }}" defer></script>{{ end }}
+{{ define "scripts" }}{{ partial "fullscreen.html" . }}{{ end }}

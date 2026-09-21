@@ -174,7 +174,7 @@ when a sidecar was written by a newer one (F-4).
 ## Design
 
 The constraints live in the CSS at the top of `site-gen/layouts/baseof.html`.
-`site-gen/static/fullscreen.js` is the only JavaScript on the site and must stay
+`site-gen/assets/fullscreen.js` is the only JavaScript on the site and must stay
 progressive enhancement: it enhances D-11's fullscreen view on a photo page and
 ships its trigger hidden until the browser proves the API exists. Every grid
 entry is a plain link to a real page. An earlier lightbox was withdrawn once

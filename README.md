@@ -17,7 +17,7 @@ Example output:
 
 ## What it generates
 
-Albums, tags, places, a timeline, a page per photograph, and a page per photograph *within each listing it belongs to*, so paging through an album stays inside that album. Plus an index, an "all" page, a gear page built from EXIF, an RSS feed and a sitemap. Every grid entry is a real link to a real page; there is no lightbox and only 1.6 KB of JavaScript on the whole site, for the fullscreen view.
+Albums, tags, places, a timeline, a page per photograph, and a page per photograph *within each listing it belongs to*, so paging through an album stays inside that album. Plus an index, an "all" page, a gear page built from EXIF, an RSS feed and a sitemap. Every grid entry is a real link to a real page; there is no lightbox and under 1 KB of JavaScript on the whole site (gzipped), for the fullscreen view.
 
 The output is plain files. No server runtime, no database, no request leaving the visitor's browser.
 
