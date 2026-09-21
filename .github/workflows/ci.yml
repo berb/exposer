@@ -39,6 +39,14 @@ jobs:
 
       - uses: actions/checkout@v4
 
+      # The checkout belongs to the runner's user and the container runs as
+      # root, so git calls the repository dubiously owned and refuses to read
+      # it -- and `go build`, which asks git for the commit to stamp into the
+      # binary, fails with "error obtaining VCS status". go vet and go test
+      # stamp nothing, so only a build notices.
+      - name: Trust the checkout
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
