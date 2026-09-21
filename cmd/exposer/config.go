@@ -66,7 +66,7 @@ func defaultConfig() config {
 		ImprintLabel: "Imprint",
 		MinRating:    publishMinRating,
 		Derivatives: derivativeConfig{
-			Widths:       []int{200, 400, 800, 1600, 2400},
+			Widths:       []int{200, 400, 800, 1200, 1600, 2400},
 			SquareWidths: []int{200, 400},
 			Formats:      []string{"jpeg", "avif"},
 			JPEGQuality:  82,

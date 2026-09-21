@@ -187,7 +187,7 @@ imprint_page: ""
 footer_line: "© 2026 The Test Library"
 min_rating: 4
 derivatives:
-  widths: [200, 400, 800, 1600, 2400]
+  widths: [200, 400, 800, 1200, 1600, 2400]
   square_widths: [200, 400]
   formats: ["jpeg", "avif"]
   jpeg_quality: 82

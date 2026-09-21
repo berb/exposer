@@ -277,7 +277,7 @@ func TestDeriveRendersTheLadderAndNothingBeyondIt(t *testing.T) {
 				t.Errorf("%s: unexpected format %q", id, d.Format)
 			}
 			// ladder() never upscales: the fixtures are 900px on the long edge,
-			// so 1600 and 2400 must not appear.
+			// so 1200, 1600 and 2400 must not appear.
 			if !d.Square && d.Width > 900 {
 				t.Errorf("%s: a %dpx derivative from a 900px original", id, d.Width)
 			}

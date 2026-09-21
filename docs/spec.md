@@ -100,7 +100,7 @@ Gear tags are **derived, not curated**, so they do not count as a way to reach a
 
 **F-4 (SHOULD)** RAW originals are developed with `darktable-cli original.raw original.raw.xmp out.jpg`, reproducing the darktable edit headlessly. Pre-exported JPEGs remain a supported alternative. Pixel dimensions come from `Composite:ImageSize`, which RAW and JPEG both provide, and are mandatory: D-7 needs them to reserve layout.
 
-**F-5 (MUST)** Each photo gets derivatives at several widths for `srcset` (default 200 / 400 / 800 / 1600 / 2400 px long edge, configurable under R-18), and square (1:1) derivatives centre-cropped from it. Squares serve every place that needs a uniform tile and never appear in a photo's own `srcset`. A square is bounded by the short edge; where a photo is too small for a size, the caller falls back to the uncropped ladder. Nothing is upscaled.
+**F-5 (MUST)** Each photo gets derivatives at several widths for `srcset` (default 200 / 400 / 800 / 1200 / 1600 / 2400 px long edge — 1200 because a phone at two or three times its CSS width needs about 1000–1100 px, which would otherwise take 1600 — configurable under R-18), and square (1:1) derivatives centre-cropped from it. Squares serve every place that needs a uniform tile and never appear in a photo's own `srcset`. A square is bounded by the short edge; where a photo is too small for a size, the caller falls back to the uncropped ladder. Nothing is upscaled.
 
 A **sample grid** is up to eleven squares plus a twelfth cell that links to the full listing and names its count. The index sections of F-7, F-24 and F-26 use it, so the sample and the way past it form one block.
 

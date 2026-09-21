@@ -29,7 +29,7 @@ min_rating: 4
 derivatives:
   # Image widths, as long-edge pixels. A width larger than the original
   # is skipped rather than upscaled.
-  widths: [200, 400, 800, 1600, 2400]
+  widths: [200, 400, 800, 1200, 1600, 2400]
   # Centre-cropped 1:1 tiles, for the places that want a uniform square
   # rather than the photograph's own shape.
   square_widths: [200, 400]
