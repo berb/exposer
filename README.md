@@ -13,7 +13,7 @@ darktable → library (originals + .xmp) → exposer → static files → any we
 
 Example output:
 
-TODO
+![Example output](example.png)
 
 ## What it generates
 
@@ -25,8 +25,8 @@ The output is plain files. No server runtime, no database, no request leaving th
 
 - [exiftool](https://exiftool.org/): for reading the library
 - [ImageMagick](https://imagemagick.org/) 7 (`magick`), built with AVIF support: renders derivatives. On Debian that requires installing `libheif-plugin-aomenc` as well, which apt treats as optional; without it every AVIF fails with "no encode delegate"
-- [darktable](https://www.darktable.org/) (`darktable-cli`) — only if your library holds RAW files
-- [Hugo](https://gohugo.io/) – for rendering the site. exposer requires Hugo 0.166.0. Under Linux, exposer pins the version it renders with, downloads it into your cache directory on first use, and checks it against a hash compiled into the binary. Otherwise, you must have Hugo 0.166.0 installed on `PATH` or you need to pass `--hugo <path>` (also for offline builds). Windows is currently not supported.
+- [darktable](https://www.darktable.org/) (`darktable-cli`): only if your library holds RAW files
+- [Hugo](https://gohugo.io/): for rendering the site. exposer requires Hugo 0.166.0. Under Linux, exposer pins the version it renders with, downloads it into your cache directory on first use, and checks it against a hash compiled into the binary. Otherwise, you must have Hugo 0.166.0 installed on `PATH` or you need to pass `--hugo <path>` (also for offline builds). Windows is currently not supported.
 
 ## Install
 
@@ -39,9 +39,9 @@ That needs Go 1.27 or newer. The binary carries its theme and schema, so it runs
 ## Quickstart
 
 ```sh
-cp exposer.example.yaml ~/photos/_data/exposer.yaml   # edit base_url and title
-exposer build ~/photos                                # artifact in ./target/site
-exposer serve                                         # http://127.0.0.1:8888
+exposer init ~/photos     # writes ~/photos/_data/exposer.yaml; edit base_url and title
+exposer build ~/photos    # artifact in ./target/site
+exposer serve             # http://127.0.0.1:8888
 ```
 
 `--target` puts the build elsewhere; the artifact is always `<target>/site`, and the caches beside it are what make the next build fast. `exposer build` runs five stages, each also available as a subcommand for running one at a time:
