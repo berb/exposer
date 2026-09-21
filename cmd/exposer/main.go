@@ -31,7 +31,8 @@ exposer <command> [flags]
   assemble  hardlink Hugo output and derivatives into the artifact
   validate  check a document against the index schema
 
-Run "exposer <command> -h" for the flags of one command.
+Run "exposer <command> -h" for the flags of one command,
+and "exposer --version" for the release and the Hugo it renders with.
 `
 
 func main() {
@@ -57,6 +58,8 @@ func main() {
 		runValidate(args)
 	case "serve":
 		runServe(args)
+	case "--version", "-version", "version":
+		runVersion()
 	case "-h", "--help", "help":
 		fmt.Print(usage)
 	default:

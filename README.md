@@ -32,6 +32,7 @@ The output is plain files. No server runtime, no database, no request leaving th
 
 ```sh
 go install github.com/berb/exposer/cmd/exposer@latest
+exposer --version    # the release, and the Hugo version it renders with
 ```
 
 That needs Go 1.27 or newer. The binary carries its theme and schema, so it runs from anywhere.
