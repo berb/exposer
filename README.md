@@ -1,30 +1,32 @@
-```
-───  e x p o s e r  ───────────────────────
-     library in, photographs out
-```
+# exposer
 
-A static photography site, generated from an offline library of originals and XMP sidecars. The library is the source of truth; the site is a build artifact you can delete and regenerate at any time.
+A generator for a static photography site, derived from original photo files and XMP sidecars. The library is the only source of truth; the site is a build artifact you can delete and regenerate at any time.
 
 Curation happens where the editing happens. A star rating in darktable decides what is published, hierarchical tags decide what a photograph belongs to, and nothing about a photograph is ever typed into this tool.
 
+The generated static photography site is responsive, optimized for fast loading.
+
+High-level work flow:
 ```
 darktable → library (originals + .xmp) → exposer → static files → any web host
 ```
 
-## What it makes
+Example output:
 
-Albums, tags, places, a timeline, a page per photograph, and a page per photograph *within each listing it belongs to*, so paging through an album stays inside that album. Plus an index, an "all" page, a gear page built from EXIF, an RSS feed and a sitemap. Every grid entry is a real link to a real page; there is no lightbox and 1.6 KB of JavaScript on the whole site, for the fullscreen view.
+TODO
+
+## What it generates
+
+Albums, tags, places, a timeline, a page per photograph, and a page per photograph *within each listing it belongs to*, so paging through an album stays inside that album. Plus an index, an "all" page, a gear page built from EXIF, an RSS feed and a sitemap. Every grid entry is a real link to a real page; there is no lightbox and only 1.6 KB of JavaScript on the whole site, for the fullscreen view.
 
 The output is plain files. No server runtime, no database, no request leaving the visitor's browser.
 
 ## Requirements
 
-- [exiftool](https://exiftool.org/) — reads the library
-- [ImageMagick](https://imagemagick.org/) 7 (`magick`), built with AVIF support — renders derivatives. On Debian that means installing `libheif-plugin-aomenc` as well, which apt treats as optional; without it every AVIF fails with "no encode delegate"
+- [exiftool](https://exiftool.org/): for reading the library
+- [ImageMagick](https://imagemagick.org/) 7 (`magick`), built with AVIF support: renders derivatives. On Debian that requires installing `libheif-plugin-aomenc` as well, which apt treats as optional; without it every AVIF fails with "no encode delegate"
 - [darktable](https://www.darktable.org/) (`darktable-cli`) — only if your library holds RAW files
-- Linux, on amd64 or arm64. macOS works with Hugo 0.166.0 installed on `PATH` (Hugo publishes macOS only as an installer, which exposer cannot unpack); Windows is not supported.
-
-Hugo is not on this list: exposer pins the version it renders with, downloads it into your cache directory on first use, and checks it against a hash compiled into the binary. Pass `--hugo <path>` to build offline.
+- [Hugo](https://gohugo.io/) – for rendering the site. exposer requires Hugo 0.166.0. Under Linux, exposer pins the version it renders with, downloads it into your cache directory on first use, and checks it against a hash compiled into the binary. Otherwise, you must have Hugo 0.166.0 installed on `PATH` or you need to pass `--hugo <path>` (also for offline builds). Windows is currently not supported.
 
 ## Install
 
