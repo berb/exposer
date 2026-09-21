@@ -22,7 +22,7 @@ exposer <command> [flags]
 
   init      write a default configuration: exposer init <library>
   build     the whole pipeline: exposer build <library>, artifact in target/site
-  serve     serve the assembled artifact for local preview (B-7)
+  serve     serve the assembled artifact for local preview
 
   The stages, for running one at a time:
   index     read the library, write target/index.json         (stage 1)

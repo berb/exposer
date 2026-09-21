@@ -1,33 +1,33 @@
 # exposer's configuration for one library. It lives at
 # <library>/_data/exposer.yaml, beside everything else the library says about
-# itself (R-18), so the directory you hand someone is the whole site.
+# itself, so the directory you hand someone is the whole site.
 # `exposer init <library>` writes this file there; --config overrides it for a
 # build that wants different settings from the same photographs.
 #
 # Every value below is the default, so this file changes nothing until you
 # edit it. Nothing here describes a photograph: that comes only from sidecars
-# and EXIF (R-2).
+# and EXIF.
 
 # The base path the site is published at. Every link and image path is built
-# from it, so a build under the wrong one is wrong everywhere (B-4).
+# from it, so a build under the wrong one is wrong everywhere.
 base_url: "/"
 title: "Photographs"
 subtitle: ""
 
-# D-10: which library page (R-13) the footer links to, by slug. Empty, or a
-# slug with no matching page, hides the link.
+# Which of the library's pages (_data/pages/) the footer links to as its
+# imprint, by slug. Empty, or a slug with no matching page, hides the link.
 imprint_page: ""
 imprint_label: "Imprint"
-# D-10: the line at the left of every page's footer, such as a copyright
+# The line at the left of every page's footer, such as a copyright
 # notice. Empty shows the site's title there instead.
 footer_line: ""
 
-# R-5: the publication gate. A photograph rated below this is not published,
+# The publication gate. A photograph rated below this is not published,
 # and curation happens in darktable rather than here.
 min_rating: 4
 
 derivatives:
-  # F-5: srcset widths, as long-edge pixels. A width larger than the original
+  # Image widths, as long-edge pixels. A width larger than the original
   # is skipped rather than upscaled.
   widths: [200, 400, 800, 1600, 2400]
   # Centre-cropped 1:1 tiles, for the places that want a uniform square

@@ -164,7 +164,7 @@ func TestCheckGearDescriptionsRefusesAFileNamingNothing(t *testing.T) {
 
 	known := map[string]string{"testcam-a1": "gear-camera-testcam-a1"}
 	message := catchFail(t, func() { checkGearDescriptions(dir, known) })
-	if !strings.Contains(message, "nonexistent") || !strings.Contains(message, "R-17") {
+	if !strings.Contains(message, "nonexistent") || !strings.Contains(message, "camera or lens") {
 		t.Errorf("fail() said %q, want it to name the file and the requirement", message)
 	}
 

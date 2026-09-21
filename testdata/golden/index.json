@@ -695,7 +695,7 @@
       "cover": "b1f943e3a9f94343",
       "first_year": "2024",
       "last_year": "2024",
-      "intro": "Reachable by its address, absent from every listing (F-18).",
+      "intro": "Reachable by its address, absent from every listing.",
       "photo_count": 2,
       "unlisted": true
     }
@@ -710,7 +710,7 @@
       ],
       "lat": null,
       "lon": null,
-      "description": "A place described without coordinates stays off the map (R-11).",
+      "description": "A place described without coordinates stays off the map.",
       "photo_count": 6
     },
     {

@@ -1084,7 +1084,7 @@ func runIndex(args []string) {
 		for _, f := range failures {
 			lines = append(lines, fmt.Sprintf("  %s: %s", f.source, strings.Join(f.problems, ", ")))
 		}
-		fail("%d photo(s) violate the metadata contract (R-8):\n%s",
+		fail("%d photo(s) violate the metadata contract:\n%s",
 			len(failures), strings.Join(lines, "\n"))
 	}
 

@@ -168,7 +168,7 @@ func TestGearDescriptionsAreCheckedAgainstTheLibrary(t *testing.T) {
 			"--out", filepath.Join(dir, "hugo"),
 		})
 	})
-	if !strings.Contains(message, "nonexistent") || !strings.Contains(message, "R-17") {
+	if !strings.Contains(message, "nonexistent") || !strings.Contains(message, "camera or lens") {
 		t.Errorf("content said %q, want it to name the file and the requirement", message)
 	}
 }
@@ -192,7 +192,7 @@ func TestTagDescriptionsAreCheckedAgainstTheLibrary(t *testing.T) {
 			"--out", filepath.Join(dir, "hugo"),
 		})
 	})
-	if !strings.Contains(message, "nonexistent") || !strings.Contains(message, "R-19") {
+	if !strings.Contains(message, "nonexistent") || !strings.Contains(message, "no tag") {
 		t.Errorf("content said %q, want it to name the file and the requirement", message)
 	}
 }

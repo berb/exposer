@@ -139,14 +139,14 @@ YAML
 cat > $root/_data/albums/private-set.yaml <<'YAML'
 tag: "Album|Private Set"
 title: Private Set
-intro: Reachable by its address, absent from every listing (F-18).
+intro: Reachable by its address, absent from every listing.
 unlisted: true
 YAML
 
 cat > $root/_data/locations/norway.yaml <<'YAML'
 tag: "Location|Norway"
 title: Norway
-description: A place described without coordinates stays off the map (R-11).
+description: A place described without coordinates stays off the map.
 YAML
 
 cat > $root/_data/locations/norway-bergen.yaml <<'YAML'
@@ -162,12 +162,12 @@ title: About
 menu: true
 ---
 
-A standalone page from the library (R-13), rendered beside the photographs.
+A standalone page from the library, rendered beside the photographs.
 MD
 
 cat > $root/_data/gear/testcam-a1.md <<'MD'
-The body most of these frames came from. This file exists to prove R-17 renders
-a description when the library offers one.
+The body most of these frames came from. This file exists to prove a gear
+description renders when the library offers one.
 MD
 
 # R-19: prose about one tag, shown on the tag index and on the tag's listing.
@@ -175,7 +175,7 @@ mkdir -p $root/_data/tags
 cat > $root/_data/tags/subject-street.md <<'MD'
 Photographs made *in public*, with nobody asked to stand anywhere.
 
-This file exists to prove R-19 renders Markdown when the library offers it.
+This file exists to prove a tag description renders Markdown when the library offers it.
 MD
 
 # R-18: the library carries the generator's configuration too.

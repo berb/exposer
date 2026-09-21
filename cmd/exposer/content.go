@@ -67,7 +67,7 @@ func runContent(args []string) {
 	fs := flag.NewFlagSet("content", flag.ExitOnError)
 	indexPath := fs.String("index", filepath.Join("target", "index.json"), "index to read")
 	manifestPath := fs.String("manifest", filepath.Join("target", "derivatives.json"), "derivative manifest")
-	library := fs.String("library", "source", "library root (read-only), for R-13 pages")
+	library := fs.String("library", "source", "library root (read-only), for its standalone pages")
 	theme := fs.String("theme", "", "theme directory to use instead of the built-in one")
 	out := fs.String("out", filepath.Join("target", "hugo"), "generated hugo project")
 	configPath := fs.String("config", "", "generator config (default: <library>/_data/exposer.yaml)")
@@ -657,7 +657,7 @@ func describedBy(library, kind, name string) string {
 // checkGearDescriptions fails the build on an R-17 file naming no gear.
 func checkGearDescriptions(library string, known map[string]string) {
 	checkDescriptions(library, "gear", known,
-		"no camera or lens in the library is named %q (R-17)")
+		"no camera or lens in the library is named %q")
 }
 
 // checkTagDescriptions is R-19's half of the same bargain: a file under
@@ -668,7 +668,7 @@ func checkTagDescriptions(library string, known map[string]bool) {
 		named[slug] = slug
 	}
 	checkDescriptions(library, "tags", named,
-		"no tag in the library has the slug %q (R-19)")
+		"no tag in the library has the slug %q")
 }
 
 // checkDescriptions fails the build on a description file that names nothing.
@@ -730,11 +730,11 @@ func loadLibraryPages(library string, existing []page) []page {
 			fail("%s: filename does not reduce to a usable slug", filepath.Join(dir, name))
 		}
 		if reservedSlugs[slug] || yearSlug.MatchString(slug) {
-			fail("%s: slug %q would shadow a generated URL (F-21)", filepath.Join(dir, name), slug)
+			fail("%s: slug %q would shadow a generated URL", filepath.Join(dir, name), slug)
 		}
 		target := filepath.Join("photos", slug+".md")
 		if _, clash := taken[target]; clash {
-			fail("%s: slug %q collides with a generated page (F-21)", filepath.Join(dir, name), slug)
+			fail("%s: slug %q collides with a generated page", filepath.Join(dir, name), slug)
 		}
 		taken[target] = target
 

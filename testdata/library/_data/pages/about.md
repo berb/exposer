@@ -3,4 +3,4 @@ title: About
 menu: true
 ---
 
-A standalone page from the library (R-13), rendered beside the photographs.
+A standalone page from the library, rendered beside the photographs.

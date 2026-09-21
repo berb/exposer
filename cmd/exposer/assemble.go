@@ -22,7 +22,7 @@ func runAssemble(args []string) {
 	public := set.String("public", filepath.Join("target", "hugo", "public"), "hugo output")
 	manifestPath := set.String("manifest", filepath.Join("target", "derivatives.json"), "derivative manifest")
 	cacheRoot := set.String("cache", filepath.Join("target", "cache", "derivatives"), "derivative cache root")
-	indexPath := set.String("index", filepath.Join("target", "index.json"), "index, for the F-15 check")
+	indexPath := set.String("index", filepath.Join("target", "index.json"), "index, to check that no original is published")
 	out := set.String("out", filepath.Join("target", "site"), "deploy artifact")
 	set.Parse(args)
 
@@ -55,7 +55,7 @@ func runAssemble(args []string) {
 
 	leaked := checkNoOriginals(*out, *indexPath)
 	if len(leaked) > 0 {
-		fail("F-15 violation: %d original(s) reached the deploy artifact:\n  %s",
+		fail("%d original(s) reached the deploy artifact, which must never publish one:\n  %s",
 			len(leaked), strings.Join(leaked, "\n  "))
 	}
 
@@ -65,7 +65,7 @@ func runAssemble(args []string) {
 			len(unreachable), strings.Join(unreachable, "\n  "))
 	}
 
-	fmt.Printf("%d pages, %d derivatives -> %s (no originals, F-15; all reachable)\n",
+	fmt.Printf("%d pages, %d derivatives -> %s (no originals; all reachable)\n",
 		pages, derivatives, *out)
 }
 

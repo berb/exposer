@@ -103,7 +103,7 @@ func downloadHugo(platform, want, dir, binary string) {
 
 	digest := sha256.Sum256(archive)
 	if got := hex.EncodeToString(digest[:]); got != want {
-		fail("%s does not match its pinned checksum (B-8)\n  want %s\n  got  %s", asset, want, got)
+		fail("%s does not match its pinned checksum\n  want %s\n  got  %s", asset, want, got)
 	}
 
 	body, err := hugoFromArchive(archive)
@@ -161,7 +161,7 @@ func requireHugoVersion(binary string) {
 		fail("cannot run %s version: %v", binary, err)
 	}
 	if !strings.HasPrefix(string(out), "hugo v"+hugoVersion+"-") {
-		fail("%s is %s, but this exposer renders with Hugo %s (B-8)",
+		fail("%s is %s, but this exposer renders with Hugo %s",
 			binary, strings.TrimSpace(string(out)), hugoVersion)
 	}
 }

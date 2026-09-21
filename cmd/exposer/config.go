@@ -96,7 +96,7 @@ func loadConfig(path string) config {
 		fail("%s: %v", path, err)
 	}
 	if len(cfg.Derivatives.Widths) == 0 || len(cfg.Derivatives.Formats) == 0 {
-		fail("%s: derivatives need at least one width and one format (F-5)", path)
+		fail("%s: derivatives need at least one width and one format", path)
 	}
 	return cfg
 }
