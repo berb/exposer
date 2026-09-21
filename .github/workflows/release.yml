@@ -1,0 +1,92 @@
+# B-8: a tag becomes a GitHub release with a ready-to-run binary for every
+# supported platform, so installing exposer does not require Go. `go install`
+# keeps working for those who have it.
+name: release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: read
+
+jobs:
+  # The whole CI job, called rather than copied: nothing is released that the
+  # suite has not just passed on this exact commit.
+  test:
+    uses: ./.github/workflows/ci.yml
+
+  release:
+    needs: test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write          # create the release
+      id-token: write          # sign the provenance attestation
+      attestations: write
+      artifact-metadata: write
+    steps:
+      # Full history, because actions/checkout otherwise fetches no tags, and
+      # without the tag Go stamps a pseudo-version into the binary instead of
+      # the release -- which the check below would then refuse.
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      # Checkout can leave an annotated tag as a lightweight one; fetch it
+      # again so its message is there to become the release notes.
+      - name: Fetch the tag itself
+        run: git fetch --force origin "refs/tags/${GITHUB_REF_NAME}:refs/tags/${GITHUB_REF_NAME}"
+
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: go.mod
+          cache-dependency-path: go.sum
+
+      # Pure Go, so CGO_ENABLED=0 gives static binaries and one runner builds
+      # every target. -trimpath keeps the runner's paths out of them, so the
+      # same tag and Go version build the same bytes. Each binary's stamped
+      # version is read back with `go version -m`, which works on a binary for
+      # any platform, and must be exactly the tag.
+      #
+      # Archive names carry no version, so the README's download commands can
+      # use releases/latest/download/<name> and stay correct for every release;
+      # `exposer --version` says which one it is.
+      #
+      # The output goes outside the checkout: Go counts untracked files as a
+      # modified tree, so writing into it would stamp every binary after the
+      # first as +dirty. The version check found that on its first run.
+      - name: Build the binaries
+        run: |
+          version="$GITHUB_REF_NAME"
+          dist="$RUNNER_TEMP/dist"
+          mkdir "$dist"
+          for target in linux/amd64 linux/arm64 darwin/amd64 darwin/arm64; do
+            os="${target%/*}" arch="${target#*/}"
+            name="exposer_${os}_${arch}"
+            mkdir "$dist/$name"
+            CGO_ENABLED=0 GOOS="$os" GOARCH="$arch" \
+              go build -trimpath -o "$dist/$name/exposer" ./cmd/exposer
+            stamped=$(go version -m "$dist/$name/exposer" | awk '$1 == "mod" { print $3 }')
+            if [ "$stamped" != "$version" ]; then
+              echo "::error::$name reports $stamped, not $version"
+              exit 1
+            fi
+            cp LICENSE README.md "$dist/$name/"
+            tar -C "$dist" -czf "$dist/$name.tar.gz" "$name"
+          done
+          (cd "$dist" && sha256sum *.tar.gz > SHA256SUMS)
+          cat "$dist/SHA256SUMS"
+
+      # Anyone can check that an archive was built here, from this commit:
+      #   gh attestation verify <archive> --repo berb/exposer
+      - uses: actions/attest@v4
+        with:
+          subject-path: ${{ runner.temp }}/dist/*.tar.gz
+
+      - name: Publish the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git tag -l --format='%(contents)' "$GITHUB_REF_NAME" > "$RUNNER_TEMP/notes.md"
+          gh release create "$GITHUB_REF_NAME" "$RUNNER_TEMP"/dist/*.tar.gz "$RUNNER_TEMP/dist/SHA256SUMS" \
+            --title "exposer $GITHUB_REF_NAME" --notes-file "$RUNNER_TEMP/notes.md" --verify-tag

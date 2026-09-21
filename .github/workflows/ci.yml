@@ -8,6 +8,9 @@ on:
   push:
     branches: [main]
   pull_request:
+  # release.yml runs this same job before it builds anything, so a release is
+  # tested by exactly the workflow that tests main -- one definition, not two.
+  workflow_call:
 
 permissions:
   contents: read
