@@ -61,6 +61,8 @@ exposer build ~/photos    # artifact in ./target/site
 exposer serve             # http://127.0.0.1:8888
 ```
 
+`exposer build -v` explains itself: which photographs were left out and why (rating below the gate, no sidecar, a duplicate), which were rendered rather than taken from the cache, and how long each stage took. `-q` prints nothing but errors.
+
 `--target` puts the build elsewhere; the artifact is always `<target>/site`, and the caches beside it are what make the next build fast. `exposer build` runs five stages, each also available as a subcommand for running one at a time:
 
 | Stage | What it does |

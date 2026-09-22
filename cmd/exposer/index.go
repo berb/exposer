@@ -958,6 +958,9 @@ func dedupeOriginals(photos []Photo) ([]Photo, int) {
 		}
 		kept = append(kept, group[0])
 		collapsed += len(group) - 1
+		for _, other := range group[1:] {
+			detail("%s  same original as %s, which is kept", other.Source, group[0].Source)
+		}
 	}
 
 	if len(conflicts) > 0 {
@@ -1001,7 +1004,9 @@ func runIndex(args []string) {
 	cachePath := fs.String("cache", filepath.Join("target", "cache", "hashes-go.json"), "hash cache path")
 	configPath := fs.String("config", "", "generator config (default: <library>/_data/exposer.yaml)")
 	minRating := fs.Int("min-rating", publishMinRating, "publication gate (default: the config's min_rating)")
+	v, q := addOutputFlags(fs)
 	fs.Parse(args)
+	applyOutputFlags(v, q)
 
 	// R-5's gate lives in the library's configuration, since it describes that
 	// library's star discipline rather than this build. The flag still wins,
@@ -1069,6 +1074,10 @@ func runIndex(args []string) {
 			}
 		} else {
 			unedited++
+			detail("%s  not published: no sidecar", photo.Source)
+		}
+		if _, err := os.Stat(sidecarPath); err == nil && !photo.Published {
+			detail("%s  not published: rating %d is below %d", photo.Source, photo.Rating, *minRating)
 		}
 
 		if photo.Published {
@@ -1163,6 +1172,6 @@ func runIndex(args []string) {
 	if collapsed > 0 {
 		note += fmt.Sprintf(", %d duplicate original(s) collapsed", collapsed)
 	}
-	fmt.Printf("%d photos (%d published%s), %d albums, %d locations (%d mappable) -> %s\n",
-		len(photos), published, note, len(albums), len(locations), mapped, *out)
+	report("%d photos (%d published%s), %d albums, %d locations (%d mappable) -> %s",
+		len(photos), published, note, len(albums), len(locations), mapped, shown(*out))
 }

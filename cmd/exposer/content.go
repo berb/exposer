@@ -71,7 +71,9 @@ func runContent(args []string) {
 	theme := fs.String("theme", "", "theme directory to use instead of the built-in one")
 	out := fs.String("out", filepath.Join("target", "hugo"), "generated hugo project")
 	configPath := fs.String("config", "", "generator config (default: <library>/_data/exposer.yaml)")
+	v, q := addOutputFlags(fs)
 	fs.Parse(args)
+	applyOutputFlags(v, q)
 
 	cfg := configFor(*library, *configPath)
 	doc := loadDocument(*indexPath)
@@ -133,8 +135,8 @@ func runContent(args []string) {
 		writePage(filepath.Join(*out, "content", p.path), p)
 	}
 
-	fmt.Printf("%d photos, %d pages (%d standalone) -> %s\n",
-		len(photos), len(pages), len(standalone), *out)
+	report("%d photos, %d pages (%d standalone) -> %s",
+		len(photos), len(pages), len(standalone), shown(*out))
 }
 
 func toRenderPhoto(photo Photo, derivs []derivative, tone string, albumTitles, placeTitles map[string]string) renderPhoto {

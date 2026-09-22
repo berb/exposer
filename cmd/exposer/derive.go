@@ -48,6 +48,17 @@ func toolVersion(name string, args ...string) string {
 	return strings.TrimSpace(strings.SplitN(string(out), "\n", 2)[0])
 }
 
+// shortVersion keeps the version out of a tool's banner, for a verbose line:
+// "Version: ImageMagick 7.1.2-18 Q16 x86_64 …" becomes "7.1.2-18".
+func shortVersion(banner string) string {
+	for _, field := range strings.Fields(banner) {
+		if field != "" && field[0] >= '0' && field[0] <= '9' {
+			return field
+		}
+	}
+	return banner
+}
+
 // paramHash makes the cache self-invalidating. Tool versions belong in it:
 // without them a darktable or ImageMagick upgrade silently serves derivatives
 // rendered by the old toolchain (F-2, F-3).
@@ -119,7 +130,9 @@ func runDerive(args []string) {
 	manifestPath := fs.String("manifest", filepath.Join("target", "derivatives.json"), "manifest output")
 	configPath := fs.String("config", "", "generator config (default: <library>/_data/exposer.yaml)")
 	jobs := fs.Int("jobs", max(1, runtime.NumCPU()/2), "photos rendered concurrently")
+	v, q := addOutputFlags(fs)
 	fs.Parse(args)
+	applyOutputFlags(v, q)
 
 	cfg := configFor(*library, *configPath)
 	doc := loadDocument(*indexPath)
@@ -146,6 +159,9 @@ func runDerive(args []string) {
 		tooling["darktable"] = toolVersion("darktable-cli", "--version")
 	}
 	hash := paramHash(cfg, tooling)
+	for _, tool := range sortedKeys(tooling) {
+		detail("%s %s", tool, shortVersion(tooling[tool]))
+	}
 
 	scratch, err := os.MkdirTemp("", "exposer-derive-")
 	if err != nil {
@@ -160,6 +176,7 @@ func runDerive(args []string) {
 		rendered int
 		reused   int
 		failures []string
+		outcomes []string // verbose: one line per photo, printed in order once all are done
 	)
 
 	started := time.Now()
@@ -185,7 +202,10 @@ func runDerive(args []string) {
 			tones[photo.ID] = tone
 			if fresh {
 				rendered++
+				outcomes = append(outcomes, photo.Source+"  rendered")
 			} else {
+				// Not listed: on a warm build that is every photograph, and the
+				// line worth reading -- "did my edit arrive?" -- is the rendered one.
 				reused++
 			}
 		}(published[i])
@@ -194,6 +214,10 @@ func runDerive(args []string) {
 		sem <- slot
 	}
 	wg.Wait()
+	sort.Strings(outcomes)
+	for _, line := range outcomes {
+		detail("%s", line)
+	}
 
 	if len(failures) > 0 {
 		sort.Strings(failures)
@@ -218,9 +242,9 @@ func runDerive(args []string) {
 	for _, derivs := range results {
 		count += len(derivs)
 	}
-	fmt.Printf("%d photos (%d rendered, %d cached), %d derivatives in %s -> %s\n",
+	report("%d photos (%d rendered, %d cached), %d derivatives in %s -> %s",
 		len(published), rendered, reused, count,
-		time.Since(started).Round(time.Millisecond), *manifestPath)
+		time.Since(started).Round(time.Millisecond), shown(*manifestPath))
 }
 
 // derivePhoto renders one photo's ladder, or reports the cached one untouched.

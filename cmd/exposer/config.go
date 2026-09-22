@@ -3,7 +3,6 @@ package main
 import (
 	"bytes"
 	"errors"
-	"fmt"
 	"io"
 	"os"
 	"path/filepath"
@@ -32,6 +31,21 @@ type config struct {
 	Derivatives  derivativeConfig `yaml:"derivatives"`
 }
 
+// onceFor runs say the first time it is asked about key in this process. Every
+// stage of a build loads the configuration, and a notice worth reading once is
+// noise the third time.
+func onceFor(key string, say func()) {
+	outputMu.Lock()
+	seen := announced[key]
+	announced[key] = true
+	outputMu.Unlock()
+	if !seen {
+		say()
+	}
+}
+
+var announced = map[string]bool{}
+
 // renamedSettings maps a setting's old name to its new one, so a configuration
 // written for an earlier release fails with the fix rather than a bare
 // "field not found".
@@ -53,9 +67,10 @@ func configFor(library, override string) config {
 	}
 	path := filepath.Join(library, libraryData, configFileName)
 	if _, err := os.Stat(path); err != nil {
-		fmt.Fprintf(os.Stderr, "no %s; building with the defaults\n", path)
+		onceFor(path, func() { notice("no %s; building with the defaults", shown(path)) })
 		return defaultConfig()
 	}
+	onceFor(path, func() { detail("configuration: %s", shown(path)) })
 	return loadConfig(path)
 }
 

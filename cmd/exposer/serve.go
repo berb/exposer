@@ -27,7 +27,9 @@ func runServe(args []string) {
 	target := fs.String("target", "target", "build directory whose site/ to serve")
 	site := fs.String("site", "", "assembled artifact to serve (default: <target>/site)")
 	addr := fs.String("addr", "127.0.0.1:8888", "address to listen on")
+	v, q := addOutputFlags(fs)
 	fs.Parse(args)
+	applyOutputFlags(v, q)
 	if *site == "" {
 		*site = filepath.Join(*target, "site")
 	}

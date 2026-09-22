@@ -7,6 +7,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
+	"time"
 )
 
 // runBuild is the whole pipeline in one command (B-8): index, derive, content,
@@ -34,7 +35,9 @@ func runBuild(args []string) {
 	if len(args) > 0 && !strings.HasPrefix(args[0], "-") {
 		library, args = args[0], args[1:]
 	}
+	v, q := addOutputFlags(fs)
 	fs.Parse(args)
+	applyOutputFlags(v, q)
 	if library == "" && fs.NArg() == 1 {
 		library = fs.Arg(0)
 	} else if fs.NArg() != 0 || library == "" {
@@ -46,6 +49,7 @@ func runBuild(args []string) {
 		fail("%s is not a library directory", library)
 	}
 	hugoBinary := findHugo(*hugo)
+	detail("hugo %s  %s", hugoVersion, shown(hugoBinary))
 
 	var (
 		index       = filepath.Join(*target, "index.json")
@@ -62,23 +66,39 @@ func runBuild(args []string) {
 		return args
 	}
 
-	runIndex(withConfig("--library", library, "--out", index,
-		"--cache", filepath.Join(*target, "cache", "hashes.json")))
-	runDerive(withConfig("--index", index, "--library", library,
-		"--cache", derivatives, "--manifest", manifest))
+	timings := []string{}
+	timed := func(name string, stage func()) {
+		started := time.Now()
+		stage()
+		timings = append(timings, fmt.Sprintf("%s %s", name, time.Since(started).Round(10*time.Millisecond)))
+	}
+	defer func() { detail("time: %s", strings.Join(timings, " · ")) }()
+
+	timed("index", func() {
+		runIndex(withConfig("--library", library, "--out", index,
+			"--cache", filepath.Join(*target, "cache", "hashes.json")))
+	})
+	timed("derive", func() {
+		runDerive(withConfig("--index", index, "--library", library,
+			"--cache", derivatives, "--manifest", manifest))
+	})
 	contentArgs := withConfig("--index", index, "--manifest", manifest,
 		"--library", library, "--out", project)
 	if *theme != "" {
 		contentArgs = append(contentArgs, "--theme", *theme)
 	}
-	runContent(contentArgs)
+	timed("content", func() { runContent(contentArgs) })
 
-	render := exec.Command(hugoBinary, "--source", project, "--destination", "public", "--quiet")
-	render.Stdout, render.Stderr = os.Stdout, os.Stderr
-	if err := render.Run(); err != nil {
-		fail("hugo failed: %v", err)
-	}
+	timed("hugo", func() {
+		render := exec.Command(hugoBinary, "--source", project, "--destination", "public", "--quiet")
+		render.Stdout, render.Stderr = os.Stdout, os.Stderr
+		if err := render.Run(); err != nil {
+			fail("hugo failed: %v", err)
+		}
+	})
 
-	runAssemble([]string{"--public", public, "--manifest", manifest,
-		"--cache", derivatives, "--index", index, "--out", site})
+	timed("assemble", func() {
+		runAssemble([]string{"--public", public, "--manifest", manifest,
+			"--cache", derivatives, "--index", index, "--out", site})
+	})
 }

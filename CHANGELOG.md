@@ -6,10 +6,13 @@ All notable changes to exposer, newest first. The format follows [Keep a Changel
 
 ### Added
 
+- `-v`/`--verbose` says why each photograph was not published (below the rating gate, no sidecar, a duplicate), which photographs were rendered rather than taken from the cache, which tools and Hugo were used, and how long each stage took.
+- `-q`/`--quiet` prints nothing but errors, for scheduled builds.
 - The footer line accepts inline Markdown, so it can carry a link: `footer_line: "© 2026 [Jane Doe](https://example.com)"`.
 
 ### Changed
 
+- A build without a configuration says so once instead of three times, and summary lines show paths relative to the current directory.
 - Release archives carry their version in the name, as in `exposer_0.1.4_linux_amd64.tar.gz`. `SHA256SUMS` keeps its fixed name, and the README's download commands read the current archive's name from it.
 - A photograph's page tells the browser the width it will really be drawn at, including when the window's height limits it, so desktops download a quarter less for the same picture.
 

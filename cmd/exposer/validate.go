@@ -2,7 +2,6 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"io"
 	"os"
 
@@ -14,7 +13,9 @@ func runValidate(args []string) {
 	fs := flag.NewFlagSet("validate", flag.ExitOnError)
 	schemaPath := fs.String("schema", "", "schema to validate against (default: the built-in one)")
 	docPath := fs.String("document", "target/index.json", "document to validate")
+	v, q := addOutputFlags(fs)
 	fs.Parse(args)
+	applyOutputFlags(v, q)
 
 	var schemaDoc io.ReadCloser
 	var err error
@@ -54,5 +55,5 @@ func runValidate(args []string) {
 	if err := schema.Validate(instance); err != nil {
 		fail("%s does not match %s:\n%v", *docPath, *schemaPath, err)
 	}
-	fmt.Printf("%s validates against %s\n", *docPath, *schemaPath)
+	report("%s validates against %s", *docPath, *schemaPath)
 }

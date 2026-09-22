@@ -86,7 +86,7 @@ func findHugo(override string) string {
 func downloadHugo(platform, want, dir, binary string) {
 	asset := fmt.Sprintf("hugo_%s_%s.tar.gz", hugoVersion, strings.ReplaceAll(platform, "/", "-"))
 	url := fmt.Sprintf("%s/v%s/%s", hugoBaseURL, hugoVersion, asset)
-	fmt.Fprintf(os.Stderr, "fetching Hugo %s for %s (once; cached in %s)\n", hugoVersion, platform, dir)
+	notice("fetching Hugo %s for %s (once; cached in %s)", hugoVersion, platform, dir)
 
 	resp, err := http.Get(url)
 	if err != nil {

@@ -24,7 +24,9 @@ func runAssemble(args []string) {
 	cacheRoot := set.String("cache", filepath.Join("target", "cache", "derivatives"), "derivative cache root")
 	indexPath := set.String("index", filepath.Join("target", "index.json"), "index, to check that no original is published")
 	out := set.String("out", filepath.Join("target", "site"), "deploy artifact")
+	v, q := addOutputFlags(set)
 	set.Parse(args)
+	applyOutputFlags(v, q)
 
 	manifestData, err := os.ReadFile(*manifestPath)
 	if err != nil {
@@ -65,8 +67,8 @@ func runAssemble(args []string) {
 			len(unreachable), strings.Join(unreachable, "\n  "))
 	}
 
-	fmt.Printf("%d pages, %d derivatives -> %s (no originals; all reachable)\n",
-		pages, derivatives, *out)
+	report("%d pages, %d derivatives -> %s (no originals; all reachable)",
+		pages, derivatives, shown(*out))
 }
 
 func linkTree(from, to string) int {
