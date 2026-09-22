@@ -178,13 +178,18 @@ func toRenderPhoto(photo Photo, derivs []derivative, tone string, albumTitles, p
 func tagRefs(tags []Tag) []tagRef {
 	refs := make([]tagRef, 0, len(tags))
 	for _, tag := range tags {
-		label := tag.Leaf
-		if len(tag.Path) > 1 && tag.Path[0] != gearNamespace {
-			label = strings.Join(tag.Path[1:], hierarchySeparator)
-		}
-		refs = append(refs, tagRef{Slug: tag.Slug, Label: label})
+		refs = append(refs, tagRef{Slug: tag.Slug, Label: tagChipLabel(tag)})
 	}
 	return refs
+}
+
+// tagChipLabel is what a chip says wherever one is written (F-11): the tag
+// without its top level, and gear as the equipment alone (R-15).
+func tagChipLabel(tag Tag) string {
+	if len(tag.Path) > 1 && tag.Path[0] != gearNamespace {
+		return strings.Join(tag.Path[1:], hierarchySeparator)
+	}
+	return tag.Leaf
 }
 
 func albumRefs(slugs []string, titles map[string]string) []albumRef {
@@ -227,6 +232,10 @@ func buildPages(doc Document, published []Photo, photos map[string]renderPhoto, 
 	byYear := map[string][]string{}
 	byMonth := map[string][]string{}
 	tagTitles := map[string]string{}
+	// F-11's chip label: the hierarchy without its top level. A heading names
+	// the tag in full; a chip is read in a row of other chips, where the top
+	// level is the part that repeats.
+	tagLabels := map[string]string{}
 	placeTitles := map[string]string{}
 	for _, loc := range doc.Locations {
 		placeTitles[loc.Slug] = strings.Join(loc.Path, hierarchySeparator)
@@ -243,6 +252,7 @@ func buildPages(doc Document, published []Photo, photos map[string]renderPhoto, 
 		for _, tag := range photo.Tags {
 			byTag[tag.Slug] = append(byTag[tag.Slug], photo.ID)
 			tagTitles[tag.Slug] = strings.Join(tag.Path, hierarchySeparator)
+			tagLabels[tag.Slug] = tagChipLabel(tag)
 			if len(tag.Path) > 0 && tag.Path[0] == gearNamespace {
 				gearTags[tag.Slug] = true
 				// Under a heading that already says "Gear", repeating the
@@ -558,7 +568,7 @@ func buildPages(doc Document, published []Photo, photos map[string]renderPhoto, 
 		return map[string]any{
 			"subtitle":  cfg.Subtitle,
 			"albums":    albumIndex,
-			"tags":      named(without(sortedMapKeys(byTag), gearTags), tagTitles),
+			"tags":      named(without(sortedMapKeys(byTag), gearTags), tagLabels),
 			"gear":      named(gearOrder(sortedMapKeys(byTag), gearTags, gearKinds, gearTitles), gearTitles),
 			"locations": named(sortedMapKeys(rolled), placeTitles),
 			"years":     reversed(sortedMapKeys(byYear)),

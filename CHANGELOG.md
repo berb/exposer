@@ -10,6 +10,7 @@ All notable changes to exposer, newest first. The format follows [Keep a Changel
 - The build fails if an image's name does not match its contents.
 - A build no longer reads the metadata of photographs and sidecars that have not changed since the last one, and reads the rest in parallel. On a library of 353 photographs, a build with nothing new to render went from 14 seconds to 3, and reading the metadata for a first build from 11 seconds to 3.
 - A photo page's tag chips now carry the tag's hierarchy without its top level, so a tag written `Places|Harbour|Dock` reads `Harbour » Dock` instead of `Dock`. Camera and lens chips are unchanged.
+- The front page's tag chips read like a photo page's, without the tag's top level: `Places|Harbour|Dock` reads `Harbour » Dock`. The tags page and each tag's own heading still name it in full.
 - The front page's tag chips have an "All tags" link beneath them, as the albums and years lists do.
 - The site menu lists Tags before Gear.
 - On the front page, the "Albums" and "Years" headings are no longer links; the "All albums" and "Whole timeline" links under each list remain.

@@ -449,6 +449,10 @@ func TestFrontPageHeadingsAreNotLinks(t *testing.T) {
 			t.Errorf("a front-page heading is a link: %s", heading)
 		}
 	}
+	// F-7: the chips read as a photo page's do, without the top level.
+	if !strings.Contains(body, `/photos/tags/places-harbour-dock/">Harbour » Dock</a>`) {
+		t.Error("a front-page tag chip does not read as a photo page's chip does")
+	}
 	for _, link := range []string{
 		`<a href="/photos/albums/">All albums →</a>`,
 		`<a href="/photos/timeline/">Whole timeline →</a>`,
