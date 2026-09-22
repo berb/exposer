@@ -452,6 +452,7 @@ func TestFrontPageHeadingsAreNotLinks(t *testing.T) {
 	for _, link := range []string{
 		`<a href="/photos/albums/">All albums →</a>`,
 		`<a href="/photos/timeline/">Whole timeline →</a>`,
+		`<a href="/photos/tags/">All tags →</a>`,
 	} {
 		if !strings.Contains(body, link) {
 			t.Errorf("the front page lost %s", link)

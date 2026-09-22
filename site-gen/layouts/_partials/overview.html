@@ -32,8 +32,14 @@
 <p>{{ range $i, $y := .Params.years }}{{ if $i }} · {{ end }}<a href="{{ (printf "photos/%s/" $y) | relURL }}">{{ $y }}</a>{{ end }}</p>
 <p class="meta"><a href="{{ "photos/timeline/" | relURL }}">Whole timeline →</a></p>
 
+{{/* The chips are every curated tag; the tags page (F-26) describes them, so
+     it sits one link below them, as the album index and the timeline do. With
+     no curated tag there is no tags page, and no section here either. */}}
+{{ with .Params.tags }}
 <h2>Tags</h2>
-<p class="tags">{{ range .Params.tags }}<a href="{{ (printf "photos/tags/%s/" .slug) | relURL }}">{{ .title }}</a>{{ end }}</p>
+<p class="tags">{{ range . }}<a href="{{ (printf "photos/tags/%s/" .slug) | relURL }}">{{ .title }}</a>{{ end }}</p>
+<p class="meta"><a href="{{ "photos/tags/" | relURL }}">All tags →</a></p>
+{{ end }}
 
 {{/* R-15's gear tags are derived from the file, not written by the
      photographer, so they keep their own heading rather than crowding the tags
