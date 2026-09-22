@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -196,5 +197,43 @@ func TestIndexFromTheCacheIsByteIdentical(t *testing.T) {
 	}
 	if warm := build("warm.json"); string(warm) != string(cold) {
 		t.Error("the index built from the cache differs from the one built from exiftool")
+	}
+}
+
+func TestExifToolSplitReadsWhatOneProcessReads(t *testing.T) {
+	requireTools(t, "exiftool")
+	// Enough files for several processes, whose results must be exactly one
+	// process's: the split is for speed and may change nothing else.
+	library := t.TempDir()
+	jpeg := readBytes(t, filepath.Join(goodLibrary, "2024", "03", "harbour-dawn.jpg"))
+	var rels []string
+	for i := range 100 {
+		rel := filepath.Join(fmt.Sprintf("d%d", i%7), fmt.Sprintf("p%03d.jpg", i))
+		if err := os.MkdirAll(filepath.Join(library, filepath.Dir(rel)), 0o755); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.WriteFile(filepath.Join(library, rel), jpeg, 0o644); err != nil {
+			t.Fatal(err)
+		}
+		rels = append(rels, rel)
+	}
+
+	split := runExifTool(library, rels)
+	entries, err := exifToolBatch(library, rels)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(split) != len(rels) || len(entries) != len(rels) {
+		t.Fatalf("read %d files split and %d in one process, want %d", len(split), len(entries), len(rels))
+	}
+	for _, entry := range entries {
+		source := toString(entry["SourceFile"])
+		// Reading a file moves its access time, so the second read of each
+		// may see what the first left; nothing in the index uses it.
+		delete(entry, "File:FileAccessDate")
+		delete(split[source], "File:FileAccessDate")
+		if !reflect.DeepEqual(split[source], entry) {
+			t.Errorf("%s reads differently when the files are split", source)
+		}
 	}
 }

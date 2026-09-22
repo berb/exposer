@@ -4,12 +4,15 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io/fs"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"sort"
 	"strings"
+	"sync"
 )
 
 // exifArgs is what stage 1 asks exiftool for. Changing it changes what a
@@ -165,14 +168,58 @@ func listLibrary(library string) []string {
 	return out
 }
 
-// runExifTool reads the given files, relative to the library, in one exiftool
-// process. The names go in on stdin (-@ -), since a large library's would not
-// fit on a command line; each line is one name, and every name begins with the
-// library's path, so none can be mistaken for an option.
+// runExifTool reads the given files, relative to the library. A first build
+// reads everything, and exiftool reads one file at a time, so the files are
+// split across processes -- half the cores, as stage 2 renders, and never
+// fewer than minPerProcess files each, since every process pays for starting
+// Perl. The results are keyed by file, so the split cannot change them.
 func runExifTool(library string, rels []string) map[string]map[string]any {
-	scanned := make(map[string]map[string]any, len(rels))
+	const minPerProcess = 32
+	processes := max(1, min(runtime.NumCPU()/2, len(rels)/minPerProcess))
+
+	var (
+		mu       sync.Mutex
+		wg       sync.WaitGroup
+		scanned  = make(map[string]map[string]any, len(rels))
+		failures []string
+	)
+	for i := range processes {
+		// Every processes-th file, so that one directory of large RAWs is not
+		// all one process's share.
+		var share []string
+		for j := i; j < len(rels); j += processes {
+			share = append(share, rels[j])
+		}
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			entries, err := exifToolBatch(library, share)
+			mu.Lock()
+			defer mu.Unlock()
+			if err != nil {
+				failures = append(failures, err.Error())
+				return
+			}
+			for _, entry := range entries {
+				scanned[toString(entry["SourceFile"])] = entry
+			}
+		}()
+	}
+	wg.Wait()
+	if len(failures) > 0 {
+		sort.Strings(failures)
+		fail("%s", strings.Join(failures, "\n"))
+	}
+	return scanned
+}
+
+// exifToolBatch reads files in one exiftool process. The names go in on stdin
+// (-@ -), since a large library's would not fit on a command line; each line
+// is one name, and every name begins with the library's path, so none can be
+// mistaken for an option.
+func exifToolBatch(library string, rels []string) ([]map[string]any, error) {
 	if len(rels) == 0 {
-		return scanned
+		return nil, nil
 	}
 	var names bytes.Buffer
 	for _, rel := range rels {
@@ -184,7 +231,7 @@ func runExifTool(library string, rels []string) map[string]map[string]any {
 	cmd := exec.Command("exiftool", append(append([]string{}, exifArgs...), "-@", "-")...)
 	cmd.Stdin, cmd.Stdout, cmd.Stderr = &names, &stdout, &stderr
 	if err := cmd.Run(); err != nil && stdout.Len() == 0 {
-		fail("exiftool failed: %s", strings.TrimSpace(stderr.String()))
+		return nil, fmt.Errorf("exiftool failed: %s", strings.TrimSpace(stderr.String()))
 	}
 
 	var entries []map[string]any
@@ -192,11 +239,8 @@ func runExifTool(library string, rels []string) map[string]map[string]any {
 	dec.UseNumber()
 	if stdout.Len() > 0 {
 		if err := dec.Decode(&entries); err != nil {
-			fail("cannot parse exiftool output: %v", err)
+			return nil, fmt.Errorf("cannot parse exiftool output: %v", err)
 		}
 	}
-	for _, entry := range entries {
-		scanned[toString(entry["SourceFile"])] = entry
-	}
-	return scanned
+	return entries, nil
 }
