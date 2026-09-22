@@ -294,35 +294,6 @@ func compareSlices(a, b []string) int {
 	return len(a) - len(b)
 }
 
-func runExifTool(library string) map[string]map[string]any {
-	args := []string{"-json", "-G0", "-a", "-struct", "-c", "%+.7f", "-r"}
-	for _, ext := range originalExts {
-		args = append(args, "-ext", ext)
-	}
-	args = append(args, "-ext", "xmp", library)
-
-	var stdout, stderr bytes.Buffer
-	cmd := exec.Command("exiftool", args...)
-	cmd.Stdout, cmd.Stderr = &stdout, &stderr
-	if err := cmd.Run(); err != nil && stdout.Len() == 0 {
-		fail("exiftool failed: %s", strings.TrimSpace(stderr.String()))
-	}
-
-	var entries []map[string]any
-	dec := json.NewDecoder(bytes.NewReader(stdout.Bytes()))
-	dec.UseNumber()
-	if stdout.Len() > 0 {
-		if err := dec.Decode(&entries); err != nil {
-			fail("cannot parse exiftool output: %v", err)
-		}
-	}
-	scanned := make(map[string]map[string]any, len(entries))
-	for _, entry := range entries {
-		scanned[toString(entry["SourceFile"])] = entry
-	}
-	return scanned
-}
-
 func exifToolVersion() string {
 	out, err := exec.Command("exiftool", "-ver").Output()
 	if err != nil {
@@ -1002,6 +973,7 @@ func runIndex(args []string) {
 	library := fs.String("library", "source", "library root (read-only)")
 	out := fs.String("out", filepath.Join("target", "index.json"), "index output path")
 	cachePath := fs.String("cache", filepath.Join("target", "cache", "hashes-go.json"), "hash cache path")
+	exifCachePath := fs.String("exif-cache", "", "metadata cache path (default: exif.json beside --cache)")
 	configPath := fs.String("config", "", "generator config (default: <library>/_data/exposer.yaml)")
 	minRating := fs.Int("min-rating", publishMinRating, "publication gate (default: the config's min_rating)")
 	v, q := addOutputFlags(fs)
@@ -1025,7 +997,11 @@ func runIndex(args []string) {
 		fail("library not found: %s", *library)
 	}
 
-	scanned := runExifTool(*library)
+	if *exifCachePath == "" {
+		*exifCachePath = filepath.Join(filepath.Dir(*cachePath), "exif.json")
+	}
+	exifTool := exifToolVersion()
+	scanned, _ := scanLibrary(*library, *exifCachePath, exifTool)
 
 	cache := map[string]cacheEntry{}
 	if data, err := os.ReadFile(*cachePath); err == nil {
@@ -1121,7 +1097,7 @@ func runIndex(args []string) {
 	document := Document{
 		SchemaVersion: schemaVersion,
 		LibraryRoot:   *library,
-		Tooling:       Tooling{ExifTool: exifToolVersion(), Extractor: extractorVersion},
+		Tooling:       Tooling{ExifTool: exifTool, Extractor: extractorVersion},
 		Photos:        photos,
 		Albums:        albums,
 		Locations:     locations,

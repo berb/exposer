@@ -94,7 +94,7 @@ Gear tags are **derived, not curated**, so they do not count as a way to reach a
 
 **F-1 (MUST)** One command produces the complete site from the library: index extraction → derivative rendering → site generation → assembly (B-8).
 
-**F-2 (MUST)** The build is incremental: an unchanged photo is not re-rendered. The cache is keyed by the source hash, the rendering parameters and the versions of the tools that render.
+**F-2 (MUST)** The build is incremental: an unchanged photo is not re-rendered. The cache is keyed by the source hash, the rendering parameters and the versions of the tools that render. Reading metadata is incremental too: stage 1 reads an original or a sidecar again only when its path, size or mtime has changed, the test that already caches each photo's id (§11), and drops every cached reading when exiftool's version or the arguments it is given change.
 
 **F-3 (MUST)** The build is deterministic: the same library and configuration yield byte-identical output, timestamps aside.
 
