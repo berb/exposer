@@ -152,7 +152,7 @@ A **sample grid** is up to eleven squares plus a twelfth cell that links to the 
 
 **F-20 (MUST)** Open Graph tags on every album and photo page.
 
-**F-21 (SHOULD)** Each R-13 page is rendered at `/photos/<slug>/`, `<slug>` being the file's stem, in the sitemap but not the feed. `menu: true` in its front matter lists it in the site menu and `weight` orders it; pages are unlisted by default, since some, like the imprint (D-10), are reached from elsewhere. A slug colliding with a year or with `albums`, `tags`, `locations` or `p` fails the build rather than shadowing it.
+**F-21 (SHOULD)** Each R-13 page is rendered at `/photos/<slug>/`, `<slug>` being the file's stem, in the sitemap but not the feed. `menu: true` in its front matter lists it in the site menu and `weight` orders it among the generated sections, which hold weights 1 to 5 in the order Albums, Timeline, All, Tags, Gear — a page weighted 6 or more, or given no weight, follows them; pages are unlisted by default, since some, like the imprint (D-10), are reached from elsewhere. A slug colliding with a year or with `albums`, `tags`, `locations` or `p` fails the build rather than shadowing it.
 
 ---
 

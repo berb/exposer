@@ -454,7 +454,7 @@ func buildPages(doc Document, published []Photo, photos map[string]renderPhoto, 
 		checkGearDescriptions(library, gearFiles)
 		add(page{
 			path: filepath.Join("photos", "gear", "_index.md"), title: "Gear",
-			layout: "gear", menu: true, weight: 4,
+			layout: "gear", menu: true, weight: 5,
 			params: map[string]any{"groups": gearGroups},
 		})
 	}
@@ -467,7 +467,7 @@ func buildPages(doc Document, published []Photo, photos map[string]renderPhoto, 
 	if len(tagSections) > 0 {
 		add(page{
 			path: filepath.Join("photos", "tags", "_index.md"), title: "Tags",
-			layout: "tags", menu: true, weight: 5,
+			layout: "tags", menu: true, weight: 4,
 			params: map[string]any{"tags": tagSections},
 		})
 	}

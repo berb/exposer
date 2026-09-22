@@ -458,3 +458,23 @@ func TestFrontPageHeadingsAreNotLinks(t *testing.T) {
 		}
 	}
 }
+
+func TestMenuListsTheSectionsInOrder(t *testing.T) {
+	// F-21: the generated sections hold weights 1 to 5, in this order, so a
+	// page of the photographer's own can be placed among them.
+	body := readFile(t, filepath.Join(buildSite(t, goodLibrary), "index.html"))
+	start := strings.Index(body, `<nav aria-label="Sections">`)
+	end := strings.Index(body[max(start, 0):], "</nav>")
+	if start < 0 || end < 0 {
+		t.Fatal("no site menu on the front page")
+	}
+	var got []string
+	for _, m := range regexp.MustCompile(`>([^<]+)</a>`).FindAllStringSubmatch(body[start:start+end], -1) {
+		got = append(got, m[1])
+	}
+	// The fixture's about.md is in the menu too, with no weight, so after them.
+	want := []string{"Albums", "Timeline", "All", "Tags", "Gear", "About"}
+	if strings.Join(got, ",") != strings.Join(want, ",") {
+		t.Errorf("the menu reads %v, want %v", got, want)
+	}
+}
