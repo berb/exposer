@@ -4,7 +4,7 @@ A generator for a static photography site, derived from original photo files and
 
 Curation happens where the editing happens. A star rating in darktable decides what is published, hierarchical tags decide what a photograph belongs to, and nothing about a photograph is ever typed into this tool.
 
-The generated static photography site is responsive, optimized for fast loading.
+The generated static photography site is responsive, optimized for fast loading, and aggressive caching.
 
 High-level work flow:
 ```
@@ -77,19 +77,6 @@ exposer serve             # http://127.0.0.1:8888
 
 The library is opened read-only: nothing here writes to an original or a sidecar, ever.
 
-## Hosting
-
-`target/site` is plain static files, so any static host serves it. exposer knows nothing about deployment. Copy the directory with anything that also deletes files the build no longer produces, such as `rsync --delete`.
-
-Images, fonts and the script carry a hash of their contents in their name, as in `/photos/img/3f/3f9c2a1b7e4d05a7/3f9c2a1b7e4d05a7-800.a41c09e2.avif`. Different bytes always get a different name, so these files can be cached forever:
-
-| Paths | Cache header |
-|---|---|
-| `/photos/img/`, `/fonts/*.woff2`, `/fullscreen.*.js` | `Cache-Control: public, max-age=31536000, immutable` |
-| everything else: pages, `index.xml`, `sitemap.xml` | short, or revalidated on every visit |
-
-Pages keep their addresses from build to build, so they must not be cached as immutable.
-
 ## The library
 
 A library is a directory of originals with their sidecars beside them, arranged however you like — the tool walks the tree and does not care about the shape.
@@ -125,6 +112,19 @@ Everything in `_data/` describes a *set* of photographs or the site itself — n
 Camera and lens come from EXIF and become `Gear|Camera|…` and `Gear|Lens|…` automatically. Coordinates are never read from a photograph: a place is located by its `_data/locations/*.yaml` file, so a photograph taken at home does not publish where home is.
 
 The build **fails** rather than skipping quietly: a published photograph with no capture date, or with no album, tag or place to be found under, stops the build and says which file it was.
+
+## Hosting
+
+`target/site` is plain static files, so any static host serves it. exposer knows nothing about deployment. Copy the directory with anything that also deletes files the build no longer produces, such as `rsync --delete`.
+
+Images, fonts and the script carry a hash of their contents in their name, as in `/photos/img/3f/3f9c2a1b7e4d05a7/3f9c2a1b7e4d05a7-800.a41c09e2.avif`. Different bytes always get a different name, so these files can be cached forever:
+
+| Paths | Cache header |
+|---|---|
+| `/photos/img/`, `/fonts/*.woff2`, `/fullscreen.*.js` | `Cache-Control: public, max-age=31536000, immutable` |
+| everything else: pages, `index.xml`, `sitemap.xml` | short, or revalidated on every visit |
+
+Pages keep their addresses from build to build, so they must not be cached as immutable.
 
 ## Configuration
 
