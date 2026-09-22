@@ -439,3 +439,22 @@ func TestFontsAndScriptAreNamedForTheirContents(t *testing.T) {
 		}
 	}
 }
+
+func TestFrontPageHeadingsAreNotLinks(t *testing.T) {
+	// F-7: the album index and the whole timeline are one link beneath their
+	// lists, so the headings above them are only headings.
+	body := readFile(t, filepath.Join(buildSite(t, goodLibrary), "index.html"))
+	for _, heading := range regexp.MustCompile(`<h2>.*?</h2>`).FindAllString(body, -1) {
+		if strings.Contains(heading, "<a ") {
+			t.Errorf("a front-page heading is a link: %s", heading)
+		}
+	}
+	for _, link := range []string{
+		`<a href="/photos/albums/">All albums →</a>`,
+		`<a href="/photos/timeline/">Whole timeline →</a>`,
+	} {
+		if !strings.Contains(body, link) {
+			t.Errorf("the front page lost %s", link)
+		}
+	}
+}

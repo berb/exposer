@@ -19,13 +19,14 @@
     {{ partial "squares.html" .Params.sample }}
   </div>
   <div class="index-ways">
-<h2><a href="{{ "photos/albums/" | relURL }}">Albums</a></h2>
+<h2>Albums</h2>
 {{/* Names only, like the years and the places below. The covers are the album
-     index's own business (F-7), and it is one link away. */}}
+     index's own business (F-7), and it is one link away -- the link under the
+     list, so the heading, like every heading here, is only a heading. */}}
 <p>{{ range $i, $a := .Params.albums }}{{ if $i }} · {{ end }}<a href="{{ (printf "photos/albums/%s/" $a.slug) | relURL }}">{{ $a.title }}</a>{{ end }}</p>
 <p class="meta"><a href="{{ "photos/albums/" | relURL }}">All albums →</a></p>
 
-<h2><a href="{{ "photos/timeline/" | relURL }}">Years</a></h2>
+<h2>Years</h2>
 {{/* The years are the way into one year; the timeline is the way into all of
      them at once (F-10), so it sits with them rather than in its own section. */}}
 <p>{{ range $i, $y := .Params.years }}{{ if $i }} · {{ end }}<a href="{{ (printf "photos/%s/" $y) | relURL }}">{{ $y }}</a>{{ end }}</p>
