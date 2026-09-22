@@ -517,3 +517,27 @@ func TestTagsPageWearsTheSameChipAsAPhotoPage(t *testing.T) {
 		t.Error("a chip on the tags page still carries its top level")
 	}
 }
+
+func TestScopedPagerNamesItsDirections(t *testing.T) {
+	// F-25: the arrow keys find the neighbours by rel, so the markup must
+	// carry it. The script itself is not exercised here -- the suite runs no
+	// browser -- which is why the links must work on their own.
+	site := buildSite(t, goodLibrary)
+	scoped, err := filepath.Glob(filepath.Join(site, "photos", "albums", "harbour", "*", "index.html"))
+	if err != nil || len(scoped) == 0 {
+		t.Fatalf("no scoped pages in the album (%v)", err)
+	}
+	for _, page := range scoped {
+		body := readFile(t, page)
+		for _, rel := range []string{`rel="prev"`, `rel="next"`} {
+			if !strings.Contains(body, rel) {
+				t.Errorf("%s carries no %s", filepath.Base(filepath.Dir(page)), rel)
+			}
+		}
+	}
+	// A photograph's own page has no listing to page through.
+	own := readFile(t, filepath.Join(site, "photos", "p", filepath.Base(filepath.Dir(scoped[0])), "index.html"))
+	if strings.Contains(own, `rel="prev"`) || strings.Contains(own, `rel="next"`) {
+		t.Error("the album-independent page carries a pager")
+	}
+}

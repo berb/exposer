@@ -134,7 +134,7 @@ A **sample grid** is up to eleven squares plus a twelfth cell that links to the 
 
 **F-24 (SHOULD)** Gear page at `/photos/gear/`, in the menu, under the headings Cameras and Lenses (R-15). Cameras are ordered by name; lenses by the focal length in their name, a zoom at its wide end, a lens without one last. The index's gear chips use the same order. Each item gets a section: a sample grid (F-5) of its most recent photos on one side of the rail, and its name, its R-17 description and its tag chip on the other.
 
-**F-25 (SHOULD)** On a scoped page (F-11a), previous and next are square thumbnails with their direction written beneath, staying inside the listing. The link out to F-11 is styled like the fullscreen control (D-11): both leave this view of the photo.
+**F-25 (SHOULD)** On a scoped page (F-11a), previous and next are square thumbnails with their direction written beneath, staying inside the listing. They carry `rel="prev"` and `rel="next"`, and where the browser runs the site's one script the left and right arrow keys follow them; the links work without it, and a modifier held with the key leaves it to the browser. The link out to F-11 is styled like the fullscreen control (D-11): both leave this view of the photo.
 
 **F-26 (SHOULD)** Tags page at `/photos/tags/`, in the menu: one section per curated tag in slug order, a sample grid (F-5) of its most recent photos on one side of the rail, and its R-19 description and its chip — F-11's, without the top level — on the other. Gear tags are left out (F-24). The page grants no reachability under §12 criterion 4, which counts a single tag's listing.
 

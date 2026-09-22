@@ -121,7 +121,7 @@ Images, fonts and the script carry a hash of their contents in their name, as in
 
 | Paths | Cache header |
 |---|---|
-| `/photos/img/`, `/fonts/*.woff2`, `/fullscreen.*.js` | `Cache-Control: public, max-age=31536000, immutable` |
+| `/photos/img/`, `/fonts/*.woff2`, `/photo.*.js` | `Cache-Control: public, max-age=31536000, immutable` |
 | everything else: pages, `index.xml`, `sitemap.xml` | short, or revalidated on every visit |
 
 Pages keep their addresses from build to build, so they must not be cached as immutable.

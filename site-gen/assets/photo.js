@@ -1,10 +1,48 @@
-// D-11: the browser's own fullscreen mode, entered from a single photograph on
-// its own page. This is the real Fullscreen API, not an in-page overlay —
-// F-12's lightbox was withdrawn once every grid began navigating to a scoped
-// page, and this is the only script the site carries.
+// The only script the site carries: D-11's fullscreen view and F-25's arrow
+// keys, both on a photograph's page and neither needed to use the page.
 //
-// Progressive enhancement: the trigger ships hidden and is only revealed when
-// the API is actually available, so nothing offers an action it cannot perform.
+// D-11 is the browser's own fullscreen mode, entered from a single photograph
+// on its own page — the real Fullscreen API, not an in-page overlay. F-12's
+// lightbox was withdrawn once every grid began navigating to a scoped page.
+//
+// Progressive enhancement throughout: the trigger ships hidden and is only
+// revealed when the API is actually available, so nothing offers an action it
+// cannot perform, and the arrow keys only follow links that are on the page
+// already, reachable with Tab and Enter without any of this.
+
+// F-25: left and right follow the neighbours of a scoped page, which carries
+// them as rel="prev" and rel="next". A photograph's own page (F-11) has no
+// pager, and the ends of a listing have only one neighbour, so this finds
+// nothing to follow there and leaves the key to the browser.
+(function () {
+  "use strict";
+
+  var steps = {
+    ArrowLeft: document.querySelector(".pager a[rel='prev']"),
+    ArrowRight: document.querySelector(".pager a[rel='next']"),
+  };
+  if (!steps.ArrowLeft && !steps.ArrowRight) return;
+
+  document.addEventListener("keydown", function (event) {
+    if (event.defaultPrevented || event.ctrlKey || event.altKey ||
+        event.metaKey || event.shiftKey) {
+      return; // Alt+Left is the browser's history, not ours
+    }
+    // Nothing on the site takes typed input today, but a page that did would
+    // have to keep its arrows.
+    var focused = document.activeElement;
+    if (focused && (focused.isContentEditable ||
+        /^(input|textarea|select)$/i.test(focused.tagName))) {
+      return;
+    }
+    var step = steps[event.key];
+    if (!step) return;
+    // Only now: on a page with one neighbour the other arrow still scrolls.
+    event.preventDefault();
+    step.click();
+  });
+})();
+
 (function () {
   "use strict";
 

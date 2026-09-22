@@ -139,7 +139,7 @@ func runContent(args []string) {
 	copyTree(themeFiles, "layouts", filepath.Join(*out, "layouts"))
 	// Fonts live here; without this they never reach the site.
 	copyTree(themeFiles, "static", filepath.Join(*out, "static"))
-	// fullscreen.js lives here, so Hugo can minify it on its way out.
+	// photo.js lives here, so Hugo can minify it on its way out.
 	copyTree(themeFiles, "assets", filepath.Join(*out, "assets"))
 	for _, p := range pages {
 		writePage(filepath.Join(*out, "content", p.path), p)

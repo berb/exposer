@@ -1,0 +1,8 @@
+{{- /* The photo pages' script: D-11's fullscreen view and F-25's arrow keys.
+       It lives in assets/ rather than static/ so it passes through Hugo's
+       minifier: the source keeps its comments, and the file a visitor
+       downloads -- photo.<hash>.js (B-10) -- carries none of them, the same
+       thing html/template already does for the CSS inlined in baseof.html. */ -}}
+{{- with partial "hashed.html" (resources.Get "photo.js" | minify) }}
+<script src="{{ .RelPermalink }}" defer></script>
+{{- end }}
