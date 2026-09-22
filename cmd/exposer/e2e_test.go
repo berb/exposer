@@ -527,13 +527,28 @@ func TestScopedPagerNamesItsDirections(t *testing.T) {
 	if err != nil || len(scoped) == 0 {
 		t.Fatalf("no scoped pages in the album (%v)", err)
 	}
+	sort.Strings(scoped)
+	var ends, middles int
 	for _, page := range scoped {
 		body := readFile(t, page)
-		for _, rel := range []string{`rel="prev"`, `rel="next"`} {
-			if !strings.Contains(body, rel) {
-				t.Errorf("%s carries no %s", filepath.Base(filepath.Dir(page)), rel)
+		prev := strings.Contains(body, `rel="prev"`)
+		next := strings.Contains(body, `rel="next"`)
+		switch {
+		case prev && next:
+			middles++
+		case prev != next:
+			// An end of the listing: one neighbour, one empty slot (F-25).
+			ends++
+			if !strings.Contains(body, `<span class="pager-step pager-`) {
+				t.Errorf("%s has an end without an empty slot to hold its column",
+					filepath.Base(filepath.Dir(page)))
 			}
+		default:
+			t.Errorf("%s carries neither neighbour", filepath.Base(filepath.Dir(page)))
 		}
+	}
+	if ends != 2 || middles != len(scoped)-2 {
+		t.Errorf("%d ends and %d middles over %d pages; want two ends", ends, middles, len(scoped))
 	}
 	// A photograph's own page has no listing to page through.
 	own := readFile(t, filepath.Join(site, "photos", "p", filepath.Base(filepath.Dir(scoped[0])), "index.html"))

@@ -5,6 +5,12 @@
      the reader is in; the middle step is this photograph itself and is the way
      out to its own page (F-11). "align" puts each label under its end of the
      row: the reader's eye finds back, out and on where it expects them. */ -}}
+{{- /* An end of the listing has no neighbour: the slot stays empty, so the
+     three steps keep their columns and "next" stays under the right-hand
+     side. */ -}}
+{{- if not .id -}}
+<span class="pager-step pager-{{ .align }}"></span>
+{{- else -}}
 {{- $p := index hugo.Data.photos .id -}}
 {{- with $p -}}
 {{- $square := where .derivatives "square" true -}}
@@ -25,4 +31,5 @@
          alt="" loading="lazy" decoding="async"></picture></span>
   <span class="pager-label">{{ $.label }}</span>
 </a>
+{{- end -}}
 {{- end -}}

@@ -24,9 +24,6 @@
       <a href="{{ $.Params.contextPath | relURL }}">{{ $.Params.contextTitle }}</a>
       · {{ $.Params.position }} / {{ $.Params.total }}
     </p>
-    {{ with .title }}<h1>{{ . }}</h1>{{ end }}
-    {{ with .caption }}<p>{{ . }}</p>{{ end }}
-
     {{/* F-25: the neighbours are shown, not just named. A thumbnail says what
          the next photograph is before the reader commits to it, which a word
          never did. */}}
@@ -35,6 +32,9 @@
       {{ partial "pagerthumb.html" (dict "id" .id "href" (printf "photos/p/%s/" .id) "align" "out" "label" "Photo details") }}
       {{ partial "pagerthumb.html" (dict "id" $.Params.nextId "href" $.Params.next "rel" "next" "align" "on" "label" "Next →") }}
     </nav>
+
+    {{ with .title }}<h1>{{ . }}</h1>{{ end }}
+    {{ with .caption }}<p>{{ . }}</p>{{ end }}
   </aside>
 
   <div class="detail-image">

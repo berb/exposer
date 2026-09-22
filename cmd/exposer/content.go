@@ -192,6 +192,23 @@ func tagChipLabel(tag Tag) string {
 	return tag.Leaf
 }
 
+// at is the id at an index of a listing, or "" past either end (F-25).
+func at(ids []string, i int) string {
+	if i < 0 || i >= len(ids) {
+		return ""
+	}
+	return ids[i]
+}
+
+// step is the path to that photograph inside this listing, or "" for a slot
+// the pager leaves empty.
+func step(prefix string, ids []string, i int) string {
+	if id := at(ids, i); id != "" {
+		return prefix + "/" + id + "/"
+	}
+	return ""
+}
+
 func albumRefs(slugs []string, titles map[string]string) []albumRef {
 	refs := make([]albumRef, 0, len(slugs))
 	for _, slug := range slugs {
@@ -315,11 +332,14 @@ func buildPages(doc Document, published []Photo, photos map[string]renderPhoto, 
 					"position": i + 1, "total": len(ids),
 					// The neighbours travel as ids as well as paths: F-25 shows
 					// each one as a thumbnail, which needs the photograph, not
-					// just the way to it.
-					"prev":      prefix + "/" + ids[(i-1+len(ids))%len(ids)] + "/",
-					"next":      prefix + "/" + ids[(i+1)%len(ids)] + "/",
-					"prevId":    ids[(i-1+len(ids))%len(ids)],
-					"nextId":    ids[(i+1)%len(ids)],
+					// just the way to it. A listing has two ends and does not
+					// wrap: at the first photograph there is nothing before it,
+					// and F-25 leaves that slot empty rather than sending the
+					// reader to the other end of the listing.
+					"prev":      step(prefix, ids, i-1),
+					"next":      step(prefix, ids, i+1),
+					"prevId":    at(ids, i-1),
+					"nextId":    at(ids, i+1),
 					"canonical": fmt.Sprintf("photos/p/%s/", id),
 					"sitemap":   false,
 				},
