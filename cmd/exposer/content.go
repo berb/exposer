@@ -495,7 +495,7 @@ func buildPages(doc Document, published []Photo, photos map[string]renderPhoto, 
 	// tags: R-15's gear tags have their own page, and locations and albums are
 	// not tags by the time the index is written -- they became their own
 	// namespaces in stage 1.
-	tagSections := tagIndex(byTag, gearTags, tagTitles, library)
+	tagSections := tagIndex(byTag, gearTags, tagLabels, library)
 	if len(tagSections) > 0 {
 		add(page{
 			path: filepath.Join("photos", "tags", "_index.md"), title: "Tags",
@@ -622,7 +622,9 @@ const gearSectionSample = 11
 // tagIndex builds F-26's sections: one per curated tag, in slug order, each
 // carrying its most recent photographs and how many there are in total, so the
 // template can offer the way to the rest without counting again.
-func tagIndex(byTag map[string][]string, gear map[string]bool, titles map[string]string, library string) []map[string]any {
+// tagIndex builds F-26's sections. Each wears the chip F-11 describes, so a
+// tag reads the same here, on the front page and on a photograph.
+func tagIndex(byTag map[string][]string, gear map[string]bool, labels map[string]string, library string) []map[string]any {
 	out := make([]map[string]any, 0, len(byTag))
 	for _, slug := range without(sortedMapKeys(byTag), gear) {
 		ids := reversed(byTag[slug])
@@ -630,7 +632,7 @@ func tagIndex(byTag map[string][]string, gear map[string]bool, titles map[string
 			ids = ids[:tagSectionSample]
 		}
 		section := map[string]any{
-			"slug": slug, "title": titles[slug],
+			"slug": slug, "title": labels[slug],
 			"ids": ids, "total": len(byTag[slug]),
 		}
 		// R-19: the same prose the tag's own listing carries, so a reader meets

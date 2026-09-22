@@ -506,3 +506,14 @@ func TestPhotoPageTagChipsDropTheTopLevel(t *testing.T) {
 		t.Errorf("a chip still carries its top level: %s", chips)
 	}
 }
+
+func TestTagsPageWearsTheSameChipAsAPhotoPage(t *testing.T) {
+	// F-26 with F-11: one tag, one chip, wherever it is met.
+	body := readFile(t, filepath.Join(buildSite(t, goodLibrary), "photos", "tags", "index.html"))
+	if !strings.Contains(body, `/photos/tags/places-harbour-dock/">Harbour » Dock</a>`) {
+		t.Error("the tags page does not wear F-11's chip")
+	}
+	if strings.Contains(body, "Places »") {
+		t.Error("a chip on the tags page still carries its top level")
+	}
+}

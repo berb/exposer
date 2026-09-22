@@ -136,7 +136,7 @@ A **sample grid** is up to eleven squares plus a twelfth cell that links to the 
 
 **F-25 (SHOULD)** On a scoped page (F-11a), previous and next are square thumbnails with their direction written beneath, staying inside the listing. The link out to F-11 is styled like the fullscreen control (D-11): both leave this view of the photo.
 
-**F-26 (SHOULD)** Tags page at `/photos/tags/`, in the menu: one section per curated tag in slug order, a sample grid (F-5) of its most recent photos on one side of the rail, and its R-19 description and its chip on the other. Gear tags are left out (F-24). The page grants no reachability under §12 criterion 4, which counts a single tag's listing.
+**F-26 (SHOULD)** Tags page at `/photos/tags/`, in the menu: one section per curated tag in slug order, a sample grid (F-5) of its most recent photos on one side of the rail, and its R-19 description and its chip — F-11's, without the top level — on the other. Gear tags are left out (F-24). The page grants no reachability under §12 criterion 4, which counts a single tag's listing.
 
 ### 5.3 Publication and privacy
 
