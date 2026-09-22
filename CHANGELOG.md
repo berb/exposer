@@ -4,6 +4,8 @@ All notable changes to exposer, newest first. The format follows [Keep a Changel
 
 ## [Unreleased]
 
+## [0.1.4] - 2026-09-22
+
 ### Added
 
 - `-v`/`--verbose` says why each photograph was not published (below the rating gate, no sidecar, a duplicate), which photographs were rendered rather than taken from the cache, which tools and Hugo were used, and how long each stage took.
@@ -59,7 +61,8 @@ The first release: a static photography site generator that reads an offline lib
 - Albums, tags, locations, a timeline, an "All" page, a Gear page and a Tags page, with a page for each photograph inside every listing it belongs to.
 - JPEG and AVIF images in a content-addressed cache, byte-identical rebuilds, originals that never reach the published site, and a build that fails if a published photograph cannot be reached.
 
-[Unreleased]: https://github.com/berb/exposer/compare/v0.1.3...HEAD
+[Unreleased]: https://github.com/berb/exposer/compare/v0.1.4...HEAD
+[0.1.4]: https://github.com/berb/exposer/compare/v0.1.3...v0.1.4
 [0.1.3]: https://github.com/berb/exposer/compare/v0.1.2...v0.1.3
 [0.1.2]: https://github.com/berb/exposer/compare/v0.1.1...v0.1.2
 [0.1.1]: https://github.com/berb/exposer/compare/v0.1.0...v0.1.1
