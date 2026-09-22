@@ -108,7 +108,7 @@ A **sample grid** is up to eleven squares plus a twelfth cell that links to the 
 
 **F-6 (MUST)** Album view: every photo of an album in a justified grid (D-4), ordered by capture time. There is no per-album override — one ordering everywhere keeps album, tag, location and timeline listings consistent.
 
-**F-7 (MUST)** Album index at `/photos/albums/`, in the site menu (F-21): one section per listed album, a sample grid (F-5) of its first eleven photos in album order on one side of the rail, and its title, year span and intro on the other. The twelfth cell always links into the album, whatever the count. The year span covers the album's published photos — `2024` or `2024–2026`; the album's own `date` still orders the index and the feed (F-19). The front page lists albums plainly, as it lists years, tags and places — a tag as the chip F-11 describes, without its top level — under headings that are not links: the album index, the whole timeline and the tags page are each one link beneath their list.
+**F-7 (MUST)** Album index at `/photos/albums/`, in the site menu (F-21): one section per listed album, a sample grid (F-5) of its first eleven photos in album order — each tile leading into the album, to that photograph's scoped page (F-11a) — on one side of the rail, and its title, year span and intro on the other. The twelfth cell always links into the album, whatever the count. The year span covers the album's published photos — `2024` or `2024–2026`; the album's own `date` still orders the index and the feed (F-19). The front page lists albums plainly, as it lists years, tags and places — a tag as the chip F-11 describes, without its top level — under headings that are not links: the album index, the whole timeline and the tags page are each one link beneath their list.
 
 **F-8 (MUST)** Tag views: one page per published tag at `/photos/tags/<slug>/`. `Album|` and `Location|` tags are not tags here; they have F-7 and F-8a.
 
@@ -136,7 +136,7 @@ A **sample grid** is up to eleven squares plus a twelfth cell that links to the 
 
 **F-25 (SHOULD)** On a scoped page (F-11a), previous and next are square thumbnails with their direction written beneath, staying inside the listing. They carry `rel="prev"` and `rel="next"`, and where the browser runs the site's one script the left and right arrow keys follow them; the links work without it, and a modifier held with the key leaves it to the browser. The link out to F-11 is styled like the fullscreen control (D-11): both leave this view of the photo.
 
-**F-26 (SHOULD)** Tags page at `/photos/tags/`, in the menu: one section per curated tag in slug order, a sample grid (F-5) of its most recent photos on one side of the rail, and its R-19 description and its chip — F-11's, without the top level — on the other. Gear tags are left out (F-24). The page grants no reachability under §12 criterion 4, which counts a single tag's listing.
+**F-26 (SHOULD)** Tags page at `/photos/tags/`, in the menu: one section per curated tag in slug order, a sample grid (F-5) of its most recent photos, each tile leading to that photograph inside the tag (F-11a), on one side of the rail, and its R-19 description and its chip — F-11's, without the top level — on the other. Gear tags are left out (F-24). The page grants no reachability under §12 criterion 4, which counts a single tag's listing.
 
 ### 5.3 Publication and privacy
 

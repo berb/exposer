@@ -541,3 +541,46 @@ func TestScopedPagerNamesItsDirections(t *testing.T) {
 		t.Error("the album-independent page carries a pager")
 	}
 }
+
+func TestSampleGridsLeadIntoTheListingTheyStandFor(t *testing.T) {
+	// F-11a: a tile under an album or a tag is that photograph inside it,
+	// carrying its neighbours. The front page and the gear page stand for no
+	// listing, so their tiles lead to the photograph's own page (F-23, R-15).
+	site := buildSite(t, goodLibrary)
+	tiles := func(page string) []string {
+		t.Helper()
+		body := readFile(t, filepath.Join(site, filepath.FromSlash(page)))
+		start := strings.Index(body, `<div class="squares">`)
+		if start < 0 {
+			t.Fatalf("%s has no sample grid", page)
+		}
+		return regexp.MustCompile(`href="(/photos/[^"]+)"`).
+			FindAllString(body[start:start+strings.Index(body[start:], "</div>")], -1)
+	}
+
+	for page, want := range map[string]string{
+		"photos/albums/index.html": `href="/photos/albums/harbour/`,
+		"photos/tags/index.html":   `href="/photos/tags/places-harbour/`,
+	} {
+		found := false
+		for _, tile := range tiles(page) {
+			if strings.HasPrefix(tile, `href="/photos/p/`) {
+				t.Errorf("%s: a tile leaves the listing: %s", page, tile)
+			}
+			found = found || strings.HasPrefix(tile, want)
+		}
+		if !found {
+			t.Errorf("%s: no tile leading into %s", page, want)
+		}
+	}
+
+	for _, page := range []string{"index.html", "photos/gear/index.html"} {
+		own := false
+		for _, tile := range tiles(page) {
+			own = own || strings.HasPrefix(tile, `href="/photos/p/`)
+		}
+		if !own {
+			t.Errorf("%s: no tile leading to a photograph's own page", page)
+		}
+	}
+}

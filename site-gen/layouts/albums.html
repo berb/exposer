@@ -16,7 +16,7 @@
 <div class="index-split" id="{{ .slug }}">
   <div>
     {{ $more := dict "href" (printf "photos/albums/%s/" .slug) "label" (printf "All %s →" (partial "count.html" .count | chomp)) }}
-    {{ partial "squares.html" (dict "ids" .sample "more" $more) }}
+    {{ partial "squares.html" (dict "ids" .sample "more" $more "scope" (printf "photos/albums/%s/" .slug)) }}
   </div>
   <div>
     <h3><a href="{{ (printf "photos/albums/%s/" .slug) | relURL }}">{{ .title }}</a></h3>

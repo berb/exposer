@@ -21,7 +21,7 @@
   {{ if gt .total (len .ids) }}
     {{ $more = dict "href" (printf "photos/tags/%s/" .slug) "label" (printf "All %s →" (partial "count.html" .total | chomp)) }}
   {{ end }}
-  <div>{{ partial "squares.html" (dict "ids" .ids "more" $more) }}</div>
+  <div>{{ partial "squares.html" (dict "ids" .ids "more" $more "scope" (printf "photos/tags/%s/" .slug)) }}</div>
   <div>
     {{/* The chip the tag wears everywhere else, and nothing more: the grid's
          last cell already says how many photographs there are and leads to the

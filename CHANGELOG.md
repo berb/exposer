@@ -19,6 +19,10 @@ All notable changes to exposer, newest first. The format follows [Keep a Changel
 - The footer's imprint link comes last, after the credit, separated from it by a middle dot.
 - The fonts and the fullscreen script carry a hash of their contents in their name too, as in `/fonts/inter-tight-latin.77fefe8c.woff2`.
 
+### Fixed
+
+- A thumbnail on the album index or the tags page now opens that photograph inside the album or tag it was shown under, with its neighbours, instead of the photograph's own page. The gear page and the front page still lead to the photograph's own page, since neither is a listing to page through.
+
 ## [0.1.4] - 2026-09-22
 
 ### Added

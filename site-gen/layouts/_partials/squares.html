@@ -9,14 +9,20 @@
      tile is ~132-200px wide at every width above one column -- a viewport share
      made the browser fetch the 400px crop for a 155px box. */ -}}
 {{- $sizes := "(max-width: 300px) 100vw, 200px" -}}
-{{- /* Called with a plain list of ids, or with a dict carrying that list and a
-     "more" cell to close the grid with: F-24 spends the last cell on the way to
-     the rest rather than on one more photograph. */ -}}
+{{- /* Called with a plain list of ids, or with a dict carrying that list, a
+     "more" cell to close the grid with -- F-24 spends the last cell on the way
+     to the rest rather than on one more photograph -- and a "scope", the
+     listing these tiles belong to. With a scope each tile leads to the
+     photograph inside that listing (F-11a), which carries its neighbours;
+     without one, as on the front page and the All page, it leads to the
+     photograph's own page (F-11). */ -}}
 {{- $ids := . -}}
 {{- $more := false -}}
+{{- $scope := "" -}}
 {{- if reflect.IsMap . -}}
   {{- $ids = .ids -}}
   {{- $more = .more -}}
+  {{- with .scope }}{{ $scope = . }}{{ end -}}
 {{- end -}}
 <div class="squares">
 {{- range $ids }}
@@ -41,7 +47,10 @@
 {{- $label := .alt }}
 {{- if eq $label .id }}{{ $label = printf "Photograph from %s" (substr .captured_at 0 10) }}{{ end }}
 {{- /* D-7: the box is sized and toned before the bytes arrive. */ -}}
-<a href="{{ (printf "photos/p/%s/" .id) | relURL }}" aria-label="{{ $label }}"><span class="frame" style="--ar:{{ $ar }};--tone:{{ .tone }}"><picture>
+{{- $id := .id }}
+{{- $href := printf "photos/p/%s/" $id }}
+{{- if $scope }}{{ $href = printf "%s%s/" $scope $id }}{{ end -}}
+<a href="{{ $href | relURL }}" aria-label="{{ $label }}"><span class="frame" style="--ar:{{ $ar }};--tone:{{ .tone }}"><picture>
 {{- with $avifSet }}<source type="image/avif" srcset="{{ delimit . ", " }}" sizes="{{ $sizes }}">{{ end -}}
 <img src="{{ relURL $fallback.public }}" srcset="{{ delimit $jpegSet ", " }}" sizes="{{ $sizes }}" width="{{ $fallback.width }}" height="{{ $fallback.height }}" alt="" loading="lazy" decoding="async"></picture></span></a>
 {{- end }}
