@@ -15,6 +15,8 @@ Example output:
 
 ![Example output](example.png)
 
+**Live Demo**: [photography.erb.io/](https://photography.erb.io/)
+
 ## What it generates
 
 Albums, tags, places, a timeline, a page per photograph, and a page per photograph *within each listing it belongs to*, so paging through an album stays inside that album. Plus an index, an "all" page, a gear page built from EXIF, an RSS feed and a sitemap. Every grid entry is a real link to a real page; there is no lightbox and under 1 KB of JavaScript on the whole site (gzipped), for the fullscreen view.
