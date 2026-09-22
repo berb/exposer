@@ -478,3 +478,26 @@ func TestMenuListsTheSectionsInOrder(t *testing.T) {
 		t.Errorf("the menu reads %v, want %v", got, want)
 	}
 }
+
+func TestPhotoPageTagChipsDropTheTopLevel(t *testing.T) {
+	// F-11: a chip carries the hierarchy without its top level, and a gear
+	// chip only the equipment (R-15).
+	site := buildSite(t, goodLibrary)
+	body := readFile(t, filepath.Join(site, "photos", "p", "2e2d8e42959ed213", "index.html"))
+	start := strings.Index(body, `<p class="meta tags">`)
+	if start < 0 {
+		t.Fatal("no tag chips on the photo page")
+	}
+	chips := body[start : start+strings.Index(body[start:], "</p>")]
+	for _, want := range []string{
+		`/photos/tags/places-harbour-dock/">Harbour » Dock</a>`, // Places|Harbour|Dock
+		`/photos/tags/gear-camera-testcam-a1/">TESTCAM A1</a>`,  // Gear|Camera|TESTCAM A1
+	} {
+		if !strings.Contains(chips, want) {
+			t.Errorf("the chips read %s, want one reading %s", chips, want)
+		}
+	}
+	if strings.Contains(chips, "Places »") {
+		t.Errorf("a chip still carries its top level: %s", chips)
+	}
+}

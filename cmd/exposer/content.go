@@ -29,13 +29,23 @@ type renderPhoto struct {
 	Tone        string       `json:"tone"`
 	Width       int          `json:"width"`
 	Height      int          `json:"height"`
-	Tags        []Tag        `json:"tags"`
+	Tags        []tagRef     `json:"tags"`
 	Albums      []albumRef   `json:"albums"`
 	Locations   []placeRef   `json:"locations"`
 	Camera      Camera       `json:"camera"`
 	Exposure    Exposure     `json:"exposure"`
 	Rights      Rights       `json:"rights"`
 	Derivatives []derivative `json:"derivatives"`
+}
+
+// tagRef names a tag on a photo page. The top level is dropped -- a chip
+// reading "Harbour » Dock" rather than "Places » Harbour » Dock" -- since the
+// chips sit in a row of technical data where the whole path would crowd it,
+// and what is left still tells two tags sharing a leaf apart. Gear keeps only
+// the equipment, as its chips do everywhere (R-15).
+type tagRef struct {
+	Slug  string `json:"slug"`
+	Label string `json:"label"`
 }
 
 // placeRef names a location on a photo the way a reader reads it — the whole
@@ -159,10 +169,22 @@ func toRenderPhoto(photo Photo, derivs []derivative, tone string, albumTitles, p
 		Year:  safeSlice(captured, 0, 4),
 		Month: safeSlice(captured, 5, 7),
 		Width: width, Height: height,
-		Tags: photo.Tags, Albums: albumRefs(photo.Albums, albumTitles), Locations: placeRefs(photo.Locations, placeTitles),
+		Tags: tagRefs(photo.Tags), Albums: albumRefs(photo.Albums, albumTitles), Locations: placeRefs(photo.Locations, placeTitles),
 		Camera: photo.Camera, Exposure: photo.Exposure, Rights: photo.Rights,
 		Derivatives: derivs,
 	}
+}
+
+func tagRefs(tags []Tag) []tagRef {
+	refs := make([]tagRef, 0, len(tags))
+	for _, tag := range tags {
+		label := tag.Leaf
+		if len(tag.Path) > 1 && tag.Path[0] != gearNamespace {
+			label = strings.Join(tag.Path[1:], hierarchySeparator)
+		}
+		refs = append(refs, tagRef{Slug: tag.Slug, Label: label})
+	}
+	return refs
 }
 
 func albumRefs(slugs []string, titles map[string]string) []albumRef {

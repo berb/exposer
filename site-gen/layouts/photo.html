@@ -30,7 +30,7 @@
     <p class="meta">In {{ range $i, $a := . }}{{ if $i }} · {{ end }}<a href="{{ (printf "photos/albums/%s/" $a.slug) | relURL }}">{{ $a.title }}</a>{{ end }}</p>
     {{ end }}
     {{ with .tags }}
-    <p class="meta tags">{{ range . }}<a href="{{ (printf "photos/tags/%s/" .slug) | relURL }}">{{ .leaf }}</a>{{ end }}</p>
+    <p class="meta tags">{{ range . }}<a href="{{ (printf "photos/tags/%s/" .slug) | relURL }}">{{ .label }}</a>{{ end }}</p>
     {{ end }}
     {{ with .locations }}
     <p class="meta">{{ range $i, $l := . }}{{ if $i }} · {{ end }}<a href="{{ (printf "photos/locations/%s/" $l.slug) | relURL }}">{{ $l.title }}</a>{{ end }}</p>

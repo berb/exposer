@@ -118,7 +118,7 @@ A **sample grid** is up to eleven squares plus a twelfth cell that links to the 
 
 **F-10 (MUST)** Timeline at `/photos/<year>/` and `/photos/<year>/<month>/`, and whole at `/photos/timeline/` in the site menu: every published photo, newest first, under a heading per year that links to that year's listing. Its photos link into the year listings, so it adds no scoped pages of its own.
 
-**F-11 (MUST)** One album-independent page per published photo at `/photos/p/<id>/`: the large derivative, title, caption, linked tags, capture date linked into the timeline, technical data, and every album the photo belongs to (R-14).
+**F-11 (MUST)** One album-independent page per published photo at `/photos/p/<id>/`: the large derivative, title, caption, linked tags — each chip without its top level, so `Places|Harbour|Dock` reads `Harbour » Dock`, and a gear tag showing only the equipment (R-15) — capture date linked into the timeline, technical data, and every album the photo belongs to (R-14).
 
 **F-11a (MUST)** The same photo seen inside a listing is its own page beneath that listing — `/photos/albums/<album>/<id>/`, and likewise under a tag, a location, a year and a month — with the listing's context and previous/next within it. Gear tags are the exception (R-15): their grids link to F-11. A scoped page declares `/photos/p/<id>/` canonical and stays out of the sitemap. *Because* a page with its own address survives being copied and works without JavaScript, which is what an overlay could not do (F-12).
 
