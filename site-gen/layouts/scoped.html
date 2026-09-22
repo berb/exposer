@@ -31,20 +31,17 @@
          the next photograph is before the reader commits to it, which a word
          never did. */}}
     <nav class="pager" aria-label="Within this listing">
-      {{ partial "pagerthumb.html" (dict "id" $.Params.prevId "href" $.Params.prev "rel" "prev" "label" "← Previous") }}
-      {{ partial "pagerthumb.html" (dict "id" $.Params.nextId "href" $.Params.next "rel" "next" "label" "Next →") }}
+      {{ partial "pagerthumb.html" (dict "id" $.Params.prevId "href" $.Params.prev "rel" "prev" "align" "back" "label" "← Previous") }}
+      {{ partial "pagerthumb.html" (dict "id" .id "href" (printf "photos/p/%s/" .id) "align" "out" "label" "Photo details") }}
+      {{ partial "pagerthumb.html" (dict "id" $.Params.nextId "href" $.Params.next "rel" "next" "align" "on" "label" "Next →") }}
     </nav>
-
-    {{/* Both of these leave this listing's view of the photograph, so they look
-         alike: the same ghost frame, side by side. */}}
-    <p class="actions">
-      <a class="ghost" href="{{ (printf "photos/p/%s/" .id) | relURL }}">All details</a>
-      <button type="button" class="ghost" data-fullscreen-trigger hidden
-              aria-pressed="false">Full screen</button>
-    </p>
   </aside>
 
   <div class="detail-image">
+    {{/* D-11: this figure is what goes full screen, and on this page it is
+         also the control that gets it there -- there is no button here, so
+         photo.js makes the figure focusable and answers Enter and Space
+         (D-9). Until the script runs it is an ordinary figure. */}}
     <figure class="viewer" data-fullscreen-viewer style="--ar:{{ $ar }};--tone:{{ .tone }}">
       <span class="frame">
         <picture>

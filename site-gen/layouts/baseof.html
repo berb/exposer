@@ -252,9 +252,11 @@ ul.plain li { border-bottom: 1px solid var(--hair); padding: var(--step) 0; }
    track: auto-fill counts columns at the track's maximum, so capping the track
    at 200px would fit one column in a 276px rail and stack the pair at widths
    where they comfortably sat side by side. */
-.pager { display: grid; grid-template-columns: repeat(auto-fill, minmax(132px, 1fr));
-         gap: var(--gutter); margin-bottom: calc(var(--step) * 2); }
-.pager-step { display: block; text-decoration: none; max-width: 200px; }
+/* Three steps in one row, whatever the rail is worth: back, out and on belong
+   side by side, and a wrapped third step would read as a fourth thing. */
+.pager { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
+         gap: 8px; margin-bottom: calc(var(--step) * 2); }
+.pager-step { display: block; text-decoration: none; }
 /* D-7 again: the box is sized and toned before the thumbnail arrives. */
 .pager-step .frame { display: block; aspect-ratio: var(--ar);
                      background: var(--tone, var(--hair)); }
@@ -262,6 +264,11 @@ ul.plain li { border-bottom: 1px solid var(--hair); padding: var(--step) 0; }
 .pager-label { display: block; padding-top: 6px;
                font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase;
                color: var(--quiet); }
+/* Back on the left, out in the middle, on to the right: the label sits under
+   the side of the row its step leads to. */
+.pager-back .pager-label { text-align: left; }
+.pager-out .pager-label { text-align: center; }
+.pager-on .pager-label { text-align: right; }
 
 /* Both leave this page, so both look the same, whether the markup is a link or
    a button the script un-hides. */
@@ -285,6 +292,9 @@ ul.plain li { border-bottom: 1px solid var(--hair); padding: var(--step) 0; }
   aspect-ratio: var(--ar); background: var(--tone, var(--hair));
 }
 .viewer img { display: block; width: 100%; height: 100%; object-fit: cover; }
+/* D-9: where the photograph itself is the fullscreen control, focus has to be
+   as visible on it as on any link. */
+.viewer[role="button"]:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
 
 /* D-1 holds here too: full screen keeps the site's own ground, so the surround
    is the same off-white as every other page rather than a dark field. */

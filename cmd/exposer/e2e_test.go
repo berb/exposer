@@ -584,3 +584,38 @@ func TestSampleGridsLeadIntoTheListingTheyStandFor(t *testing.T) {
 		}
 	}
 }
+
+func TestScopedPagerIsThreeStepsAndNoButtons(t *testing.T) {
+	// F-25: previous, this photograph out to its own page, next -- and nothing
+	// else in the rail. D-11's control is then the photograph itself, which
+	// only the script can offer, so the markup ships without it.
+	site := buildSite(t, goodLibrary)
+	const id = "9e5d22c16423d73e"
+	body := readFile(t, filepath.Join(site, "photos", "albums", "harbour", id, "index.html"))
+	pager := body[strings.Index(body, `<nav class="pager"`):]
+	pager = pager[:strings.Index(pager, "</nav>")]
+
+	steps := regexp.MustCompile(`class="pager-step pager-(\w+)" href="([^"]+)"`).FindAllStringSubmatch(pager, -1)
+	if len(steps) != 3 {
+		t.Fatalf("%d pager steps, want three:\n%s", len(steps), pager)
+	}
+	if steps[1][1] != "out" || steps[1][2] != "/photos/p/"+id+"/" {
+		t.Errorf("the middle step is %v, want the way out to /photos/p/%s/", steps[1], id)
+	}
+	if !strings.Contains(pager, "Photo details") {
+		t.Errorf("the middle step is not labelled:\n%s", pager)
+	}
+	for _, class := range []string{"pager-back", "pager-out", "pager-on"} {
+		if !strings.Contains(pager, class) {
+			t.Errorf("no %s step, so a label cannot be aligned to its side", class)
+		}
+	}
+	if strings.Contains(body, `class="ghost"`) {
+		t.Error("a scoped page still carries a button beside its pager")
+	}
+	// The photograph's own page keeps its button: it has no pager to fill the rail.
+	own := readFile(t, filepath.Join(site, "photos", "p", id, "index.html"))
+	if !strings.Contains(own, "data-fullscreen-trigger") {
+		t.Error("the album-independent page lost its fullscreen button")
+	}
+}

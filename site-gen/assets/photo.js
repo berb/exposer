@@ -58,7 +58,23 @@
     return;
   }
 
-  if (trigger) trigger.hidden = false;
+  if (trigger) {
+    trigger.hidden = false;
+  } else {
+    // A scoped page shows no button -- its pager already fills that rail -- so
+    // the photograph is the control (D-9): focusable, named, and answering the
+    // keys a button answers. This is set only once the API is known to work,
+    // so nothing offers an action it cannot perform.
+    viewer.setAttribute("tabindex", "0");
+    viewer.setAttribute("role", "button");
+    viewer.setAttribute("aria-pressed", "false");
+    viewer.setAttribute("aria-label", "Show the photograph full screen");
+    viewer.addEventListener("keydown", function (event) {
+      if (event.key !== "Enter" && event.key !== " ") return;
+      event.preventDefault(); // Space would scroll the page
+      toggle();
+    });
+  }
 
   // The page's own sizes hints describe the page layout, which is not the screen.
   // Remember them so leaving full screen restores exactly what the markup said.
@@ -133,6 +149,10 @@
     if (trigger) {
       trigger.setAttribute("aria-pressed", active ? "true" : "false");
       trigger.textContent = active ? "Exit full screen" : "Full screen";
+    } else {
+      viewer.setAttribute("aria-pressed", active ? "true" : "false");
+      viewer.setAttribute("aria-label",
+        active ? "Leave full screen" : "Show the photograph full screen");
     }
     if (image) image.style.cursor = active ? "zoom-out" : "zoom-in";
   });

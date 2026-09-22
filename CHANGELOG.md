@@ -10,6 +10,7 @@ All notable changes to exposer, newest first. The format follows [Keep a Changel
 - The build fails if an image's name does not match its contents.
 - A build no longer reads the metadata of photographs and sidecars that have not changed since the last one, and reads the rest in parallel. On a library of 353 photographs, a build with nothing new to render went from 14 seconds to 3, and reading the metadata for a first build from 11 seconds to 3.
 - A photo page's tag chips now carry the tag's hierarchy without its top level, so a tag written `Places|Harbour|Dock` reads `Harbour » Dock` instead of `Dock`. Camera and lens chips are unchanged.
+- A photograph's page inside a listing now shows three thumbnails: the previous photograph, this one and the next. The middle one, labelled "Photo details", leads to the photograph's own page, and the labels sit under the side each leads to. The "All details" and "Full screen" buttons are gone: the middle thumbnail replaces the first, and the photograph itself is now the fullscreen control, which a keyboard reaches with Tab and Enter.
 - On a photograph's page inside a listing, the left and right arrow keys move to the previous and next photograph. The thumbnails below still do the same, and both work without the arrow keys.
 - The tags page's chips read like a photo page's too.
 - The front page's tag chips read like a photo page's, without the tag's top level: `Places|Harbour|Dock` reads `Harbour » Dock`. The tags page and each tag's own heading still name it in full.
