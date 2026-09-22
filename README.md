@@ -77,6 +77,19 @@ exposer serve             # http://127.0.0.1:8888
 
 The library is opened read-only: nothing here writes to an original or a sidecar, ever.
 
+## Hosting
+
+`target/site` is plain static files, so any static host serves it. exposer knows nothing about deployment. Copy the directory with anything that also deletes files the build no longer produces, such as `rsync --delete`.
+
+Images, fonts and the script carry a hash of their contents in their name, as in `/photos/img/3f/3f9c2a1b7e4d05a7/3f9c2a1b7e4d05a7-800.a41c09e2.avif`. Different bytes always get a different name, so these files can be cached forever:
+
+| Paths | Cache header |
+|---|---|
+| `/photos/img/`, `/fonts/*.woff2`, `/fullscreen.*.js` | `Cache-Control: public, max-age=31536000, immutable` |
+| everything else: pages, `index.xml`, `sitemap.xml` | short, or revalidated on every visit |
+
+Pages keep their addresses from build to build, so they must not be cached as immutable.
+
 ## The library
 
 A library is a directory of originals with their sidecars beside them, arranged however you like — the tool walks the tree and does not care about the shape.
