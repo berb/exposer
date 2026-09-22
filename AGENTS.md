@@ -172,7 +172,9 @@ when a sidecar was written by a newer one (F-4).
 - Both AVIF and JPEG derivatives are generated.
 - The URL layout is fixed: `/photos/albums/<slug>/`, `/photos/tags/<slug>/`,
   `/photos/<year>/<month>/`, `/photos/p/<id>/`, and everything generated lives
-  under `/photos/`.
+  under `/photos/`. An image is named for its photograph and its bytes —
+  `/photos/img/<id[:2]>/<id>/<id>-<size>.<hash>.<ext>` — so a host can cache
+  them forever (B-10).
 
 ## Design
 

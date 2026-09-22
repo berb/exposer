@@ -333,6 +333,116 @@ func TestDeriveIsACacheNotAReRender(t *testing.T) {
 	}
 }
 
+// rederive runs stage 2 again over buildDerivatives' index and cache, under
+// the fixture configuration with one line replaced.
+func rederive(t *testing.T, dir, old, new string) derivativeManifest {
+	t.Helper()
+	raw := string(readBytes(t, filepath.Join(goodLibrary, "_data", "exposer.yaml")))
+	if !strings.Contains(raw, old) {
+		t.Fatalf("the fixture configuration has no %q to replace", old)
+	}
+	config := filepath.Join(dir, "exposer.yaml")
+	write(t, config, strings.Replace(raw, old, new, 1))
+	manifest := filepath.Join(dir, "rederived.json")
+	runDerive([]string{
+		"--index", filepath.Join(dir, "index.json"),
+		"--library", goodLibrary,
+		"--cache", filepath.Join(dir, "cache"),
+		"--manifest", manifest,
+		"--config", config,
+	})
+	var out derivativeManifest
+	read(t, manifest, &out)
+	return out
+}
+
+// publicNames maps each derivative's cache name (800.avif) to its public path.
+func publicNames(derivs []derivative) map[string]string {
+	out := map[string]string{}
+	for _, d := range derivs {
+		out[filepath.Base(d.Cache)] = d.Public
+	}
+	return out
+}
+
+func TestDeriveNamesTheBytesNotTheSettings(t *testing.T) {
+	requireTools(t, "exiftool", "magick")
+	dir, first := buildDerivatives(t, goodLibrary)
+
+	// B-10: a new width changes the cache key and renders again, but the sizes
+	// that were already there come out as the same bytes, so under the same
+	// names -- a deploy uploads the new width and nothing else.
+	widened := rederive(t, dir, "square_widths: [200, 400]", "square_widths: [200, 300, 400]")
+	for id, derivs := range first.Photos {
+		after := publicNames(widened.Photos[id])
+		for cached, public := range publicNames(derivs) {
+			if after[cached] != public {
+				t.Errorf("%s: adding a width renamed %s from %s to %s", id, cached, public, after[cached])
+			}
+		}
+		if len(after) <= len(derivs) {
+			t.Errorf("%s: %d derivatives after adding a width, %d before", id, len(after), len(derivs))
+		}
+	}
+
+	// Different bytes are a different name, so a host holding the old file
+	// forever never serves it in place of the new one.
+	requality := rederive(t, dir, "jpeg_quality: 82", "jpeg_quality: 70")
+	for id, derivs := range first.Photos {
+		after := publicNames(requality.Photos[id])
+		for _, d := range derivs {
+			cached := filepath.Base(d.Cache)
+			if d.Format == "jpeg" && after[cached] == d.Public {
+				t.Errorf("%s: %s kept the name %s with new bytes", id, cached, d.Public)
+			}
+			if d.Format == "avif" && after[cached] != d.Public {
+				t.Errorf("%s: %s was renamed, yet a JPEG setting cannot change an AVIF", id, cached)
+			}
+		}
+	}
+}
+
+func TestDeriveHashesAnOlderCacheWithoutRenderingIt(t *testing.T) {
+	requireTools(t, "exiftool", "magick")
+	dir, first := buildDerivatives(t, goodLibrary)
+
+	// A cache from before B-10 has no hashes in its meta.json. It must still
+	// count as a cache: the first build after an upgrade names the files it
+	// has rather than rendering the whole library again.
+	metas, err := filepath.Glob(filepath.Join(dir, "cache", "*", "*", "*", "meta.json"))
+	if err != nil || len(metas) == 0 {
+		t.Fatalf("no meta.json in the cache (%v)", err)
+	}
+	stamps := map[string]int64{}
+	for _, path := range metas {
+		var meta map[string]any
+		read(t, path, &meta)
+		delete(meta, "hashes")
+		data, _ := json.Marshal(meta)
+		write(t, path, string(data))
+		files, _ := filepath.Glob(filepath.Join(filepath.Dir(path), "*.avif"))
+		for _, f := range files {
+			info, _ := os.Stat(f)
+			stamps[f] = info.ModTime().UnixNano()
+		}
+	}
+
+	again := rederive(t, dir, "min_rating: 4", "min_rating: 4")
+	for f, stamp := range stamps {
+		if info, _ := os.Stat(f); info.ModTime().UnixNano() != stamp {
+			t.Errorf("%s was rendered again", f)
+		}
+	}
+	for id, derivs := range first.Photos {
+		after := publicNames(again.Photos[id])
+		for cached, public := range publicNames(derivs) {
+			if after[cached] != public {
+				t.Errorf("%s: %s named %s, then %s", id, cached, public, after[cached])
+			}
+		}
+	}
+}
+
 func TestDeriveRendersNothingForAnUnpublishedPhotograph(t *testing.T) {
 	requireTools(t, "exiftool", "magick")
 

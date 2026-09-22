@@ -290,7 +290,6 @@ func derivePhoto(photo Photo, library, cacheRoot, hash string, cfg config, scrat
 				Width:  size,
 				Format: format,
 				Cache:  filepath.Join(photo.ID[:2], photo.ID, renderKey, name),
-				Public: filepath.Join("photos", "img", photo.ID, name),
 				Square: square,
 			}
 			if info, err := os.Stat(filepath.Join(dir, name)); err == nil && info.Size() > 0 {
@@ -310,8 +309,9 @@ func derivePhoto(photo Photo, library, cacheRoot, hash string, cfg config, scrat
 
 	metaPath := filepath.Join(dir, "meta.json")
 	var meta struct {
-		Dims map[string][2]int `json:"dims"`
-		Tone string            `json:"tone"`
+		Dims   map[string][2]int `json:"dims"`
+		Tone   string            `json:"tone"`
+		Hashes map[string]string `json:"hashes"`
 	}
 	if complete {
 		if data, err := os.ReadFile(metaPath); err == nil &&
@@ -322,6 +322,17 @@ func derivePhoto(photo Photo, library, cacheRoot, hash string, cfg config, scrat
 					wanted[i].Width, wanted[i].Height = wh[0], wh[1]
 				}
 			}
+			// A cache written before B-10 has no hashes; it needs hashing
+			// once, not rendering again.
+			if len(meta.Hashes) != len(wanted) {
+				if meta.Hashes, err = hashDerivatives(dir, wanted); err != nil {
+					return nil, "", false, err
+				}
+				if err := saveMeta(metaPath, meta); err != nil {
+					return nil, "", false, err
+				}
+			}
+			namePublic(photo.ID, wanted, meta.Hashes)
 			return wanted, meta.Tone, false, nil
 		}
 	}
@@ -381,15 +392,55 @@ func derivePhoto(photo Photo, library, cacheRoot, hash string, cfg config, scrat
 		}
 	}
 
-	meta.Dims, meta.Tone = dims, tone
-	data, err := json.Marshal(meta)
+	// Hashed last: exiftool has just rewritten every file.
+	hashes, err := hashDerivatives(dir, wanted)
 	if err != nil {
 		return nil, "", false, err
 	}
-	if err := os.WriteFile(metaPath, data, 0o644); err != nil {
+	meta.Dims, meta.Tone, meta.Hashes = dims, tone, hashes
+	if err := saveMeta(metaPath, meta); err != nil {
 		return nil, "", false, err
 	}
+	namePublic(photo.ID, wanted, hashes)
 	return wanted, tone, true, nil
+}
+
+func saveMeta(path string, value any) error {
+	data, err := json.Marshal(value)
+	if err != nil {
+		return err
+	}
+	return os.WriteFile(path, data, 0o644)
+}
+
+// hashDerivatives keys each cached file's short content hash by its cache name.
+func hashDerivatives(dir string, derivs []derivative) (map[string]string, error) {
+	hashes := make(map[string]string, len(derivs))
+	for _, d := range derivs {
+		name := filepath.Base(d.Cache)
+		sum, err := hashFile(filepath.Join(dir, name))
+		if err != nil {
+			return nil, err
+		}
+		hashes[name] = sum[:publicHashLen]
+	}
+	return hashes, nil
+}
+
+// publicHashLen is B-10's 8 hex digits: a collision matters only between two
+// renderings of one photograph at one size and format, and assembly refuses one.
+const publicHashLen = 8
+
+// namePublic gives each derivative its public path (B-10), which names the bytes
+// rather than the photograph, so a host may cache it forever:
+// photos/img/<id[:2]>/<id>/<id>-<size>.<hash>.<ext>.
+func namePublic(id string, derivs []derivative, hashes map[string]string) {
+	for i := range derivs {
+		cached := filepath.Base(derivs[i].Cache) // 800.avif, 400sq.jpg
+		stem, ext, _ := strings.Cut(cached, ".")
+		derivs[i].Public = filepath.Join("photos", "img", id[:2], id,
+			fmt.Sprintf("%s-%s.%s.%s", id, stem, hashes[cached], ext))
+	}
 }
 
 // developRaw reproduces the darktable edit headlessly (F-4). The core flags keep

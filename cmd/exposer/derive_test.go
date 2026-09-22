@@ -77,3 +77,26 @@ func TestParamHashChangesWithEverythingItCovers(t *testing.T) {
 		}
 	}
 }
+
+func TestPublicNameCarriesShardIdAndHash(t *testing.T) {
+	// B-10: the name says which photograph, which size and which bytes.
+	derivs := []derivative{
+		{Cache: "e7/e7a82ee2493d05a7/1a2b3c4d5e6f/800.avif"},
+		{Cache: "e7/e7a82ee2493d05a7/1a2b3c4d5e6f/400sq.jpg"},
+	}
+	hashes := map[string]string{"800.avif": "244ad8cf", "400sq.jpg": "ac6fc20a"}
+	namePublic("e7a82ee2493d05a7", derivs, hashes)
+
+	want := []string{
+		"photos/img/e7/e7a82ee2493d05a7/e7a82ee2493d05a7-800.244ad8cf.avif",
+		"photos/img/e7/e7a82ee2493d05a7/e7a82ee2493d05a7-400sq.ac6fc20a.jpg",
+	}
+	for i, d := range derivs {
+		if d.Public != want[i] {
+			t.Errorf("public name %q, want %q", d.Public, want[i])
+		}
+		if !derivativeName.MatchString(d.Public) {
+			t.Errorf("%q is a name assembly would refuse", d.Public)
+		}
+	}
+}

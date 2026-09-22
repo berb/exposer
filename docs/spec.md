@@ -224,6 +224,9 @@ Two deviations, both deliberate. **Row heights vary** between rows rather than b
 
 
 **B-9 (SHOULD)** A build reports what it did, at three levels. By default each stage prints one summary line to stdout, and notices such as "no configuration, using the defaults" go to stderr once per build. `-v`/`--verbose` adds, on stderr, why each photograph was not published — below the rating gate, no sidecar, or a duplicate of which original — which photographs were rendered rather than reused from the cache, the tool versions and the Hugo binary in use, and each stage's time; the per-photograph level is deliberate, since a line per derivative would be thousands no one reads. `-q`/`--quiet` prints nothing but errors. Errors are printed at every level, and `-v` with `-q` is refused.
+
+**B-10 (SHOULD)** Every file whose bytes can change behind a stable name carries a hash of its own contents in that name, so a host may cache it as immutable: the derivatives, the fonts and the script. A derivative lives at `/photos/img/<id[:2]>/<id>/<id>-<size>.<hash>.<ext>` — `<size>sq` for a square — sharded as the cache is, so no directory grows with the library, and named after its photograph, so a saved copy still says which one it is. `<hash>` is the first 8 hex digits of the file's SHA-256: a collision matters only between two renderings of one photograph at one size and format, and assembly refuses one anyway, since it fails the build unless every derivative's shard, directory, id and hash agree with its name and contents. The hash is of the bytes and not of the cache key, so adding a width or upgrading a tool that renders the same bytes renames nothing. Pages keep their stable addresses and are not covered. Which headers a host sends is the site's concern (B-6).
+
 ---
 
 ## 9. Technology decision
@@ -245,7 +248,7 @@ Asked before anything was built, and answered; numbered because code cites them.
 3. **Albums by directory or by tag?** By tag namespace, `Album|<name>` (R-3).
 4. **A separate publication date?** No; the timeline uses capture date.
 5. **AVIF as well as JPEG?** Yes, both.
-6. **URL layout?** Everything generated lives under `/photos/`: `/photos/albums/<slug>/`, `/photos/tags/<slug>/`, `/photos/locations/<slug>/`, `/photos/<year>/<month>/`, `/photos/p/<id>/`, and a scoped page beneath each listing (F-11a). The site root `/` carries the index itself; `/photos/` repeats it with `/` as its canonical URL, out of the sitemap.
+6. **URL layout?** Everything generated lives under `/photos/`: `/photos/albums/<slug>/`, `/photos/tags/<slug>/`, `/photos/locations/<slug>/`, `/photos/<year>/<month>/`, `/photos/p/<id>/`, a scoped page beneath each listing (F-11a), and the derivatives under `/photos/img/` (B-10). The site root `/` carries the index itself; `/photos/` repeats it with `/` as its canonical URL, out of the sitemap.
 7. **Photo ids?** A content hash of the original, truncated for URLs, cached by path, size and mtime. It survives renaming and re-editing, since darktable writes only the sidecar.
 
 ---

@@ -4,6 +4,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"flag"
 	"fmt"
 	"io"
@@ -11,8 +12,10 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"runtime"
 	"sort"
 	"strings"
+	"sync"
 )
 
 // runAssemble builds the deploy artifact (B-5): Hugo's HTML plus the cached
@@ -59,6 +62,12 @@ func runAssemble(args []string) {
 	if len(leaked) > 0 {
 		fail("%d original(s) reached the deploy artifact, which must never publish one:\n  %s",
 			len(leaked), strings.Join(leaked, "\n  "))
+	}
+
+	misnamed := checkDerivativeNames(*out)
+	if len(misnamed) > 0 {
+		fail("%d derivative(s) are not named for their contents, so a host caching them forever would serve the wrong bytes:\n  %s",
+			len(misnamed), strings.Join(misnamed, "\n  "))
 	}
 
 	unreachable := checkReachable(*out, *indexPath)
@@ -157,6 +166,79 @@ func checkNoOriginals(root, indexPath string) []string {
 	}
 	sort.Strings(leaked)
 	return leaked
+}
+
+// derivativeName is B-10's photos/img/<id[:2]>/<id>/<id>-<size>.<hash>.<ext>.
+var derivativeName = regexp.MustCompile(
+	`^photos/img/([0-9a-f]{2})/([0-9a-f]{16})/([0-9a-f]{16})-[0-9]+(?:sq)?\.([0-9a-f]{8})\.(?:jpg|avif)$`)
+
+// checkDerivativeNames enforces B-10: under photos/img/, a file's shard,
+// directory and id agree, and the hash in its name is the hash of its bytes. A
+// host may cache these files forever, so a name that lies would serve stale
+// bytes with no way to take them back.
+func checkDerivativeNames(root string) []string {
+	var (
+		misnamed []string
+		hashed   []string // well-formed names, whose hash is still to be checked
+	)
+	img := filepath.Join(root, "photos", "img")
+	err := filepath.WalkDir(img, func(path string, entry fs.DirEntry, err error) error {
+		if err != nil || entry.IsDir() {
+			return err
+		}
+		rel, err := filepath.Rel(root, path)
+		if err != nil {
+			return err
+		}
+		rel = filepath.ToSlash(rel)
+		m := derivativeName.FindStringSubmatch(rel)
+		switch {
+		case m == nil:
+			misnamed = append(misnamed, rel+" (not <id[:2]>/<id>/<id>-<size>.<hash>.<ext>)")
+		case m[1] != m[2][:2] || m[2] != m[3]:
+			misnamed = append(misnamed, rel+" (shard, directory and id disagree)")
+		default:
+			hashed = append(hashed, rel)
+		}
+		return nil
+	})
+	if err != nil && !errors.Is(err, fs.ErrNotExist) {
+		fail("cannot check %s: %v", img, err)
+	}
+
+	// Every derivative is read in full, which on one core was most of the
+	// stage; spread across them it is a fraction.
+	var (
+		mu   sync.Mutex
+		wg   sync.WaitGroup
+		work = make(chan string)
+	)
+	for range runtime.NumCPU() {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			for rel := range work {
+				sum, err := hashFile(filepath.Join(root, filepath.FromSlash(rel)))
+				m := derivativeName.FindStringSubmatch(rel)
+				mu.Lock()
+				switch {
+				case err != nil:
+					misnamed = append(misnamed, fmt.Sprintf("%s (cannot read: %v)", rel, err))
+				case sum[:publicHashLen] != m[4]:
+					misnamed = append(misnamed, fmt.Sprintf("%s (contents hash to %s)", rel, sum[:publicHashLen]))
+				}
+				mu.Unlock()
+			}
+		}()
+	}
+	for _, rel := range hashed {
+		work <- rel
+	}
+	close(work)
+	wg.Wait()
+
+	sort.Strings(misnamed)
+	return misnamed
 }
 
 func hashFile(path string) (string, error) {
