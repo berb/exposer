@@ -1,0 +1,7 @@
+{{- /* B-10: the resource under a name that carries the first 8 hex digits of
+       its SHA-256 -- fonts/inter-tight-latin.3c1f09ab.woff2 -- so a host may
+       cache it forever. Hugo's own fingerprint would write all 64 digits;
+       this keeps one naming rule for the whole site. */ -}}
+{{- $hash := substr (crypto.SHA256 .Content) 0 8 -}}
+{{- $name := replaceRE `(\.[^./]+)$` (printf ".%s$1" $hash) .Name -}}
+{{- return resources.Copy $name . -}}

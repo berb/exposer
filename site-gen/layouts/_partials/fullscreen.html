@@ -1,7 +1,8 @@
 {{- /* D-11's script. It lives in assets/ rather than static/ so it passes
        through Hugo's minifier: the source keeps its comments, and the file a
-       visitor downloads -- fullscreen.min.js -- carries none of them, the same
-       thing html/template already does for the CSS inlined in baseof.html. */ -}}
-{{- with resources.Get "fullscreen.js" | minify }}
+       visitor downloads -- fullscreen.<hash>.js (B-10) -- carries none of
+       them, the same thing html/template already does for the CSS inlined in
+       baseof.html. */ -}}
+{{- with partial "hashed.html" (resources.Get "fullscreen.js" | minify) }}
 <script src="{{ .RelPermalink }}" defer></script>
 {{- end }}

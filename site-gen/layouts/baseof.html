@@ -17,7 +17,9 @@
      it in the head starts the fetch with the document instead. The mono face is
      not preloaded: it sets only the technical data on a photo page, so most
      pages never use it. */}}
-<link rel="preload" href="{{ "fonts/inter-tight-latin.woff2" | relURL }}" as="font" type="font/woff2" crossorigin>
+{{- $sans := partial "hashed.html" (resources.Get "fonts/inter-tight-latin.woff2") }}
+{{- $mono := partial "hashed.html" (resources.Get "fonts/ibm-plex-mono-latin.woff2") }}
+<link rel="preload" href="{{ $sans.RelPermalink }}" as="font" type="font/woff2" crossorigin>
 <link rel="canonical" href="{{ $canonical }}">
 <link rel="alternate" type="application/rss+xml" title="{{ site.Title }}" href="{{ "index.xml" | absURL }}">
 {{ partial "og.html" . }}
@@ -26,12 +28,12 @@
    these are served from our own origin and never linked to a font CDN. */
 @font-face {
   font-family: "Inter Tight";
-  src: url({{ "fonts/inter-tight-latin.woff2" | relURL }}) format("woff2");
+  src: url({{ $sans.RelPermalink }}) format("woff2");
   font-weight: 100 900; font-style: normal; font-display: swap;
 }
 @font-face {
   font-family: "IBM Plex Mono";
-  src: url({{ "fonts/ibm-plex-mono-latin.woff2" | relURL }}) format("woff2");
+  src: url({{ $mono.RelPermalink }}) format("woff2");
   font-weight: 400; font-style: normal; font-display: swap;
 }
 

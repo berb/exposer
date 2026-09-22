@@ -388,3 +388,51 @@ func TestPhotoSizesFollowTheLayout(t *testing.T) {
 		}
 	}
 }
+
+func TestFontsAndScriptAreNamedForTheirContents(t *testing.T) {
+	// B-10: a host may cache these forever, so each carries 8 hex digits of its
+	// own SHA-256, every page asks for it by that name, and the unhashed name
+	// is not published for a page to fall back on.
+	site := buildSite(t, goodLibrary)
+	hashed := regexp.MustCompile(`\.([0-9a-f]{8})\.(?:woff2|js)$`)
+
+	var assets []string
+	err := filepath.WalkDir(site, func(path string, entry os.DirEntry, err error) error {
+		if err != nil || entry.IsDir() {
+			return err
+		}
+		if ext := filepath.Ext(path); ext != ".woff2" && ext != ".js" {
+			return nil
+		}
+		rel, _ := filepath.Rel(site, path)
+		m := hashed.FindStringSubmatch(rel)
+		if m == nil {
+			t.Errorf("%s is published without a hash in its name", rel)
+			return nil
+		}
+		sum := sha256.Sum256(readBytes(t, path))
+		if got := hex.EncodeToString(sum[:])[:8]; got != m[1] {
+			t.Errorf("%s: contents hash to %s", rel, got)
+		}
+		assets = append(assets, "/"+filepath.ToSlash(rel))
+		return nil
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(assets) != 3 {
+		t.Fatalf("published %v, want the two fonts and the script", assets)
+	}
+
+	page := string(readBytes(t, filepath.Join(site, "index.html")))
+	photo, _ := filepath.Glob(filepath.Join(site, "photos", "p", "*", "index.html"))
+	if len(photo) == 0 {
+		t.Fatal("no photo page to read the script from")
+	}
+	page += string(readBytes(t, photo[0]))
+	for _, asset := range assets {
+		if !strings.Contains(page, asset) {
+			t.Errorf("no page asks for %s", asset)
+		}
+	}
+}

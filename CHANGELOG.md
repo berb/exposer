@@ -8,6 +8,7 @@ All notable changes to exposer, newest first. The format follows [Keep a Changel
 
 - Image files carry a hash of their contents in their name, as in `/photos/img/3f/3f9c2a1b7e4d05a7/3f9c2a1b7e4d05a7-800.a41c09e2.avif`, so a host can cache them forever: a re-edited photograph gets new names rather than new bytes behind the old ones. Adding a width or upgrading a tool renames only the files whose bytes changed. The first deploy after upgrading uploads every image once under its new name, and links to the old image addresses stop working; photo page addresses are unchanged.
 - The build fails if an image's name does not match its contents.
+- The fonts and the fullscreen script carry a hash of their contents in their name too, as in `/fonts/inter-tight-latin.77fefe8c.woff2`.
 
 ## [0.1.4] - 2026-09-22
 
