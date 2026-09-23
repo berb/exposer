@@ -6,29 +6,18 @@ All notable changes to exposer, newest first. The format follows [Keep a Changel
 
 ### Changed
 
-- A photograph's caption is read as Markdown, so it can carry emphasis and links, as the footer line already could. Raw HTML in a caption is dropped. Where the caption is used as text rather than shown — the `alt` text a screen reader reads, and the description handed to a site that unfurls a link — it carries its words without the markup.
-- Image files carry a hash of their contents in their name, as in `/photos/img/3f/3f9c2a1b7e4d05a7/3f9c2a1b7e4d05a7-800.a41c09e2.avif`, so a host can cache them forever: a re-edited photograph gets new names rather than new bytes behind the old ones. Adding a width or upgrading a tool renames only the files whose bytes changed. The first deploy after upgrading uploads every image once under its new name, and links to the old image addresses stop working; photo page addresses are unchanged.
-- The build fails if an image's name does not match its contents.
-- An existing derivative cache keeps its worth: the first build after upgrading hashes the files it already holds instead of rendering them again, so there is no reason to clear it.
-- A build no longer reads the metadata of photographs and sidecars that have not changed since the last one, and reads the rest in parallel. On a library of 353 photographs, a build with nothing new to render went from 14 seconds to 3, and reading the metadata for a first build from 11 seconds to 3.
-- A photo page's tag chips now carry the tag's hierarchy without its top level, so a tag written `Places|Harbour|Dock` reads `Harbour » Dock` instead of `Dock`. Camera and lens chips are unchanged.
-- The "Full screen" button is gone from every photo page. The photograph itself is the control: click it, or reach it with Tab and press Enter or Space.
-- A photograph's page inside a listing now shows three thumbnails: the previous photograph, this one and the next. At the first photograph of a listing there is no previous thumbnail and at the last no next one, rather than wrapping round to the other end; the remaining thumbnails fill the row from the left. The middle one, labelled "Photo details", leads to the photograph's own page, and the labels sit under the side each leads to. The "All details" and "Full screen" buttons are gone: the middle thumbnail replaces the first, and the photograph itself is now the fullscreen control, which a keyboard reaches with Tab and Enter.
-- A photograph's page inside a listing asks the browser to fetch its neighbours' pages in advance, so stepping to one is immediate. Only the pages are fetched, never their photographs, which is about 7 KB each.
-- On a photograph's page inside a listing, the left and right arrow keys move to the previous and next photograph. The thumbnails below still do the same, and both work without the arrow keys.
-- The tags page's chips read like a photo page's too.
-- The front page's tag chips read like a photo page's, without the tag's top level: `Places|Harbour|Dock` reads `Harbour » Dock`. The tags page and each tag's own heading still name it in full.
-- The front page's tag chips have an "All tags" link beneath them, as the albums and years lists do.
-- The site menu lists Tags before Gear.
-- On the front page, the "Albums" and "Years" headings are no longer links; the "All albums" and "Whole timeline" links under each list remain.
-- The footer's imprint link comes last, after the credit, separated from it by a middle dot.
-- The fonts and the fullscreen script carry a hash of their contents in their name too, as in `/fonts/inter-tight-latin.77fefe8c.woff2`.
+- **Images, fonts and the script are named after their contents**, as in `/photos/img/3f/3f9c2a1b7e4d05a7/3f9c2a1b7e4d05a7-800.a41c09e2.avif`, so a host can cache them forever. Different bytes always mean a different name, and the build fails if a name and its contents disagree. Links to the old image addresses stop working and the first deploy uploads every image once; page addresses are unchanged, and an existing derivative cache is hashed rather than rendered again.
+- **Builds skip what has not changed.** Metadata is read only for new or edited files, and in parallel. On a library of 353 photographs a build with nothing to render went from 14 seconds to 3, and a first build's metadata from 11 seconds to 3.
+- **Captions are Markdown**, so they can carry emphasis and links; raw HTML in one is dropped. Where a caption is used as text — the `alt` a screen reader reads, the description a link unfurls — it carries its words without the markup.
+- **A photograph inside a listing pages differently.** Three thumbnails replace two: previous, this photograph and next, filled from the left, with no wrap round the ends. The middle one, "Photo details", leads to the photograph's own page and replaces the "All details" button. The left and right arrow keys step between neighbours, and the neighbouring pages are fetched in advance — the pages only, about 7 KB each, never their photographs.
+- **The "Full screen" button is gone from every photo page.** The photograph itself is the control: click it, or reach it with Tab and press Enter or Space.
+- **A tag chip reads without its top level** wherever one appears: `Places|Harbour|Dock` reads `Harbour » Dock`. Headings still name a tag in full.
+- **The front page and the menu:** the "Albums" and "Years" headings are no longer links, the tag chips gained an "All tags" link like the lists above them, and the menu lists Tags before Gear.
+- **The footer's imprint link comes last**, after the credit and a middle dot.
 
 ### Fixed
 
-- A thumbnail on the gear page, and one in a camera's or a lens's own listing, now opens that photograph inside that gear tag, with its neighbours, as albums and tags already did. Gear still grants a photograph no way to be reached, since every photograph has a camera.
-
-- A thumbnail on the album index or the tags page now opens that photograph inside the album or tag it was shown under, with its neighbours, instead of the photograph's own page. The gear page and the front page still lead to the photograph's own page, since neither is a listing to page through.
+- A thumbnail on the album index, the tags page or the gear page now opens that photograph inside the album, tag or camera it was shown under, with its neighbours, instead of the photograph's own page. The front page still leads to the photograph's own page, standing for no listing, and gear still grants a photograph no way to be reached, since every photograph has a camera.
 
 ## [0.1.4] - 2026-09-22
 
