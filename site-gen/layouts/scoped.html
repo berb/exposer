@@ -28,9 +28,9 @@
          the next photograph is before the reader commits to it, which a word
          never did. */}}
     <nav class="pager" aria-label="Within this listing">
-      {{ partial "pagerthumb.html" (dict "id" $.Params.prevId "href" $.Params.prev "rel" "prev" "align" "back" "label" "← Previous") }}
-      {{ partial "pagerthumb.html" (dict "id" .id "href" (printf "photos/p/%s/" .id) "align" "out" "label" "Photo details") }}
-      {{ partial "pagerthumb.html" (dict "id" $.Params.nextId "href" $.Params.next "rel" "next" "align" "on" "label" "Next →") }}
+      {{ partial "pagerthumb.html" (dict "id" $.Params.prevId "href" $.Params.prev "rel" "prev" "label" "← Previous") }}
+      {{ partial "pagerthumb.html" (dict "id" .id "href" (printf "photos/p/%s/" .id) "label" "Photo details") }}
+      {{ partial "pagerthumb.html" (dict "id" $.Params.nextId "href" $.Params.next "rel" "next" "label" "Next →") }}
     </nav>
 
     {{ with .title }}<h1>{{ . }}</h1>{{ end }}

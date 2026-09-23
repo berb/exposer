@@ -5,12 +5,10 @@
      the reader is in; the middle step is this photograph itself and is the way
      out to its own page (F-11). "align" puts each label under its end of the
      row: the reader's eye finds back, out and on where it expects them. */ -}}
-{{- /* An end of the listing has no neighbour: the slot stays empty, so the
-     three steps keep their columns and "next" stays under the right-hand
-     side. */ -}}
-{{- if not .id -}}
-<span class="pager-step pager-{{ .align }}"></span>
-{{- else -}}
+{{- /* An end of the listing has no neighbour, and that step is not written at
+     all: the row fills from the left, and the labels follow the slots they
+     land in rather than the step they belong to. */ -}}
+{{- if .id -}}
 {{- $p := index hugo.Data.photos .id -}}
 {{- with $p -}}
 {{- $square := where .derivatives "square" true -}}
@@ -24,7 +22,7 @@
 {{- $avif := where $pool "format" "avif" -}}
 {{- $fallback := index (first 1 $jpeg) 0 -}}
 {{- $small := index (first 1 $avif) 0 -}}
-<a class="pager-step pager-{{ $.align }}" href="{{ $.href | relURL }}"{{ with $.rel }} rel="{{ . }}"{{ end }}>
+<a class="pager-step" href="{{ $.href | relURL }}"{{ with $.rel }} rel="{{ . }}"{{ end }}>
   <span class="frame" style="--ar:{{ $ar }};--tone:{{ .tone }}"><picture>
     {{- with $small }}<source type="image/avif" srcset="{{ relURL .public }}">{{ end -}}
     <img src="{{ relURL $fallback.public }}" width="{{ $fallback.width }}" height="{{ $fallback.height }}"

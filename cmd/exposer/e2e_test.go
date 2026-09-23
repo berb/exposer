@@ -537,11 +537,12 @@ func TestScopedPagerNamesItsDirections(t *testing.T) {
 		case prev && next:
 			middles++
 		case prev != next:
-			// An end of the listing: one neighbour, one empty slot (F-25).
+			// An end of the listing: one neighbour, and two steps in the row
+			// rather than a held-open third (F-25).
 			ends++
-			if !strings.Contains(body, `<span class="pager-step pager-`) {
-				t.Errorf("%s has an end without an empty slot to hold its column",
-					filepath.Base(filepath.Dir(page)))
+			if got := strings.Count(body, `class="pager-step"`); got != 2 {
+				t.Errorf("%s has %d steps at an end of the listing, want two",
+					filepath.Base(filepath.Dir(page)), got)
 			}
 		default:
 			t.Errorf("%s carries neither neighbour", filepath.Base(filepath.Dir(page)))
@@ -610,20 +611,15 @@ func TestScopedPagerIsThreeStepsAndNoButtons(t *testing.T) {
 	pager := body[strings.Index(body, `<nav class="pager"`):]
 	pager = pager[:strings.Index(pager, "</nav>")]
 
-	steps := regexp.MustCompile(`class="pager-step pager-(\w+)" href="([^"]+)"`).FindAllStringSubmatch(pager, -1)
+	steps := regexp.MustCompile(`class="pager-step" href="([^"]+)"`).FindAllStringSubmatch(pager, -1)
 	if len(steps) != 3 {
 		t.Fatalf("%d pager steps, want three:\n%s", len(steps), pager)
 	}
-	if steps[1][1] != "out" || steps[1][2] != "/photos/p/"+id+"/" {
-		t.Errorf("the middle step is %v, want the way out to /photos/p/%s/", steps[1], id)
+	if steps[1][1] != "/photos/p/"+id+"/" {
+		t.Errorf("the middle step goes to %s, want the way out to /photos/p/%s/", steps[1][1], id)
 	}
 	if !strings.Contains(pager, "Photo details") {
 		t.Errorf("the middle step is not labelled:\n%s", pager)
-	}
-	for _, class := range []string{"pager-back", "pager-out", "pager-on"} {
-		if !strings.Contains(pager, class) {
-			t.Errorf("no %s step, so a label cannot be aligned to its side", class)
-		}
 	}
 	// D-11: no page carries a fullscreen button. The photograph is the control,
 	// which only the script can make it, so the markup ships without one.

@@ -271,11 +271,12 @@ ul.plain li { border-bottom: 1px solid var(--hair); padding: var(--step) 0; }
 .pager-label { display: block; padding-top: 6px;
                font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase;
                color: var(--quiet); }
-/* Back on the left, out in the middle, on to the right: the label sits under
-   the side of the row its step leads to. */
-.pager-back .pager-label { text-align: left; }
-.pager-out .pager-label { text-align: center; }
-.pager-on .pager-label { text-align: right; }
+/* The label sits under the side of the row its slot occupies: left, middle,
+   right. At an end of a listing the missing step is not written, so the steps
+   that remain move left and take those alignments with them. */
+.pager-step:nth-child(1) .pager-label { text-align: left; }
+.pager-step:nth-child(2) .pager-label { text-align: center; }
+.pager-step:nth-child(3) .pager-label { text-align: right; }
 
 /* D-11: the photo page's figure, and what it becomes full screen. */
 .viewer { margin: 0; }
