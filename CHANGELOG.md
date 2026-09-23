@@ -4,6 +4,8 @@ All notable changes to exposer, newest first. The format follows [Keep a Changel
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-09-23
+
 ### Changed
 
 - **Images, fonts and the script are named after their contents**, as in `/photos/img/3f/3f9c2a1b7e4d05a7/3f9c2a1b7e4d05a7-800.a41c09e2.avif`, so a host can cache them forever. Different bytes always mean a different name, and the build fails if a name and its contents disagree. Links to the old image addresses stop working and the first deploy uploads every image once; page addresses are unchanged, and an existing derivative cache is hashed rather than rendered again.
@@ -76,7 +78,8 @@ The first release: a static photography site generator that reads an offline lib
 - Albums, tags, locations, a timeline, an "All" page, a Gear page and a Tags page, with a page for each photograph inside every listing it belongs to.
 - JPEG and AVIF images in a content-addressed cache, byte-identical rebuilds, originals that never reach the published site, and a build that fails if a published photograph cannot be reached.
 
-[Unreleased]: https://github.com/berb/exposer/compare/v0.1.4...HEAD
+[Unreleased]: https://github.com/berb/exposer/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/berb/exposer/compare/v0.1.4...v0.2.0
 [0.1.4]: https://github.com/berb/exposer/compare/v0.1.3...v0.1.4
 [0.1.3]: https://github.com/berb/exposer/compare/v0.1.2...v0.1.3
 [0.1.2]: https://github.com/berb/exposer/compare/v0.1.1...v0.1.2
