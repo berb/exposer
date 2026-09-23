@@ -8,7 +8,7 @@
    xmp:Rating="5">
    <dc:creator><rdf:Seq><rdf:li>A. Photographer</rdf:li></rdf:Seq></dc:creator>
    <dc:title><rdf:Alt><rdf:li xml:lang="x-default">Still water</rdf:li></rdf:Alt></dc:title>
-   <dc:description><rdf:Alt><rdf:li xml:lang="x-default">Nothing moved for an hour.</rdf:li></rdf:Alt></dc:description>
+   <dc:description><rdf:Alt><rdf:li xml:lang="x-default">Nothing moved for an hour. &lt;script&gt;alert(1)&lt;/script&gt;</rdf:li></rdf:Alt></dc:description>
    <dc:subject><rdf:Bag><rdf:li>Private Set</rdf:li><rdf:li>Norway</rdf:li></rdf:Bag></dc:subject>
    <lr:hierarchicalSubject><rdf:Bag><rdf:li>Album|Private Set</rdf:li><rdf:li>Location|Norway</rdf:li></rdf:Bag></lr:hierarchicalSubject>
   </rdf:Description>

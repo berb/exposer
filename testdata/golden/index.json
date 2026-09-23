@@ -195,8 +195,8 @@
       "label": null,
       "captured_at": "2024-03-04T07:12:00",
       "title": "Harbour at dawn",
-      "caption": "The first light over the container cranes.",
-      "alt": "The first light over the container cranes.",
+      "caption": "The first light over the *container cranes*, seen from [the quay](https://example.com/quay).",
+      "alt": "The first light over the container cranes, seen from the quay.",
       "tags": [
         {
           "slug": "gear-camera-testcam-a1",
@@ -453,8 +453,8 @@
       "label": null,
       "captured_at": "2024-07-18T17:02:00",
       "title": "Still water",
-      "caption": "Nothing moved for an hour.",
-      "alt": "Nothing moved for an hour.",
+      "caption": "Nothing moved for an hour. <script>alert(1)</script>",
+      "alt": "Nothing moved for an hour. alert(1)",
       "tags": [
         {
           "slug": "gear-camera-testcam-b2",

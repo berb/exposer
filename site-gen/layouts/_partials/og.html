@@ -7,7 +7,8 @@
 
 {{ $description := "" }}
 {{ with .Params.intro }}{{ $description = . }}{{ end }}
-{{ if and (not $description) $photo }}{{ $description = $photo.caption }}{{ end }}
+{{/* A caption is Markdown; a scraper wants the words. */}}
+{{ if and (not $description) $photo }}{{ $description = $photo.caption | markdownify | plainify }}{{ end }}
 {{ if and (not $description) $photo }}{{ $description = $photo.alt }}{{ end }}
 {{ if not $description }}{{ $description = site.Params.subtitle }}{{ end }}
 

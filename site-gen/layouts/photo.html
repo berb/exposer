@@ -18,7 +18,9 @@
   <aside class="detail-meta">
     <p class="label">Photo Details</p>
     {{ with .title }}<h1>{{ . }}</h1>{{ end }}
-    {{ with .caption }}<p>{{ . }}</p>{{ end }}
+    {{/* R-4: the caption is Markdown, so it may carry emphasis and a link.
+         Hugo drops raw HTML in it, as it does in the footer line (R-18). */}}
+    {{ with .caption }}<div class="note">{{ . | markdownify }}</div>{{ end }}
 
     {{ with .captured_at }}
     <p class="meta">

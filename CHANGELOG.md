@@ -6,6 +6,7 @@ All notable changes to exposer, newest first. The format follows [Keep a Changel
 
 ### Changed
 
+- A photograph's caption is read as Markdown, so it can carry emphasis and links, as the footer line already could. Raw HTML in a caption is dropped. Where the caption is used as text rather than shown — the `alt` text a screen reader reads, and the description handed to a site that unfurls a link — it carries its words without the markup.
 - Image files carry a hash of their contents in their name, as in `/photos/img/3f/3f9c2a1b7e4d05a7/3f9c2a1b7e4d05a7-800.a41c09e2.avif`, so a host can cache them forever: a re-edited photograph gets new names rather than new bytes behind the old ones. Adding a width or upgrading a tool renames only the files whose bytes changed. The first deploy after upgrading uploads every image once under its new name, and links to the old image addresses stop working; photo page addresses are unchanged.
 - The build fails if an image's name does not match its contents.
 - An existing derivative cache keeps its worth: the first build after upgrading hashes the files it already holds instead of rendering them again, so there is no reason to clear it.

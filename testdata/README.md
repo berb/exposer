@@ -19,11 +19,11 @@ a library of pretty pictures would test nothing in particular.
 
 | Photograph | Covers |
 |---|---|
-| `2024/03/harbour-dawn.jpg` | the complete case: title, caption, album, place, curated tag, gear, and the album's cover |
+| `2024/03/harbour-dawn.jpg` | the complete case: title, caption, album, place, curated tag, gear, and the album's cover. Its caption carries Markdown — emphasis and a link — so R-4's rendering and D-9's plain `alt` are both exercised |
 | `2024/03/harbour-boats.jpg` | no title and no caption, so D-9's alt text falls back to the id. Its lens is written `7-14/F4.0`, the form with no `mm` that F-24's focal parser has to handle |
 | `2024/03/harbour-crane.jpg` | 3:1, the wide end of D-4's rows |
 | `2024/07/fjord-wall.jpg` | 9:16, narrower than 2:3 — the only shape a grid crops |
-| `2024/07/fjord-water.jpg` | second member of the unlisted album (F-18) |
+| `2024/07/fjord-water.jpg` | second member of the unlisted album (F-18); its caption carries raw HTML, which R-4 drops rather than renders |
 | `2023/11/street-lamp.jpg` | R-7: a flat tag and a `darktable|` tag, both filtered, beside a namespaced one that survives |
 | `inbox/copy-of-lamp.jpg` | R-12: the same bytes at a second path, curated identically, collapsed into one photograph |
 | `2022/05/rejected.jpg` | rating 3 — below the gate (R-5) |

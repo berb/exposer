@@ -689,3 +689,38 @@ func TestScopedPagesPrefetchTheirNeighbours(t *testing.T) {
 		t.Errorf("a photograph's own page prefetches %v", own)
 	}
 }
+
+func TestCaptionsAreMarkdownAndAltIsNot(t *testing.T) {
+	// R-4: the caption renders as Markdown, and every place that wants text
+	// rather than markup gets text. The fixture's caption carries emphasis,
+	// a link and, on another photograph, raw HTML.
+	site := buildSite(t, goodLibrary)
+	body := readFile(t, filepath.Join(site, "photos", "p", "e7a82ee2493d05a7", "index.html"))
+
+	for _, want := range []string{
+		"<em>container cranes</em>",
+		`<a href="https://example.com/quay">the quay</a>`,
+		`alt="The first light over the container cranes, seen from the quay."`,
+		`<meta property="og:description" content="The first light over the container cranes, seen from the quay.">`,
+	} {
+		if !strings.Contains(body, want) {
+			t.Errorf("the photo page is missing %s", want)
+		}
+	}
+	if strings.Contains(body, "*container cranes*") {
+		t.Error("the caption's Markdown reached the page as written")
+	}
+
+	// Raw HTML in a caption is dropped rather than rendered, on the page and
+	// in the alt text alike.
+	html := readFile(t, filepath.Join(site, "photos", "p", "b8274fcf7dd01d14", "index.html"))
+	if !strings.Contains(html, "Nothing moved for an hour.") {
+		t.Fatal("the fixture with raw HTML in its caption is not this page")
+	}
+	if strings.Contains(html, "<script>alert(1)</script>") {
+		t.Error("raw HTML in a caption reached the page")
+	}
+	if !strings.Contains(html, `alt="Nothing moved for an hour. alert(1)"`) {
+		t.Error("alt text still carries the tags around its words")
+	}
+}

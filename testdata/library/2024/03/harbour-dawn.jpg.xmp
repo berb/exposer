@@ -8,7 +8,7 @@
    xmp:Rating="5">
    <dc:creator><rdf:Seq><rdf:li>A. Photographer</rdf:li></rdf:Seq></dc:creator>
    <dc:title><rdf:Alt><rdf:li xml:lang="x-default">Harbour at dawn</rdf:li></rdf:Alt></dc:title>
-   <dc:description><rdf:Alt><rdf:li xml:lang="x-default">The first light over the container cranes.</rdf:li></rdf:Alt></dc:description>
+   <dc:description><rdf:Alt><rdf:li xml:lang="x-default">The first light over the *container cranes*, seen from [the quay](https://example.com/quay).</rdf:li></rdf:Alt></dc:description>
    <dc:subject><rdf:Bag><rdf:li>Harbour</rdf:li><rdf:li>Bergen</rdf:li><rdf:li>Harbour</rdf:li></rdf:Bag></dc:subject>
    <lr:hierarchicalSubject><rdf:Bag><rdf:li>Album|Harbour</rdf:li><rdf:li>Location|Norway|Bergen</rdf:li><rdf:li>Places|Harbour</rdf:li></rdf:Bag></lr:hierarchicalSubject>
   </rdf:Description>

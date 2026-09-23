@@ -478,10 +478,11 @@ func buildPhoto(source string, image, sidecar map[string]any, library string,
 	title := pick(lookup(sidecar, "XMP:Title"))
 	caption := pick(lookup(sidecar, "XMP:Description"))
 	// D-9 wants non-empty alt text; the id is the last resort when the library
-	// offers nothing to say about the photo.
+	// offers nothing to say about the photo. A caption is Markdown (R-4), and
+	// alt text is read aloud, so it carries the words without the syntax.
 	alt := sum[:16]
 	if caption != nil {
-		alt = *caption
+		alt = markdownText(*caption)
 	} else if title != nil {
 		alt = *title
 	}
