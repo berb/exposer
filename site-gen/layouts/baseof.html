@@ -21,6 +21,13 @@
 {{- $mono := partial "hashed.html" (resources.Get "fonts/ibm-plex-mono-latin.woff2") }}
 <link rel="preload" href="{{ $sans.RelPermalink }}" as="font" type="font/woff2" crossorigin>
 <link rel="canonical" href="{{ $canonical }}">
+{{- /* F-25: a reader on a scoped page is most likely to ask for a neighbour
+     next, so the browser may fetch those documents while it is idle. The
+     document only -- 7 KB gzipped, against 134 KB for one photograph, which
+     most readers never ask for. A page with no neighbours prints nothing. */}}
+{{- range slice .Params.prev .Params.next }}{{ with . }}
+<link rel="prefetch" href="{{ . | relURL }}">
+{{- end }}{{ end }}
 <link rel="alternate" type="application/rss+xml" title="{{ site.Title }}" href="{{ "index.xml" | absURL }}">
 {{ partial "og.html" . }}
 <style>

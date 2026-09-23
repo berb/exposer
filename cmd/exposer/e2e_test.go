@@ -658,3 +658,38 @@ func TestGearTagsCarryScopedPagesLikeAnyOtherTag(t *testing.T) {
 		t.Error("a gear scoped page reached the sitemap")
 	}
 }
+
+func TestScopedPagesPrefetchTheirNeighbours(t *testing.T) {
+	// F-25: the documents, and only where there is a neighbour. A photograph's
+	// own page has no listing, so it asks for nothing.
+	site := buildSite(t, goodLibrary)
+	prefetch := regexp.MustCompile(`<link rel="prefetch" href="([^"]+)">`)
+	count := func(page string) []string {
+		t.Helper()
+		var hrefs []string
+		for _, m := range prefetch.FindAllStringSubmatch(readFile(t, filepath.Join(site, filepath.FromSlash(page))), -1) {
+			hrefs = append(hrefs, m[1])
+		}
+		return hrefs
+	}
+
+	const album = "photos/albums/harbour/"
+	middle := count(album + "9e5d22c16423d73e/index.html")
+	if len(middle) != 2 {
+		t.Errorf("a photograph between two others prefetches %v, want both neighbours", middle)
+	}
+	for _, href := range middle {
+		if !strings.HasPrefix(href, "/"+album) {
+			t.Errorf("prefetching %s leaves the listing", href)
+		}
+		if strings.Contains(href, "/photos/img/") {
+			t.Errorf("prefetching %s fetches a photograph, not a page", href)
+		}
+	}
+	if ends := count(album + "e7a82ee2493d05a7/index.html"); len(ends) != 1 {
+		t.Errorf("the first photograph prefetches %v, want only its one neighbour", ends)
+	}
+	if own := count("photos/p/9e5d22c16423d73e/index.html"); len(own) != 0 {
+		t.Errorf("a photograph's own page prefetches %v", own)
+	}
+}
