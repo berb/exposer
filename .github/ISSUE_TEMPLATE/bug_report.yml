@@ -1,0 +1,61 @@
+name: Bug report
+description: Something the generator did that it should not have
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Nearly every rendering difference comes from the tools exposer shells
+        out to, so the versions below matter as much as the description.
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: What you ran, what you expected, and what you got instead.
+      placeholder: |
+        exposer build ~/photos
+        Expected the album to hold 12 photographs; it holds 11.
+    validations:
+      required: true
+  - type: textarea
+    id: verbose
+    attributes:
+      label: Output of the build with -v
+      description: >
+        `exposer build <library> -v` says why each photograph was left out and
+        which were rendered. Paste the part that covers the problem; it is
+        rendered as a code block, so no backticks are needed.
+      render: text
+  - type: input
+    id: version
+    attributes:
+      label: exposer --version
+      description: The release and the Hugo it renders with.
+      placeholder: exposer v0.2.0 (hugo 0.166.0, go1.27.1, linux/amd64)
+    validations:
+      required: true
+  - type: textarea
+    id: tools
+    attributes:
+      label: Tool versions
+      description: >
+        Output of `magick --version | head -1`, `exiftool -ver` and, for a RAW
+        library, `darktable-cli --version | head -1`.
+      render: text
+    validations:
+      required: true
+  - type: input
+    id: os
+    attributes:
+      label: Operating system
+      placeholder: Debian 13, macOS 15.2, …
+    validations:
+      required: true
+  - type: textarea
+    id: library
+    attributes:
+      label: About the library
+      description: >
+        JPEG or RAW originals, roughly how many photographs, and anything
+        unusual about the sidecars or `_data/`. Do not attach photographs —
+        a sidecar, or the `_data/` file involved, is usually enough.

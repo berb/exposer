@@ -1,0 +1,34 @@
+name: Feature request
+description: Something the generator should do and does not
+labels: [enhancement]
+body:
+  - type: markdown
+    attributes:
+      value: >
+        exposer is specified before it is built: `docs/spec.md` numbers every
+        requirement, and a change that fits none of them is a change to the
+        specification first. A request that says which requirement it extends,
+        or why a new one is needed, is halfway to being implemented.
+  - type: textarea
+    id: problem
+    attributes:
+      label: What you were trying to do
+      description: The situation, not the solution.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: What exposer should do
+    validations:
+      required: true
+  - type: input
+    id: requirement
+    attributes:
+      label: Related requirement, if you know one
+      description: An id from docs/spec.md, such as F-8 or D-4.
+      placeholder: F-9
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: What you do instead today

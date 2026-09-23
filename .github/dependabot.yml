@@ -1,0 +1,17 @@
+# The Go modules and the actions this repository pins. Both are small enough
+# that a weekly pull request is a few a year rather than noise, and an action
+# pinned and forgotten is the one that breaks a release.
+version: 2
+updates:
+  - package-ecosystem: gomod
+    directory: /
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: "deps"
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: "ci"
