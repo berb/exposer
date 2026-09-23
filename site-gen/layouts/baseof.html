@@ -270,16 +270,6 @@ ul.plain li { border-bottom: 1px solid var(--hair); padding: var(--step) 0; }
 .pager-out .pager-label { text-align: center; }
 .pager-on .pager-label { text-align: right; }
 
-/* Both leave this page, so both look the same, whether the markup is a link or
-   a button the script un-hides. */
-.actions { display: flex; flex-wrap: wrap; gap: 8px; }
-.ghost {
-  font: inherit; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase;
-  color: var(--ink); background: none; border: 1px solid var(--hair);
-  padding: 6px 10px; cursor: pointer; text-decoration: none;
-}
-.ghost[hidden] { display: none; }
-
 /* D-11: the photo page's figure, and what it becomes full screen. */
 .viewer { margin: 0; }
 /* Cap the height without breaking D-7's reserved box: constrain the width to

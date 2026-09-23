@@ -181,8 +181,9 @@ when a sidecar was written by a newer one (F-4).
 The constraints live in the CSS at the top of `site-gen/layouts/baseof.html`.
 `site-gen/assets/photo.js` is the only JavaScript on the site and must stay
 progressive enhancement: it enhances D-11's fullscreen view on a photo page and
-ships its trigger hidden until the browser proves the API exists. Every grid
-entry is a plain link to a real page. An earlier lightbox was withdrawn once
+F-25's arrow keys, and makes the photograph the fullscreen control only once
+the browser proves the API exists. Every grid entry is a plain link to a real
+page. An earlier lightbox was withdrawn once
 every listing gained scoped pages, and nothing may reintroduce a grid overlay —
 a scoped page has an address that survives copying, works without JavaScript,
 and carries its neighbours.

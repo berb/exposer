@@ -625,13 +625,19 @@ func TestScopedPagerIsThreeStepsAndNoButtons(t *testing.T) {
 			t.Errorf("no %s step, so a label cannot be aligned to its side", class)
 		}
 	}
-	if strings.Contains(body, `class="ghost"`) {
-		t.Error("a scoped page still carries a button beside its pager")
-	}
-	// The photograph's own page keeps its button: it has no pager to fill the rail.
-	own := readFile(t, filepath.Join(site, "photos", "p", id, "index.html"))
-	if !strings.Contains(own, "data-fullscreen-trigger") {
-		t.Error("the album-independent page lost its fullscreen button")
+	// D-11: no page carries a fullscreen button. The photograph is the control,
+	// which only the script can make it, so the markup ships without one.
+	for _, page := range []string{
+		filepath.Join("photos", "albums", "harbour", id, "index.html"),
+		filepath.Join("photos", "p", id, "index.html"),
+	} {
+		markup := readFile(t, filepath.Join(site, page))
+		if strings.Contains(markup, "data-fullscreen-trigger") || strings.Contains(markup, `class="ghost"`) {
+			t.Errorf("%s still carries a fullscreen button", page)
+		}
+		if !strings.Contains(markup, "data-fullscreen-viewer") {
+			t.Errorf("%s has no figure for the script to make a control", page)
+		}
 	}
 }
 
