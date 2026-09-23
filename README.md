@@ -1,5 +1,9 @@
 # exposer
 
+[![build](https://img.shields.io/github/actions/workflow/status/berb/exposer/ci.yml?branch=main&label=build)](https://github.com/berb/exposer/actions/workflows/ci.yml)
+[![release](https://img.shields.io/github/v/release/berb/exposer)](https://github.com/berb/exposer/releases/latest)
+[![license](https://img.shields.io/github/license/berb/exposer)](LICENSE)
+
 A generator for a static photography site, derived from original photo files and XMP sidecars. The library is the only source of truth; the site is a build artifact you can delete and regenerate at any time.
 
 Curation happens where the editing happens. A star rating in darktable decides what is published, hierarchical tags decide what a photograph belongs to, and nothing about a photograph is ever typed into this tool.
