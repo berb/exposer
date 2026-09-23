@@ -394,13 +394,11 @@ func buildPages(doc Document, published []Photo, photos map[string]renderPhoto, 
 				params["note"] = body
 			}
 		}
-		// R-15's gear tags are derived, not curated. They list photographs, but
-		// they are not a sequence anyone composed, so they get no scoped pages
-		// and their grid links go to the album-independent page.
-		if !gearTags[slug] {
-			params["scopeBase"] = strings.Join(base, "/")
-			scoped(base, tagTitles[slug], byTag[slug])
-		}
+		// A gear tag is derived rather than curated (R-15), which is why it
+		// grants no reachability, but it is still a listing a reader pages
+		// through -- so it carries scoped pages like any other tag (F-11a).
+		params["scopeBase"] = strings.Join(base, "/")
+		scoped(base, tagTitles[slug], byTag[slug])
 		add(page{
 			path:  filepath.Join(append(append([]string{}, base...), "_index.md")...),
 			title: tagTitles[slug], layout: "listing", params: params,

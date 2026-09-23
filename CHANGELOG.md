@@ -23,6 +23,8 @@ All notable changes to exposer, newest first. The format follows [Keep a Changel
 
 ### Fixed
 
+- A thumbnail on the gear page, and one in a camera's or a lens's own listing, now opens that photograph inside that gear tag, with its neighbours, as albums and tags already did. Gear still grants a photograph no way to be reached, since every photograph has a camera.
+
 - A thumbnail on the album index or the tags page now opens that photograph inside the album or tag it was shown under, with its neighbours, instead of the photograph's own page. The gear page and the front page still lead to the photograph's own page, since neither is a listing to page through.
 
 ## [0.1.4] - 2026-09-22

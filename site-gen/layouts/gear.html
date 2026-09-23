@@ -23,7 +23,7 @@
   {{ if gt .total (len .ids) }}
     {{ $more = dict "href" (printf "photos/tags/%s/" .slug) "label" (printf "All %s →" (partial "count.html" .total | chomp)) }}
   {{ end }}
-  <div>{{ partial "squares.html" (dict "ids" .ids "more" $more) }}</div>
+  <div>{{ partial "squares.html" (dict "ids" .ids "more" $more "scope" (printf "photos/tags/%s/" .slug)) }}</div>
   <div>
     <h3>{{ .title }}</h3>
     {{/* R-17 is optional; most gear has nothing written about it. The wrapper

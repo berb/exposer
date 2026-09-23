@@ -576,6 +576,7 @@ func TestSampleGridsLeadIntoTheListingTheyStandFor(t *testing.T) {
 	for page, want := range map[string]string{
 		"photos/albums/index.html": `href="/photos/albums/harbour/`,
 		"photos/tags/index.html":   `href="/photos/tags/places-harbour/`,
+		"photos/gear/index.html":   `href="/photos/tags/gear-camera-`,
 	} {
 		found := false
 		for _, tile := range tiles(page) {
@@ -589,14 +590,13 @@ func TestSampleGridsLeadIntoTheListingTheyStandFor(t *testing.T) {
 		}
 	}
 
-	for _, page := range []string{"index.html", "photos/gear/index.html"} {
-		own := false
-		for _, tile := range tiles(page) {
-			own = own || strings.HasPrefix(tile, `href="/photos/p/`)
-		}
-		if !own {
-			t.Errorf("%s: no tile leading to a photograph's own page", page)
-		}
+	// The front page stands for no listing, so its tiles lead to F-11.
+	own := false
+	for _, tile := range tiles("index.html") {
+		own = own || strings.HasPrefix(tile, `href="/photos/p/`)
+	}
+	if !own {
+		t.Error("the front page has no tile leading to a photograph's own page")
 	}
 }
 
@@ -632,5 +632,23 @@ func TestScopedPagerIsThreeStepsAndNoButtons(t *testing.T) {
 	own := readFile(t, filepath.Join(site, "photos", "p", id, "index.html"))
 	if !strings.Contains(own, "data-fullscreen-trigger") {
 		t.Error("the album-independent page lost its fullscreen button")
+	}
+}
+
+func TestGearTagsCarryScopedPagesLikeAnyOtherTag(t *testing.T) {
+	// F-11a: a gear tag is a listing a reader pages through, so it has scoped
+	// pages. R-15 still denies it reachability, which §12 criterion 4 checks
+	// elsewhere, and a scoped page stays out of the sitemap whatever it is under.
+	site := buildSite(t, goodLibrary)
+	const scoped = "photos/tags/gear-camera-testcam-a1/2e2d8e42959ed213"
+	body := readFile(t, filepath.Join(site, filepath.FromSlash(scoped), "index.html"))
+	if !strings.Contains(body, `rel="canonical" href="/photos/p/2e2d8e42959ed213/"`) {
+		t.Error("a gear scoped page does not name the photograph's own page canonical")
+	}
+	if !strings.Contains(body, `class="pager"`) {
+		t.Error("a gear scoped page carries no pager")
+	}
+	if strings.Contains(readFile(t, filepath.Join(site, "sitemap.xml")), scoped) {
+		t.Error("a gear scoped page reached the sitemap")
 	}
 }
