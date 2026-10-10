@@ -226,3 +226,20 @@ func TestTagIndexSamplesTheNewestAndSkipsGear(t *testing.T) {
 		t.Errorf("the sample starts at %q, want the newest photograph", ids[0])
 	}
 }
+
+func TestHugoConfigCarriesTheExposerVersion(t *testing.T) {
+	// D-10: the footer credits the exposer that built the site, so the
+	// version has to reach the templates as a site parameter.
+	path := filepath.Join(t.TempDir(), "hugo.toml")
+	writeHugoConfig(path, config{Title: "A Library"}, "v9.9.9")
+	if body := readFile(t, path); !strings.Contains(body, `exposerVersion = "v9.9.9"`) {
+		t.Errorf("the generated hugo.toml carries no version:\n%s", body)
+	}
+
+	// An unstamped binary writes the key empty rather than a placeholder the
+	// footer would print.
+	writeHugoConfig(path, config{Title: "A Library"}, "")
+	if body := readFile(t, path); !strings.Contains(body, `exposerVersion = ""`) {
+		t.Errorf("the generated hugo.toml should carry an empty version:\n%s", body)
+	}
+}

@@ -24,3 +24,20 @@ func TestVersionLineNamesTheReleaseAndTheRenderer(t *testing.T) {
 		}
 	}
 }
+
+func TestBuildVersionIsEmptyWhereThereIsNone(t *testing.T) {
+	// D-10 prints this beside the credit, so "unknown" or "(devel)" must not
+	// reach a footer: nothing is printed instead.
+	if got := buildVersion(&debug.BuildInfo{Main: debug.Module{Version: "v0.3.0"}}, true); got != "v0.3.0" {
+		t.Errorf("buildVersion = %q, want v0.3.0", got)
+	}
+	for _, info := range []*debug.BuildInfo{
+		{Main: debug.Module{Version: "(devel)"}},
+		{Main: debug.Module{Version: ""}},
+		nil,
+	} {
+		if got := buildVersion(info, info != nil); got != "" {
+			t.Errorf("an unstamped binary reports %q, want nothing", got)
+		}
+	}
+}

@@ -134,7 +134,7 @@ func runContent(args []string) {
 		fail("cannot clear %s: %v", *out, err)
 	}
 	writeJSON(filepath.Join(*out, "data", "photos.json"), photos)
-	writeHugoConfig(filepath.Join(*out, "hugo.toml"), cfg)
+	writeHugoConfig(filepath.Join(*out, "hugo.toml"), cfg, exposerVersion())
 	themeFiles := themeFS(*theme)
 	copyTree(themeFiles, "layouts", filepath.Join(*out, "layouts"))
 	// Fonts live here; without this they never reach the site.
@@ -1024,7 +1024,7 @@ func writeJSON(path string, value any) {
 
 // writeHugoConfig keeps B-4 in one place: the base URL comes from exposer.yaml,
 // so nothing has to be passed on the Hugo command line.
-func writeHugoConfig(path string, cfg config) {
+func writeHugoConfig(path string, cfg config, version string) {
 	body := fmt.Sprintf(`baseURL = %q
 title = %q
 disableKinds = ["taxonomy", "term", "robotsTXT", "404"]
@@ -1040,7 +1040,10 @@ disableKinds = ["taxonomy", "term", "robotsTXT", "404"]
   imprintPage = %q
   imprintLabel = %q
   footerLine = %q
-`, cfg.BaseURL, cfg.Title, cfg.Subtitle, cfg.ImprintPage, cfg.ImprintLabel, cfg.FooterLine)
+  # D-10: the footer credits the generator by name and version, so a page
+  # says which exposer built it. Empty where Go stamped none in.
+  exposerVersion = %q
+`, cfg.BaseURL, cfg.Title, cfg.Subtitle, cfg.ImprintPage, cfg.ImprintLabel, cfg.FooterLine, version)
 	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
 		fail("cannot create %s: %v", filepath.Dir(path), err)
 	}

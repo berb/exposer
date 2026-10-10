@@ -15,12 +15,28 @@ import (
 // tree had uncommitted changes. Only a binary built without module information
 // reports "unknown".
 func versionLine(info *debug.BuildInfo, ok bool) string {
-	version := "unknown"
-	if ok && info.Main.Version != "" && info.Main.Version != "(devel)" {
-		version = info.Main.Version
+	version := buildVersion(info, ok)
+	if version == "" {
+		version = "unknown"
 	}
 	return fmt.Sprintf("exposer %s (hugo %s, %s, %s/%s)",
 		version, hugoVersion, runtime.Version(), runtime.GOOS, runtime.GOARCH)
+}
+
+// buildVersion is the stamped version, or "" where Go has none to give -- a
+// binary built without module information. The footer (D-10) prints it beside
+// the credit, and prints the credit alone when there is nothing to print.
+func buildVersion(info *debug.BuildInfo, ok bool) string {
+	if ok && info.Main.Version != "" && info.Main.Version != "(devel)" {
+		return info.Main.Version
+	}
+	return ""
+}
+
+// exposerVersion is buildVersion for the running binary.
+func exposerVersion() string {
+	info, ok := debug.ReadBuildInfo()
+	return buildVersion(info, ok)
 }
 
 func runVersion() {
