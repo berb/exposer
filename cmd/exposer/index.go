@@ -18,6 +18,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"time"
 
 	"golang.org/x/text/unicode/norm"
 	"gopkg.in/yaml.v3"
@@ -270,6 +271,11 @@ func parseNumber(v any) *float64 {
 	return &f
 }
 
+// parseDateTime shapes exiftool's date into the index's, and rejects one that
+// is not a date at all. A camera that lost its clock writes
+// "0000:00:00 00:00:00", which matches the pattern and is no capture date: R-8
+// must fail the build over it rather than let a photograph reach Hugo with a
+// front matter date Hugo refuses to parse.
 func parseDateTime(v *string) *string {
 	if v == nil {
 		return nil
@@ -279,6 +285,11 @@ func parseDateTime(v *string) *string {
 		return nil
 	}
 	out := fmt.Sprintf("%s-%s-%sT%s:%s:%s", m[1], m[2], m[3], m[4], m[5], m[6])
+	// time.Parse is strict about what a day of a month can be, so 0000-00-00,
+	// a thirteenth month and a thirty-second day are all refused here.
+	if _, err := time.Parse("2006-01-02T15:04:05", out); err != nil {
+		return nil
+	}
 	return &out
 }
 

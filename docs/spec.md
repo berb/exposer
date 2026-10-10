@@ -53,7 +53,7 @@ A caption is Markdown, as the footer line is (R-18): emphasis and links reach th
 
 **R-7 (SHOULD)** Workflow tags never reach the site: neither un-namespaced tags (`todo`, `export`) nor editor namespaces such as `darktable|`. A namespaced tag is not automatically site content.
 
-**R-8 (MUST)** The build fails loudly on a published photo that breaks the contract: no capture date, a sidecar that cannot be read, or no way to reach it — no display tag, no album and no location, which §12 criterion 4 needs for a page besides the timeline. Silent skipping is not acceptable.
+**R-8 (MUST)** The build fails loudly on a published photo that breaks the contract: no capture date — a date that is not a real one, as a camera with a lost clock writes, counts as none — a sidecar that cannot be read, or no way to reach it — no display tag, no album and no location, which §12 criterion 4 needs for a page besides the timeline. Silent skipping is not acceptable.
 
 Not violations: a missing title or caption (D-9 decides the `alt` text), and a photo with no sidecar at all, which has no rating and so cannot pass the gate. The build reports how many of those it saw.
 

@@ -214,3 +214,40 @@ func sign(n int) int {
 	}
 	return 0
 }
+
+func TestParseDateTimeRefusesWhatIsNotADate(t *testing.T) {
+	// R-8: a date the index accepts travels into Hugo's front matter, which
+	// refuses to parse an impossible one -- four stages away from the
+	// photograph that caused it.
+	good := map[string]string{
+		"2024:03:04 05:06:07":       "2024-03-04T05:06:07", // EXIF writes colons
+		"2024-03-04T05:06:07":       "2024-03-04T05:06:07", // XMP writes dashes
+		"2024:03:04 05:06:07+02:00": "2024-03-04T05:06:07", // an offset is dropped
+		"2024:03:04 05:06:07.25":    "2024-03-04T05:06:07", // and so is sub-second
+		"2024:02:29 00:00:00":       "2024-02-29T00:00:00", // a leap day is a day
+	}
+	for source, want := range good {
+		got := parseDateTime(&source)
+		if got == nil || *got != want {
+			t.Errorf("parseDateTime(%q) = %v, want %q", source, deref(got), want)
+		}
+	}
+
+	for _, source := range []string{
+		"0000:00:00 00:00:00", // a camera that lost its clock
+		"2024:13:04 05:06:07", // no thirteenth month
+		"2024:03:32 05:06:07", // no thirty-second day
+		"2023:02:29 00:00:00", // 2023 was not a leap year
+		"2024:03:04 25:00:00", // no twenty-fifth hour
+		"not a date at all",
+		"",
+	} {
+		if got := parseDateTime(&source); got != nil {
+			t.Errorf("parseDateTime(%q) = %q, want nothing", source, *got)
+		}
+	}
+
+	if got := parseDateTime(nil); got != nil {
+		t.Errorf("parseDateTime(nil) = %q, want nothing", *got)
+	}
+}

@@ -6,6 +6,7 @@ All notable changes to exposer, newest first. The format follows [Keep a Changel
 
 ### Fixed
 
+- A photograph whose camera recorded `0000:00:00 00:00:00` as its capture time is now reported as having no capture date, naming the file, instead of failing the build several stages later with nothing but an exit status. The same holds for any impossible date, such as a thirteenth month.
 - When the site generator fails, its own errors are printed with the failure. A broken page or template used to leave only `hugo failed: exit status 1`.
 
 ## [0.2.0] - 2026-09-23

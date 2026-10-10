@@ -210,6 +210,8 @@ func TestIndexRefusesTheBrokenLibraries(t *testing.T) {
 	// message a person reads first: what is wrong, not where.
 	for _, c := range []struct{ library, want string }{
 		{"no-capture-date", "no capture date"},
+		// A camera that lost its clock writes zeros rather than nothing.
+		{"zero-capture-date", "no capture date"},
 		{"no-path", "no tags, album or location"},
 		{"duplicate-conflict", "different metadata"},
 		{"unknown-featured", "is not a photo in the library"},
