@@ -724,3 +724,28 @@ func TestCaptionsAreMarkdownAndAltIsNot(t *testing.T) {
 		t.Error("alt text still carries the tags around its words")
 	}
 }
+
+func TestHugoFailureCarriesHugosOwnWords(t *testing.T) {
+	// B-9: a stage that fails says why. Hugo's errors are the only thing that
+	// names the page that broke, and running it with --quiet threw them away.
+	hugo := hugoBinary(t)
+	project := t.TempDir()
+	write(t, filepath.Join(project, "hugo.toml"), "baseURL = \"/\"\ntitle = \"Broken\"\n")
+	content := filepath.Join(project, "content")
+	if err := os.MkdirAll(content, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	// The failure that reached a real library: a camera with no clock.
+	write(t, filepath.Join(content, "undated.md"),
+		"{\n  \"date\": \"0000-00-00T00:00:00\",\n  \"title\": \"Undated\"\n}\n")
+
+	message := catchFail(t, func() { renderSite(hugo, project) })
+	if message == "" {
+		t.Fatal("Hugo rendered a page it cannot parse")
+	}
+	for _, want := range []string{"hugo failed", "not a parsable date", "undated.md"} {
+		if !strings.Contains(message, want) {
+			t.Errorf("the failure says %q, which does not mention %q", message, want)
+		}
+	}
+}

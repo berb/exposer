@@ -4,6 +4,10 @@ All notable changes to exposer, newest first. The format follows [Keep a Changel
 
 ## [Unreleased]
 
+### Fixed
+
+- When the site generator fails, its own errors are printed with the failure. A broken page or template used to leave only `hugo failed: exit status 1`.
+
 ## [0.2.0] - 2026-09-23
 
 ### Changed

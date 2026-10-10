@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"flag"
 	"fmt"
 	"os"
@@ -9,6 +10,28 @@ import (
 	"strings"
 	"time"
 )
+
+// renderSite runs Hugo over the content stage's project. Hugo's output is
+// captured rather than passed through: B-9 keeps a build to one line per
+// stage, and Hugo's banner and statistics table are not that line. They are
+// printed under -v, and in full when it fails -- which is why --quiet is not
+// used, since that silences Hugo's errors too and leaves a build with nothing
+// but "exit status 1" to go on.
+func renderSite(hugoBinary, project string) {
+	render := exec.Command(hugoBinary, "--source", project, "--destination", "public")
+	var log bytes.Buffer
+	render.Stdout, render.Stderr = &log, &log
+	err := render.Run()
+	output := strings.TrimRight(log.String(), "\n")
+	if err != nil {
+		fail("hugo failed: %v\n%s", err, output)
+	}
+	for _, line := range strings.Split(output, "\n") {
+		if line != "" {
+			detail("hugo: %s", line)
+		}
+	}
+}
 
 // runBuild is the whole pipeline in one command (B-8): index, derive, content,
 // Hugo, assemble. It chains the same stage functions the subcommands run, with
@@ -89,13 +112,7 @@ func runBuild(args []string) {
 	}
 	timed("content", func() { runContent(contentArgs) })
 
-	timed("hugo", func() {
-		render := exec.Command(hugoBinary, "--source", project, "--destination", "public", "--quiet")
-		render.Stdout, render.Stderr = os.Stdout, os.Stderr
-		if err := render.Run(); err != nil {
-			fail("hugo failed: %v", err)
-		}
-	})
+	timed("hugo", func() { renderSite(hugoBinary, project) })
 
 	timed("assemble", func() {
 		runAssemble([]string{"--public", public, "--manifest", manifest,
