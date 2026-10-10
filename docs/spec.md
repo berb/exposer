@@ -30,7 +30,7 @@ The library is what a photographer already has: originals developed in darktable
 
 **R-2 (MUST)** Everything the site shows about one photograph comes from metadata in the original or its sidecar. There is no hand-maintained file per photo.
 
-**R-3 (SHOULD)** An album's title, intro and cover may live in `<library>/_data/albums/<slug>.yaml`, where `<slug>` is the slug of the album tag. *Because* albums are a tag namespace (§11 Q3), their photographs can sit in any directory, so there is no album directory to hold the file.
+**R-3 (SHOULD)** An album's title, intro and cover may live in `<library>/_data/albums/<slug>.yaml`, where `<slug>` is the slug of the album tag — a file named anything else fails the build, naming the file it should be, since the photographs carry that slug and an album whose file disagrees would have an entry and no page. *Because* albums are a tag namespace (§11 Q3), their photographs can sit in any directory, so there is no album directory to hold the file.
 
 **R-4 (MUST)** Metadata contract — the fields consumed:
 

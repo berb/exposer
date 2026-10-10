@@ -53,6 +53,7 @@ be blamed.
 | `no-path/` | `no tags, album or location` (R-8) | index |
 | `duplicate-conflict/` | same bytes, different metadata (R-12) | index |
 | `unknown-featured/` | a featured path that is not in the library (R-16) | index |
+| `album-slug-mismatch/` | an album file named `allg-u.yaml` for `Album|Allgäu`, whose photographs are slugged `allgau` (R-3) | index |
 | `unknown-gear/` | a gear description naming no camera or lens (R-17) | **content** |
 | `unknown-tag/` | a tag description naming no tag (R-19) | **content** |
 

@@ -215,6 +215,8 @@ func TestIndexRefusesTheBrokenLibraries(t *testing.T) {
 		{"no-path", "no tags, album or location"},
 		{"duplicate-conflict", "different metadata"},
 		{"unknown-featured", "is not a photo in the library"},
+		// An album file named for another transliteration of its tag.
+		{"album-slug-mismatch", "belongs in allgau.yaml"},
 	} {
 		t.Run(c.library, func(t *testing.T) {
 			dir := t.TempDir()

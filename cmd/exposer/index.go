@@ -729,9 +729,17 @@ func loadAlbums(library string, photos []Photo) []Album {
 			}
 		}
 
+		// R-3 keys an album file by the slug of its tag, and the photographs
+		// carry that same slug. Taking the slug from the file name instead let
+		// the two disagree -- allg-u.yaml declaring Album|Allgäu, whose photos
+		// are slugged allgau -- and the album then had a count, an entry in the
+		// index and no page at all, with the build still passing.
 		slug := slugify(name)
 		if hasMeta {
-			slug = strings.TrimSuffix(filepath.Base(declaredFile[name]), ".yaml")
+			if base := filepath.Base(declaredFile[name]); base != slug+".yaml" {
+				fail("%s: an album file is named for the slug of its tag, so %q belongs in %s.yaml",
+					declaredFile[name], meta.Tag, slug)
+			}
 		}
 
 		var cover *string
