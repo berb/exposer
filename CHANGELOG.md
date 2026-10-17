@@ -4,6 +4,8 @@ All notable changes to exposer, newest first. The format follows [Keep a Changel
 
 ## [Unreleased]
 
+## [0.3.1] - 2026-10-17
+
 ### Fixed
 
 - A place's `title:` in `_data/locations/` is now used. The location page, its chips and the lists on the front page all ignored it and wrote the hierarchy instead ("Norway » Bergen"). A place without a file, or without a title in it, is still named by its hierarchy.
@@ -98,7 +100,8 @@ The first release: a static photography site generator that reads an offline lib
 - Albums, tags, locations, a timeline, an "All" page, a Gear page and a Tags page, with a page for each photograph inside every listing it belongs to.
 - JPEG and AVIF images in a content-addressed cache, byte-identical rebuilds, originals that never reach the published site, and a build that fails if a published photograph cannot be reached.
 
-[Unreleased]: https://github.com/berb/exposer/compare/v0.3.0...HEAD
+[Unreleased]: https://github.com/berb/exposer/compare/v0.3.1...HEAD
+[0.3.1]: https://github.com/berb/exposer/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/berb/exposer/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/berb/exposer/compare/v0.1.4...v0.2.0
 [0.1.4]: https://github.com/berb/exposer/compare/v0.1.3...v0.1.4
