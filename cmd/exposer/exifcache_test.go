@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -235,5 +236,98 @@ func TestExifToolSplitReadsWhatOneProcessReads(t *testing.T) {
 		if !reflect.DeepEqual(split[source], entry) {
 			t.Errorf("%s reads differently when the files are split", source)
 		}
+	}
+}
+
+// captureNotices returns what notice() said while body ran.
+func captureNotices(t *testing.T, body func()) string {
+	t.Helper()
+	var buf bytes.Buffer
+	outputMu.Lock()
+	original := stderr
+	stderr = &buf
+	outputMu.Unlock()
+	defer func() {
+		outputMu.Lock()
+		stderr = original
+		outputMu.Unlock()
+	}()
+	body()
+	return buf.String()
+}
+
+func TestIndexDoesNotRememberAFileExifToolCouldNotRead(t *testing.T) {
+	requireTools(t, "exiftool")
+	if os.Geteuid() == 0 {
+		t.Skip("root reads a file with no permissions, so there is nothing to fail")
+	}
+	library := copyLibrary(t)
+	cache := filepath.Join(t.TempDir(), "exif.json")
+	version := exifToolVersion()
+
+	// Still being copied in, or unreadable to this user: either way exiftool
+	// reports the failure on the file's own entry and exits non-zero.
+	rel := filepath.Join("inbox", "unreadable.jpg")
+	path := filepath.Join(library, rel)
+	write(t, path, string(readBytes(t, filepath.Join(library, "2024", "03", "harbour-dawn.jpg"))))
+	if err := os.Chmod(path, 0o000); err != nil {
+		t.Fatal(err)
+	}
+
+	var first map[string]map[string]any
+	said := captureNotices(t, func() { first, _ = scanLibrary(library, cache, version) })
+	if !strings.Contains(said, path) || !strings.Contains(said, "Error opening file") {
+		t.Errorf("the failure was not reported with the file and the reason, got %q", said)
+	}
+	var stored exifCache
+	read(t, cache, &stored)
+	if _, ok := stored.Files[rel]; ok {
+		t.Error("a file exiftool could not read was written to the cache")
+	}
+	if toString(first[path]["EXIF:Model"]) != "" {
+		t.Error("an unreadable file has metadata")
+	}
+
+	// The cause is fixed without touching the file's size or mtime, which is
+	// what a chmod does. A remembered failure would never be read again.
+	if err := os.Chmod(path, 0o644); err != nil {
+		t.Fatal(err)
+	}
+	second, read := scanLibrary(library, cache, version)
+	if read != 1 {
+		t.Errorf("after the permissions were fixed, %d files were read, want just the one", read)
+	}
+	if toString(second[path]["EXIF:Model"]) == "" {
+		t.Errorf("the file reads no camera model once it can be opened: %v", second[path])
+	}
+}
+
+func TestIndexReadsAgainAFailureAnOlderCacheRemembered(t *testing.T) {
+	requireTools(t, "exiftool")
+	library := copyLibrary(t)
+	cache := filepath.Join(t.TempDir(), "exif.json")
+	version := exifToolVersion()
+	path := filepath.Join(library, "2024", "03", "harbour-dawn.jpg")
+	rel := filepath.Join("2024", "03", "harbour-dawn.jpg")
+
+	// Earlier releases cached a failure under the file's size and mtime.
+	scanLibrary(library, cache, version)
+	var stored exifCache
+	read(t, cache, &stored)
+	record := stored.Files[rel]
+	record.Tags = map[string]any{"ExifTool:Error": "Error opening file"}
+	stored.Files[rel] = record
+	data, err := json.Marshal(stored)
+	if err != nil {
+		t.Fatal(err)
+	}
+	write(t, cache, string(data))
+
+	scanned, n := scanLibrary(library, cache, version)
+	if n != 1 {
+		t.Errorf("%d files were read, want the one whose cached entry was a failure", n)
+	}
+	if toString(scanned[path]["EXIF:Model"]) == "" {
+		t.Error("the file still reads as the failure the cache held")
 	}
 }
