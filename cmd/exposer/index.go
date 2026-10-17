@@ -886,7 +886,10 @@ func loadLocations(library string, photos []Photo) []Location {
 			}
 		}
 
-		title := node[len(node)-1]
+		// A place no file describes is named by its whole hierarchy, as it has
+		// always been written on the site (R-6); the title in its file (R-10)
+		// replaces that wherever the place is named (F-8a).
+		title := strings.Join(node, hierarchySeparator)
 		if meta.Title != "" {
 			title = meta.Title
 		}

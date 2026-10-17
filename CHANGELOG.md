@@ -6,6 +6,7 @@ All notable changes to exposer, newest first. The format follows [Keep a Changel
 
 ### Fixed
 
+- A place's `title:` in `_data/locations/` is now used. The location page, its chips and the lists on the front page all ignored it and wrote the hierarchy instead ("Norway » Bergen"). A place without a file, or without a title in it, is still named by its hierarchy.
 - An album file whose name is not the slug of its tag now fails the build, naming the file it should be. `_data/albums/allg-u.yaml` describing `Album|Allgäu` used to leave the album with a photo count in the index and no page on the site, and the build still passed.
 
 ## [0.3.0] - 2026-10-10
