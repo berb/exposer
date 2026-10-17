@@ -260,17 +260,9 @@ func derivePhoto(photo Photo, library, cacheRoot, hash string, cfg config, scrat
 	squares := ladder(cfg.Derivatives.SquareWidths, shortEdge)
 
 	source := filepath.Join(library, photo.Source)
-	// The photo id is the hash of the original, which a darktable edit never
-	// touches — the edit lives in the sidecar. Without it in the key, re-editing
-	// a RAW would silently keep serving the previous rendering (F-2).
-	renderKey := hash
-	if isRaw(source) {
-		sidecarSum, err := hashFile(source + ".xmp")
-		if err != nil {
-			return nil, "", false, fmt.Errorf("hashing sidecar: %w", err)
-		}
-		sum := sha256.Sum256([]byte(hash + sidecarSum))
-		renderKey = hex.EncodeToString(sum[:])[:12]
+	renderKey, err := renderKeyFor(photo, source, hash)
+	if err != nil {
+		return nil, "", false, err
 	}
 	dir := filepath.Join(cacheRoot, photo.ID[:2], photo.ID, renderKey)
 
@@ -403,6 +395,33 @@ func derivePhoto(photo Photo, library, cacheRoot, hash string, cfg config, scrat
 	}
 	namePublic(photo.ID, wanted, hashes)
 	return wanted, tone, true, nil
+}
+
+// renderKeyFor is the part of a derivative's cache path that says what it was
+// rendered from, beyond the settings in hash.
+//
+// The photo id is the hash of the original, which an edit in the sidecar never
+// touches. A RAW is developed from its sidecar, so the sidecar is in the key:
+// without it, re-editing a RAW would keep serving the previous rendering (F-2).
+// A JPEG is not developed, but every derivative carries the creator and rights
+// the sidecar names (F-16). Leaving those out of the key kept serving the old
+// copyright line after it was corrected, under a name that a host may cache
+// forever. A photograph that stamps nothing keeps the plain key.
+func renderKeyFor(photo Photo, source, hash string) (string, error) {
+	if isRaw(source) {
+		sidecarSum, err := hashFile(source + ".xmp")
+		if err != nil {
+			return "", fmt.Errorf("hashing sidecar: %w", err)
+		}
+		sum := sha256.Sum256([]byte(hash + sidecarSum))
+		return hex.EncodeToString(sum[:])[:12], nil
+	}
+	creator, rights := deref(photo.Rights.Creator), deref(photo.Rights.Rights)
+	if creator == "" && rights == "" {
+		return hash, nil
+	}
+	sum := sha256.Sum256([]byte(hash + "\x00" + creator + "\x00" + rights))
+	return hex.EncodeToString(sum[:])[:12], nil
 }
 
 func saveMeta(path string, value any) error {
