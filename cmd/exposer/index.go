@@ -583,6 +583,42 @@ func validateContract(photo Photo) []string {
 	return problems
 }
 
+// checkSlug fails the build on a name that cannot be an address: one with no
+// ASCII letter or digit in it, such as "東京", whose slug is empty, so that its
+// page would be written over the section's own index; or one whose slug an
+// earlier name already holds ("Allgäu" and "Allgau"), so that one page would
+// overwrite the other and their photographs would merge. owners remembers
+// which name holds which slug; nil checks emptiness alone.
+func checkSlug(kind, name, slug string, owners map[string]string) {
+	if slug == "" {
+		fail("%s %q has no letters or digits a URL can carry, so it has no address of its own; "+
+			"name it with at least one Latin letter or digit", kind, name)
+	}
+	if owners == nil {
+		return
+	}
+	if previous, taken := owners[slug]; taken && previous != name {
+		fail("%ss %q and %q both have the slug %q, so one page would overwrite the other; rename one of them",
+			kind, previous, name, slug)
+	}
+	owners[slug] = name
+}
+
+// checkTagSlugs applies checkSlug to the tags that get a page: those on
+// published photographs. Two tags with one slug would share a listing, and a tag
+// with none would be written over the tags index.
+func checkTagSlugs(photos []Photo) {
+	owners := map[string]string{}
+	for _, photo := range photos {
+		if !photo.Published {
+			continue
+		}
+		for _, tag := range photo.Tags {
+			checkSlug("tag", strings.Join(tag.Path, "|"), tag.Slug, owners)
+		}
+	}
+}
+
 // libraryData is where the library keeps the files that describe the site
 // rather than a photograph: albums (R-3), locations (R-10) and pages (R-13).
 // One folder keeps them out of the way of the photographs, which may sit in
@@ -711,6 +747,7 @@ func loadAlbums(library string, photos []Photo) []Album {
 	sort.Strings(names)
 
 	albums := make([]Album, 0, len(names))
+	slugOwner := map[string]string{}
 	for _, name := range names {
 		meta, hasMeta := declared[name]
 		members := byTag[name]
@@ -735,6 +772,9 @@ func loadAlbums(library string, photos []Photo) []Album {
 		// are slugged allgau -- and the album then had a count, an entry in the
 		// index and no page at all, with the build still passing.
 		slug := slugify(name)
+		if len(published) > 0 {
+			checkSlug("album", name, slug, slugOwner)
+		}
 		if hasMeta {
 			if base := filepath.Base(declaredFile[name]); base != slug+".yaml" {
 				fail("%s: an album file is named for the slug of its tag, so %q belongs in %s.yaml",
@@ -890,6 +930,10 @@ func loadLocations(library string, photos []Photo) []Location {
 					break
 				}
 			}
+		}
+
+		if count > 0 {
+			checkSlug("location", strings.Join(node, "|"), slug, nil)
 		}
 
 		title := node[len(node)-1]
@@ -1109,6 +1153,7 @@ func runIndex(args []string) {
 		byID[photo.ID] = photo.Source
 	}
 
+	checkTagSlugs(photos)
 	albums := loadAlbums(*library, photos)
 	locations := loadLocations(*library, photos)
 

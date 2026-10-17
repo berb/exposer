@@ -6,6 +6,7 @@ All notable changes to exposer, newest first. The format follows [Keep a Changel
 
 ### Fixed
 
+- An album, tag or place whose name has no letter or digit a URL can carry, such as `Album|東京`, now fails the build naming it. Its page used to be written over the albums or tags index. Two albums or tags that reduce to the same address, such as `Allgäu` and `Allgau`, now fail the build too, where they were silently merged into one page. A name that only appears on unpublished photos is not affected.
 - An album file whose `cover:` names a photograph below the publication gate now fails the build, naming the file and the rating. The album used to point at an image the site does not contain.
 - Correcting a photograph's creator or copyright in its sidecar now reaches the published images. For a JPEG, the old line stayed stamped into every image until the cache was cleared by hand. Images of photographs that carry a creator or copyright are rendered once more on the next build; their names do not change unless their bytes do.
 - A photograph exiftool could not read, such as one still being copied in or without read permission, is now named with the reason, and is read again on the next build. Its failure used to be remembered until the file's size or modification time changed, so fixing the permissions did not help, and the photograph was left out of the index without a word.
