@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
 	"reflect"
 	"strings"
 	"testing"
@@ -249,5 +251,40 @@ func TestParseDateTimeRefusesWhatIsNotADate(t *testing.T) {
 
 	if got := parseDateTime(nil); got != nil {
 		t.Errorf("parseDateTime(nil) = %q, want nothing", *got)
+	}
+}
+
+func TestAlbumCoverMustBePublished(t *testing.T) {
+	// A cover is drawn from the photographs' derivatives, which exist only for
+	// published ones; an unpublished cover left the album pointing at an image
+	// the site does not contain.
+	library := t.TempDir()
+	albums := filepath.Join(library, libraryData, "albums")
+	if err := os.MkdirAll(albums, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	write(t, filepath.Join(albums, "harbour.yaml"),
+		"tag: \"Album|Harbour\"\ncover: dawn.jpg\n")
+
+	photos := func(dawnPublished bool) []Photo {
+		return []Photo{
+			{ID: "a1", Source: "2024/03/dawn.jpg", Published: dawnPublished, Rating: 3, albumTags: []string{"Harbour"}},
+			{ID: "a2", Source: "2024/03/dusk.jpg", Published: true, Rating: 5, albumTags: []string{"Harbour"}},
+		}
+	}
+
+	message := catchFail(t, func() { loadAlbums(library, photos(false)) })
+	for _, want := range []string{"harbour.yaml", "dawn.jpg", "not published", "rating 3"} {
+		if !strings.Contains(message, want) {
+			t.Errorf("failed with %q, want it to mention %q", message, want)
+		}
+	}
+
+	var got []Album
+	if message := catchFail(t, func() { got = loadAlbums(library, photos(true)) }); message != "" {
+		t.Fatalf("a published cover failed the build: %s", message)
+	}
+	if len(got) != 1 || got[0].Cover == nil || *got[0].Cover != "a1" {
+		t.Errorf("the album's cover is %v, want a1", got)
 	}
 }

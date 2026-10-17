@@ -6,6 +6,7 @@ All notable changes to exposer, newest first. The format follows [Keep a Changel
 
 ### Fixed
 
+- An album file whose `cover:` names a photograph below the publication gate now fails the build, naming the file and the rating. The album used to point at an image the site does not contain.
 - An album file whose name is not the slug of its tag now fails the build, naming the file it should be. `_data/albums/allg-u.yaml` describing `Album|Allgäu` used to leave the album with a photo count in the index and no page on the site, and the build still passed.
 
 ## [0.3.0] - 2026-10-10
