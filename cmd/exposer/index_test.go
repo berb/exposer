@@ -282,3 +282,147 @@ func TestLocationTitleIsItsFilesOrItsHierarchy(t *testing.T) {
 		}
 	}
 }
+
+func publishedWithAlbums(id string, albums ...string) Photo {
+	return Photo{ID: id, Published: true, albumTags: albums}
+}
+
+func TestAlbumWithNoAddressFailsTheBuild(t *testing.T) {
+	// "東京" has no ASCII letter, so its slug is empty and its page would be
+	// written to photos/albums/_index.md, over the album index.
+	message := catchFail(t, func() {
+		loadAlbums(t.TempDir(), []Photo{publishedWithAlbums("a1", "東京")})
+	})
+	if !strings.Contains(message, "東京") || !strings.Contains(message, "no letters or digits") {
+		t.Errorf("failed with %q, want it to name the album and say it has no address", message)
+	}
+}
+
+func TestAlbumsSharingASlugFailTheBuild(t *testing.T) {
+	// slugify drops what ASCII cannot say, so these are one address.
+	message := catchFail(t, func() {
+		loadAlbums(t.TempDir(), []Photo{
+			publishedWithAlbums("a1", "Allgäu"),
+			publishedWithAlbums("a2", "Allgau"),
+		})
+	})
+	for _, want := range []string{"Allgäu", "Allgau", `"allgau"`} {
+		if !strings.Contains(message, want) {
+			t.Errorf("failed with %q, want it to mention %s", message, want)
+		}
+	}
+}
+
+func TestAlbumsNobodyPublishesNeedNoAddress(t *testing.T) {
+	// An album of unpublished photographs has no page, so its slug is not
+	// contended for: failing here would break libraries that build today.
+	hidden := Photo{ID: "a1", Published: false, albumTags: []string{"東京"}}
+	other := Photo{ID: "a2", Published: false, albumTags: []string{"Tokyo", "tokyo"}}
+	if message := catchFail(t, func() { loadAlbums(t.TempDir(), []Photo{hidden, other}) }); message != "" {
+		t.Errorf("an album with no published photograph failed the build: %s", message)
+	}
+}
+
+func TestDistinctAlbumsPass(t *testing.T) {
+	albums := loadAlbums(t.TempDir(), []Photo{
+		publishedWithAlbums("a1", "Harbour", "Allgäu"),
+		publishedWithAlbums("a2", "Harbour"),
+	})
+	if len(albums) != 2 {
+		t.Fatalf("got %d albums, want 2", len(albums))
+	}
+}
+
+func TestTagsSharingASlugFailTheBuild(t *testing.T) {
+	tagged := func(published bool, paths ...[]string) Photo {
+		photo := Photo{Published: published}
+		for _, path := range paths {
+			photo.Tags = append(photo.Tags, Tag{
+				Slug: slugify(strings.Join(path, "-")), Path: path, Leaf: path[len(path)-1],
+			})
+		}
+		return photo
+	}
+
+	// Places|Harbour Dock and Places|Harbour|Dock are both places-harbour-dock.
+	message := catchFail(t, func() {
+		checkTagSlugs([]Photo{
+			tagged(true, []string{"Places", "Harbour Dock"}),
+			tagged(true, []string{"Places", "Harbour", "Dock"}),
+		})
+	})
+	if !strings.Contains(message, "Places|Harbour Dock") || !strings.Contains(message, "Places|Harbour|Dock") {
+		t.Errorf("failed with %q, want it to name both tags", message)
+	}
+
+	// The same tag on many photographs is one tag.
+	if message := catchFail(t, func() {
+		checkTagSlugs([]Photo{
+			tagged(true, []string{"Places", "Harbour"}),
+			tagged(true, []string{"Places", "Harbour"}),
+		})
+	}); message != "" {
+		t.Errorf("one tag on two photographs failed: %s", message)
+	}
+
+	// Nothing is written for a tag on unpublished photographs only.
+	if message := catchFail(t, func() {
+		checkTagSlugs([]Photo{
+			tagged(true, []string{"Places", "Harbour Dock"}),
+			tagged(false, []string{"Places", "Harbour", "Dock"}),
+		})
+	}); message != "" {
+		t.Errorf("a tag on an unpublished photograph failed the build: %s", message)
+	}
+
+	// A tag with no slug would be written over the tags index.
+	message = catchFail(t, func() {
+		checkTagSlugs([]Photo{tagged(true, []string{"Москва"}, []string{"東京"})})
+	})
+	if !strings.Contains(message, "no letters or digits") {
+		t.Errorf("failed with %q, want a tag with an empty slug refused", message)
+	}
+}
+
+func TestLocationWithNoAddressFailsTheBuild(t *testing.T) {
+	photo := Photo{Published: true, locationPaths: [][]string{{"日本"}}}
+	message := catchFail(t, func() { loadLocations(t.TempDir(), []Photo{photo}) })
+	if !strings.Contains(message, "日本") || !strings.Contains(message, "no letters or digits") {
+		t.Errorf("failed with %q, want it to name the location and say it has no address", message)
+	}
+}
+
+func TestAlbumCoverMustBePublished(t *testing.T) {
+	// A cover is drawn from the photographs' derivatives, which exist only for
+	// published ones; an unpublished cover left the album pointing at an image
+	// the site does not contain.
+	library := t.TempDir()
+	albums := filepath.Join(library, libraryData, "albums")
+	if err := os.MkdirAll(albums, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	write(t, filepath.Join(albums, "harbour.yaml"),
+		"tag: \"Album|Harbour\"\ncover: dawn.jpg\n")
+
+	photos := func(dawnPublished bool) []Photo {
+		return []Photo{
+			{ID: "a1", Source: "2024/03/dawn.jpg", Published: dawnPublished, Rating: 3, albumTags: []string{"Harbour"}},
+			{ID: "a2", Source: "2024/03/dusk.jpg", Published: true, Rating: 5, albumTags: []string{"Harbour"}},
+		}
+	}
+
+	message := catchFail(t, func() { loadAlbums(library, photos(false)) })
+	for _, want := range []string{"harbour.yaml", "dawn.jpg", "not published", "rating 3"} {
+		if !strings.Contains(message, want) {
+			t.Errorf("failed with %q, want it to mention %q", message, want)
+		}
+	}
+
+	var got []Album
+	if message := catchFail(t, func() { got = loadAlbums(library, photos(true)) }); message != "" {
+		t.Fatalf("a published cover failed the build: %s", message)
+	}
+	if len(got) != 1 || got[0].Cover == nil || *got[0].Cover != "a1" {
+		t.Errorf("the album's cover is %v, want a1", got)
+	}
+}
