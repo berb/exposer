@@ -196,14 +196,21 @@ var fail = func(format string, args ...any) {
 	os.Exit(1)
 }
 
-// spelledOut holds the Latin letters that NFKD leaves with no ASCII form of
-// their own, spelled as a reader of the language would spell them (R-20).
-// Without it they vanish rather than decompose: "Weißbier" slugged to weibier,
-// "Tromsø" to troms and "Łódź" to odz, each of them a lost letter nobody is
-// told about, and two names that lose different letters can end up one
-// address. A letter NFKD does decompose -- ä, ö, ü, å -- is left to it, so no
-// slug a site has already published moves.
+// spelledOut holds the letters a slug spells rather than folds (R-20), as a
+// reader of the language would spell them.
+//
+// Two kinds. A letter NFKD leaves with no ASCII form at all used to vanish:
+// "Weißbier" slugged to weibier, "Tromsø" to troms, "Łódź" to odz -- a lost
+// letter nobody is told about, and two names that lose different letters can
+// end up one address. An umlaut is the other kind: NFKD does fold it, to the
+// bare vowel, so "Allgäu" slugged to allgau -- readable, and not what German
+// writes when it has only ASCII, which is allgaeu. The umlauts are spelled out
+// too, which moves an address that an earlier release published; a library
+// keeps the old one by declaring it (R-20).
 var spelledOut = map[rune]string{
+	'ä': "ae", 'Ä': "ae",
+	'ö': "oe", 'Ö': "oe",
+	'ü': "ue", 'Ü': "ue",
 	'ß': "ss", 'ẞ': "ss",
 	'æ': "ae", 'Æ': "ae",
 	'œ': "oe", 'Œ': "oe",
@@ -219,13 +226,22 @@ var spelledOut = map[rune]string{
 }
 
 func slugify(text string) string {
+	// Spelling comes before normalising, and over composed text: NFKD would
+	// have split "ä" into a and a combining diaeresis, leaving nothing for the
+	// table to match, and a sidecar may write either form.
+	var spelled strings.Builder
+	for _, r := range norm.NFC.String(text) {
+		if out, spells := spelledOut[r]; spells {
+			spelled.WriteString(out)
+			continue
+		}
+		spelled.WriteRune(r)
+	}
+
 	var ascii strings.Builder
-	for _, r := range norm.NFKD.String(text) {
-		switch {
-		case r < 128: // mirrors Python's .encode("ascii", "ignore")
+	for _, r := range norm.NFKD.String(spelled.String()) {
+		if r < 128 { // mirrors Python's .encode("ascii", "ignore")
 			ascii.WriteRune(r)
-		default:
-			ascii.WriteString(spelledOut[r]) // "" for a letter nothing spells
 		}
 	}
 	s := nonAlnumRe.ReplaceAllString(strings.ToLower(ascii.String()), "-")

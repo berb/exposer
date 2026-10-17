@@ -10,7 +10,9 @@ All notable changes to exposer, newest first. The format follows [Keep a Changel
 
 ### Fixed
 
-- A letter that ASCII cannot carry is spelled out in an address instead of being dropped: `Weißbier` is now `weissbier` rather than `weibier`, `Tromsø` is `tromsoe` rather than `troms`, `Łódź` is `lodz` rather than `odz` and `Œuvre` is `oeuvre` rather than `uvre`. Names with an umlaut are unchanged — `Allgäu` is still `allgau` — so no address a site has already published moves. A site whose album, place or tag names carry one of the spelled-out letters does move, and its old addresses stop working.
+- An address spells a letter out instead of folding or dropping it: `Allgäu` is now `allgaeu` rather than `allgau`, `Ulmer Münster` is `ulmer-muenster`, `Weißbier` is `weissbier` rather than `weibier`, `Tromsø` is `tromsoe` rather than `troms`, `Łódź` is `lodz` rather than `odz`, `Œuvre` is `oeuvre` rather than `uvre`.
+
+**This moves addresses that earlier releases published.** An album, place or tag whose name carries an umlaut, `ß`, `ø`, `œ`, `æ`, `ł`, `đ` or `þ` is published at a new URL, and the old one stops working. To keep the old address, declare it: `slug: allgau` in the album's or place's file, or under `tag_slugs:` in `_data/exposer.yaml` for a tag. The addresses a library publishes are the `slug` values in `target/index.json`, so a build with the previous version lists exactly what to pin.
 
 ## [0.3.1] - 2026-10-17
 
