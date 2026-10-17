@@ -75,7 +75,8 @@ func scanLibrary(library, cachePath, version string) (map[string]map[string]any,
 			fail("cannot stat %s: %v", filepath.Join(library, rel), err)
 		}
 		record := exifRecord{Size: info.Size(), MTime: float64(info.ModTime().UnixNano()) / 1e9}
-		if hit, ok := cache.Files[rel]; ok && hit.Size == record.Size && hit.MTime == record.MTime {
+		if hit, ok := cache.Files[rel]; ok && hit.Size == record.Size && hit.MTime == record.MTime &&
+			unreadable(hit.Tags) == "" {
 			record.Tags = hit.Tags
 		} else {
 			misses = append(misses, rel)
@@ -84,10 +85,15 @@ func scanLibrary(library, cachePath, version string) (map[string]map[string]any,
 	}
 
 	read := runExifTool(library, misses)
+	var unread []string
 	for _, rel := range misses {
 		record := current[rel]
 		record.Tags = read[filepath.Join(library, rel)]
 		current[rel] = record
+		if why := unreadable(record.Tags); why != "" {
+			unread = append(unread, rel)
+			notice("exiftool could not read %s: %s", filepath.Join(library, rel), why)
+		}
 	}
 	detail("exiftool read %d of %d files; the rest were unchanged", len(misses), len(rels))
 
@@ -98,6 +104,12 @@ func scanLibrary(library, cachePath, version string) (map[string]map[string]any,
 		}
 	}
 
+	// A file exiftool could not read is not remembered. Its size and mtime stay
+	// as they were when someone fixes the permissions or finishes copying it,
+	// and a cached failure would be served until the file changed.
+	for _, rel := range unread {
+		delete(current, rel)
+	}
 	cache.Files = current
 	if err := os.MkdirAll(filepath.Dir(cachePath), 0o755); err != nil {
 		fail("cannot create cache directory: %v", err)
@@ -110,6 +122,20 @@ func scanLibrary(library, cachePath, version string) (map[string]map[string]any,
 		fail("cannot write %s: %v", cachePath, err)
 	}
 	return scanned, len(misses)
+}
+
+// unreadable says why exiftool could not read a file, or "" when it could. It
+// reports a failure in its output as an ExifTool:Error tag on the file's own
+// entry -- "Error opening file", "File is empty" -- and gives no entry at all
+// for one that vanished between listing and reading.
+func unreadable(tags map[string]any) string {
+	if tags == nil {
+		return "no output for it"
+	}
+	if why := toString(tags["ExifTool:Error"]); why != "" {
+		return why
+	}
+	return ""
 }
 
 // listLibrary finds what `exiftool -r -ext <each original> -ext xmp` would:
