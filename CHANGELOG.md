@@ -6,6 +6,7 @@ All notable changes to exposer, newest first. The format follows [Keep a Changel
 
 ### Fixed
 
+- A place's `title:` in `_data/locations/` is now used. The location page, its chips and the lists on the front page all ignored it and wrote the hierarchy instead ("Norway » Bergen"). A place without a file, or without a title in it, is still named by its hierarchy.
 - An album, tag or place whose name has no letter or digit a URL can carry, such as `Album|東京`, now fails the build naming it. Its page used to be written over the albums or tags index. Two albums or tags that reduce to the same address, such as `Allgäu` and `Allgau`, now fail the build too, where they were silently merged into one page. A name that only appears on unpublished photos is not affected.
 - An album file whose `cover:` names a photograph below the publication gate now fails the build, naming the file and the rating. The album used to point at an image the site does not contain.
 - Correcting a photograph's creator or copyright in its sidecar now reaches the published images. For a JPEG, the old line stayed stamped into every image until the cache was cleared by hand. Images of photographs that carry a creator or copyright are rendered once more on the next build; their names do not change unless their bytes do.

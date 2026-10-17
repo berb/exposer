@@ -254,6 +254,35 @@ func TestParseDateTimeRefusesWhatIsNotADate(t *testing.T) {
 	}
 }
 
+func TestLocationTitleIsItsFilesOrItsHierarchy(t *testing.T) {
+	// R-10: a place's file may carry a title. Without one, a place is named by
+	// its whole hierarchy (R-6), not by its last level, so that two places that
+	// share a leaf read differently in a list.
+	library := t.TempDir()
+	if err := os.MkdirAll(filepath.Join(library, libraryData, "locations"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	write(t, filepath.Join(library, libraryData, "locations", "norway-bergen.yaml"),
+		"tag: \"Location|Norway|Bergen\"\ntitle: Bergen, on the west coast\n")
+	paths := [][]string{{"Norway", "Bergen"}, {"Norway", "Oslo"}, {"Germany", "Oslo"}}
+	photo := Photo{Published: true, locationPaths: paths}
+
+	titles := map[string]string{}
+	for _, loc := range loadLocations(library, []Photo{photo}) {
+		titles[loc.Slug] = loc.Title
+	}
+	for slug, want := range map[string]string{
+		"norway-bergen": "Bergen, on the west coast",
+		"norway-oslo":   "Norway » Oslo",
+		"germany-oslo":  "Germany » Oslo",
+		"norway":        "Norway",
+	} {
+		if titles[slug] != want {
+			t.Errorf("location %s is titled %q, want %q", slug, titles[slug], want)
+		}
+	}
+}
+
 func publishedWithAlbums(id string, albums ...string) Photo {
 	return Photo{ID: id, Published: true, albumTags: albums}
 }

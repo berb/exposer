@@ -103,7 +103,7 @@ func runContent(args []string) {
 	}
 	placeTitles := map[string]string{}
 	for _, loc := range doc.Locations {
-		placeTitles[loc.Slug] = strings.Join(loc.Path, hierarchySeparator)
+		placeTitles[loc.Slug] = loc.Title
 	}
 
 	photos := map[string]renderPhoto{}
@@ -255,7 +255,7 @@ func buildPages(doc Document, published []Photo, photos map[string]renderPhoto, 
 	tagLabels := map[string]string{}
 	placeTitles := map[string]string{}
 	for _, loc := range doc.Locations {
-		placeTitles[loc.Slug] = strings.Join(loc.Path, hierarchySeparator)
+		placeTitles[loc.Slug] = loc.Title
 	}
 	gearTags := map[string]bool{}
 	gearTitles := map[string]string{}

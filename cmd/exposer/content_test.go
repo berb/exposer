@@ -243,3 +243,40 @@ func TestHugoConfigCarriesTheExposerVersion(t *testing.T) {
 		t.Errorf("the generated hugo.toml should carry an empty version:\n%s", body)
 	}
 }
+
+// locationPageTitle builds the pages for one published photograph at a place
+// and returns the title of that place's listing.
+func locationPageTitle(t *testing.T, loc Location) string {
+	t.Helper()
+	photo := Photo{ID: "a1b2c3d4e5f60718", Published: true, Locations: []string{loc.Slug}}
+	captured := "2024-03-02T09:00:00"
+	photo.CapturedAt = &captured
+	doc := Document{Photos: []Photo{photo}, Locations: []Location{loc}}
+	renders := map[string]renderPhoto{photo.ID: {ID: photo.ID, CapturedAt: captured, Year: "2024", Month: "03",
+		Locations: placeRefs(photo.Locations, map[string]string{loc.Slug: loc.Title})}}
+
+	pages := buildPages(doc, []Photo{photo}, renders, defaultConfig(), t.TempDir())
+	want := filepath.Join("photos", "locations", loc.Slug, "_index.md")
+	for _, p := range pages {
+		if p.path == want {
+			return p.title
+		}
+	}
+	t.Fatalf("no page at %s", want)
+	return ""
+}
+
+func TestLocationPageIsTitledFromItsFile(t *testing.T) {
+	// F-8a: "with the title and description from its R-10 file". The title was
+	// read into the index and then never used; the page said the path instead.
+	declared := Location{Slug: "norway-bergen", Path: []string{"Norway", "Bergen"}, Title: "Bergen, on the west coast"}
+	if got := locationPageTitle(t, declared); got != "Bergen, on the west coast" {
+		t.Errorf("a place with a title in its file is headed %q", got)
+	}
+
+	// A place nobody describes is still named by its hierarchy (R-6).
+	undeclared := Location{Slug: "norway-oslo", Path: []string{"Norway", "Oslo"}, Title: "Norway » Oslo"}
+	if got := locationPageTitle(t, undeclared); got != "Norway » Oslo" {
+		t.Errorf("a place without a file is headed %q, want its hierarchy", got)
+	}
+}
