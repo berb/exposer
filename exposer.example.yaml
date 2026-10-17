@@ -41,3 +41,13 @@ derivatives:
   formats: ["jpeg", "avif"]
   jpeg_quality: 82
   avif_quality: 50
+
+# Addresses for tags whose names a URL cannot carry. A slug is the name with
+# its accents folded away — "Allgäu" is allgau — and a name in another script
+# leaves nothing behind, so the build stops and asks for the address here.
+# Keyed by the tag's whole name, as the sidecar writes it:
+#   tag_slugs:
+#     "Places|東京": tokyo
+#     "Москва": moskva
+# An album or a place declares its own with 'slug:' in its file instead.
+# No tag needs one until the build says so, so this starts out empty.
