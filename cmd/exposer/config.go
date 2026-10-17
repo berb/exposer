@@ -29,6 +29,12 @@ type config struct {
 	FooterLine   string           `yaml:"footer_line"`
 	MinRating    int              `yaml:"min_rating"`
 	Derivatives  derivativeConfig `yaml:"derivatives"`
+	// TagSlugs gives a tag an address its name cannot produce (R-20), keyed by
+	// the tag's whole name: "Places|東京": tokyo. An album or a place declares
+	// its own in its file (R-3, R-10); a tag has no file keyed by its name --
+	// R-19's is named for the slug this very setting decides -- so the
+	// configuration is where it belongs.
+	TagSlugs map[string]string `yaml:"tag_slugs"`
 }
 
 // onceFor runs say the first time it is asked about key in this process. Every

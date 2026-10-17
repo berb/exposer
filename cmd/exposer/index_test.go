@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"slices"
 	"strings"
 	"testing"
 )
@@ -346,10 +347,10 @@ func TestTagsSharingASlugFailTheBuild(t *testing.T) {
 
 	// Places|Harbour Dock and Places|Harbour|Dock are both places-harbour-dock.
 	message := catchFail(t, func() {
-		checkTagSlugs([]Photo{
+		applyTagSlugs([]Photo{
 			tagged(true, []string{"Places", "Harbour Dock"}),
 			tagged(true, []string{"Places", "Harbour", "Dock"}),
-		})
+		}, nil)
 	})
 	if !strings.Contains(message, "Places|Harbour Dock") || !strings.Contains(message, "Places|Harbour|Dock") {
 		t.Errorf("failed with %q, want it to name both tags", message)
@@ -357,27 +358,27 @@ func TestTagsSharingASlugFailTheBuild(t *testing.T) {
 
 	// The same tag on many photographs is one tag.
 	if message := catchFail(t, func() {
-		checkTagSlugs([]Photo{
+		applyTagSlugs([]Photo{
 			tagged(true, []string{"Places", "Harbour"}),
 			tagged(true, []string{"Places", "Harbour"}),
-		})
+		}, nil)
 	}); message != "" {
 		t.Errorf("one tag on two photographs failed: %s", message)
 	}
 
 	// Nothing is written for a tag on unpublished photographs only.
 	if message := catchFail(t, func() {
-		checkTagSlugs([]Photo{
+		applyTagSlugs([]Photo{
 			tagged(true, []string{"Places", "Harbour Dock"}),
 			tagged(false, []string{"Places", "Harbour", "Dock"}),
-		})
+		}, nil)
 	}); message != "" {
 		t.Errorf("a tag on an unpublished photograph failed the build: %s", message)
 	}
 
 	// A tag with no slug would be written over the tags index.
 	message = catchFail(t, func() {
-		checkTagSlugs([]Photo{tagged(true, []string{"Москва"}, []string{"東京"})})
+		applyTagSlugs([]Photo{tagged(true, []string{"Москва"}, []string{"東京"})}, nil)
 	})
 	if !strings.Contains(message, "no letters or digits") {
 		t.Errorf("failed with %q, want a tag with an empty slug refused", message)
@@ -424,5 +425,177 @@ func TestAlbumCoverMustBePublished(t *testing.T) {
 	}
 	if len(got) != 1 || got[0].Cover == nil || *got[0].Cover != "a1" {
 		t.Errorf("the album's cover is %v, want a1", got)
+	}
+}
+
+func TestSlugifySpellsOutALetterItCannotFold(t *testing.T) {
+	// R-20: a letter NFKD leaves without an ASCII form used to vanish, which
+	// loses a letter nobody is told about. A letter it does fold -- ä, ö, ü, å
+	// -- is left alone, so no slug a site has published moves.
+	for name, want := range map[string]string{
+		"Weißbier":       "weissbier",
+		"Tromsø":         "tromsoe",
+		"Łódź":           "lodz",
+		"Œuvre":          "oeuvre",
+		"Ænima":          "aenima",
+		"Þingvellir":     "thingvellir",
+		"Ngô Đình":       "ngo-dinh",
+		"Allgäu":         "allgau",
+		"Köln":           "koln",
+		"Zürich":         "zurich",
+		"Århus":          "arhus",
+		"Category|Mixed": "category-mixed",
+		"東京":             "",
+		"Москва":         "",
+	} {
+		if got := slugify(name); got != want {
+			t.Errorf("slugify(%q) = %q, want %q", name, got, want)
+		}
+	}
+}
+
+func TestADeclaredSlugMustLookLikeAGeneratedOne(t *testing.T) {
+	// R-20: a declared address and a generated one cannot be told apart in a
+	// URL, so the declared one has to have the same shape.
+	for _, declared := range []string{"Tokyo", "to kyo", "-tokyo", "tokyo-", "tō", "tokyo--jp", "東京"} {
+		message := catchFail(t, func() { slugFor("album", "東京", declared, "albums/tokyo.yaml") })
+		if !strings.Contains(message, "is not a slug") {
+			t.Errorf("slugFor accepted %q (said %q)", declared, message)
+		}
+	}
+	for _, declared := range []string{"tokyo", "tokyo-jp", "x1", "2024-summer"} {
+		if got := slugFor("album", "東京", declared, "albums/tokyo.yaml"); got != declared {
+			t.Errorf("slugFor(%q) = %q, want it kept", declared, got)
+		}
+	}
+}
+
+func TestAnAlbumMaySayWhatItsAddressIs(t *testing.T) {
+	// R-20: "東京" slugs to nothing, so the album has an address only because
+	// its file declares one -- and R-3's file name follows that address.
+	library := t.TempDir()
+	albums := filepath.Join(library, libraryData, "albums")
+	if err := os.MkdirAll(albums, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	write(t, filepath.Join(albums, "tokyo.yaml"), "tag: \"Album|東京\"\nslug: tokyo\n")
+	photos := []Photo{{ID: "a1", Published: true, Rating: 5, albumTags: []string{"東京"},
+		Albums: []string{slugify("東京")}}}
+
+	var got []Album
+	if message := catchFail(t, func() { got = loadAlbums(library, photos) }); message != "" {
+		t.Fatalf("a declared slug failed the build: %s", message)
+	}
+	if len(got) != 1 || got[0].Slug != "tokyo" {
+		t.Fatalf("album slugs are %v, want one album at tokyo", got)
+	}
+	// The photograph has to carry the album's address, or it has an entry and
+	// no page -- the bug R-3 already names.
+	if len(photos[0].Albums) != 1 || photos[0].Albums[0] != "tokyo" {
+		t.Errorf("the photograph's albums are %v, want [tokyo]", photos[0].Albums)
+	}
+
+	// The file is named for the address it declares, not for the tag's name.
+	write(t, filepath.Join(albums, "tokyo.yaml"), "tag: \"Album|東京\"\nslug: tokyo-jp\n")
+	message := catchFail(t, func() { loadAlbums(library, photos) })
+	if !strings.Contains(message, "tokyo-jp.yaml") {
+		t.Errorf("failed with %q, want it to name tokyo-jp.yaml", message)
+	}
+}
+
+func TestAPlaceMaySayWhatItsAddressIs(t *testing.T) {
+	library := t.TempDir()
+	locations := filepath.Join(library, libraryData, "locations")
+	if err := os.MkdirAll(locations, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	write(t, filepath.Join(locations, "tokyo.yaml"),
+		"tag: \"Location|日本|東京\"\nslug: tokyo\ntitle: Tokyo\n")
+	// The parent, 日本, has no file and no address, and it gets a page too.
+	photos := []Photo{{ID: "a1", Published: true, locationPaths: [][]string{{"日本", "東京"}}}}
+	message := catchFail(t, func() { loadLocations(library, photos) })
+	if !strings.Contains(message, "日本") || !strings.Contains(message, "location file") {
+		t.Errorf("failed with %q, want the undeclared parent refused and the fix named", message)
+	}
+
+	write(t, filepath.Join(locations, "japan.yaml"), "tag: \"Location|日本\"\nslug: japan\n")
+	var got []Location
+	if message := catchFail(t, func() { got = loadLocations(library, photos) }); message != "" {
+		t.Fatalf("declared slugs failed the build: %s", message)
+	}
+	slugs := []string{}
+	for _, loc := range got {
+		slugs = append(slugs, loc.Slug)
+	}
+	slices.Sort(slugs)
+	if strings.Join(slugs, ",") != "japan,tokyo" {
+		t.Errorf("place slugs are %v, want japan and tokyo", slugs)
+	}
+	if len(photos[0].Locations) != 1 || photos[0].Locations[0] != "tokyo" {
+		t.Errorf("the photograph's places are %v, want [tokyo]", photos[0].Locations)
+	}
+}
+
+func TestATagsAddressMayComeFromTheConfiguration(t *testing.T) {
+	// A tag has no file of its own keyed by its name -- R-19's is named for the
+	// slug -- so tag_slugs in the configuration is where its address lives.
+	photo := func() Photo {
+		return Photo{Published: true, Tags: []Tag{
+			{Slug: slugify("東京"), Path: []string{"東京"}, Leaf: "東京"},
+			{Slug: slugify("Harbour"), Path: []string{"Harbour"}, Leaf: "Harbour"},
+		}}
+	}
+
+	photos := []Photo{photo()}
+	if message := catchFail(t, func() {
+		applyTagSlugs(photos, map[string]string{"東京": "tokyo"})
+	}); message != "" {
+		t.Fatalf("a declared tag slug failed the build: %s", message)
+	}
+	if photos[0].Tags[0].Slug != "tokyo" || photos[0].Tags[1].Slug != "harbour" {
+		t.Errorf("tag slugs are %q and %q, want tokyo and harbour",
+			photos[0].Tags[0].Slug, photos[0].Tags[1].Slug)
+	}
+
+	// Without it the build stops and says where to put the address.
+	message := catchFail(t, func() { applyTagSlugs([]Photo{photo()}, nil) })
+	if !strings.Contains(message, "tag_slugs") {
+		t.Errorf("failed with %q, want it to name tag_slugs", message)
+	}
+
+	// A declared slug naming no tag is a typo, as an unused description is
+	// (R-17, R-19).
+	message = catchFail(t, func() {
+		applyTagSlugs([]Photo{photo()}, map[string]string{
+			"東京": "tokyo", "京都": "kyoto",
+		})
+	})
+	if !strings.Contains(message, "京都") {
+		t.Errorf("failed with %q, want the unused tag_slugs entry named", message)
+	}
+
+	// A tag whose own level is non-Latin keeps its ancestors' slug -- Places|東京
+	// is places -- which is the slug the tag Places itself holds, so the two
+	// would share one listing. tag_slugs is the way out.
+	nested := []Photo{{Published: true, Tags: []Tag{
+		{Slug: slugify("Places"), Path: []string{"Places"}, Leaf: "Places"},
+		{Slug: slugify("Places-東京"), Path: []string{"Places", "東京"}, Leaf: "東京"},
+	}}}
+	message = catchFail(t, func() { applyTagSlugs(nested, nil) })
+	if !strings.Contains(message, "Places|東京") || !strings.Contains(message, "places") {
+		t.Errorf("failed with %q, want the two tags sharing places refused", message)
+	}
+	if message := catchFail(t, func() {
+		applyTagSlugs(nested, map[string]string{"Places|東京": "places-tokyo"})
+	}); message != "" {
+		t.Errorf("a declared slug did not settle the clash: %s", message)
+	}
+
+	// A declared slug that collides with another tag's is still refused.
+	message = catchFail(t, func() {
+		applyTagSlugs([]Photo{photo()}, map[string]string{"東京": "harbour"})
+	})
+	if !strings.Contains(message, "harbour") {
+		t.Errorf("failed with %q, want the clash refused", message)
 	}
 }

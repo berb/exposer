@@ -168,6 +168,7 @@ type cacheEntry struct {
 
 type albumMeta struct {
 	Tag      string `yaml:"tag"`
+	Slug     string `yaml:"slug"`
 	Title    string `yaml:"title"`
 	Date     string `yaml:"date"`
 	Cover    string `yaml:"cover"`
@@ -177,6 +178,7 @@ type albumMeta struct {
 
 type locationMeta struct {
 	Tag         string   `yaml:"tag"`
+	Slug        string   `yaml:"slug"`
 	Title       string   `yaml:"title"`
 	Lat         *float64 `yaml:"lat"`
 	Lon         *float64 `yaml:"lon"`
@@ -194,15 +196,60 @@ var fail = func(format string, args ...any) {
 	os.Exit(1)
 }
 
+// spelledOut holds the Latin letters that NFKD leaves with no ASCII form of
+// their own, spelled as a reader of the language would spell them (R-20).
+// Without it they vanish rather than decompose: "Weißbier" slugged to weibier,
+// "Tromsø" to troms and "Łódź" to odz, each of them a lost letter nobody is
+// told about, and two names that lose different letters can end up one
+// address. A letter NFKD does decompose -- ä, ö, ü, å -- is left to it, so no
+// slug a site has already published moves.
+var spelledOut = map[rune]string{
+	'ß': "ss", 'ẞ': "ss",
+	'æ': "ae", 'Æ': "ae",
+	'œ': "oe", 'Œ': "oe",
+	'ø': "oe", 'Ø': "oe",
+	'ð': "d", 'Ð': "d",
+	'þ': "th", 'Þ': "th",
+	'đ': "d", 'Đ': "d",
+	'ł': "l", 'Ł': "l",
+	'ħ': "h", 'Ħ': "h",
+	'ŋ': "ng", 'Ŋ': "ng",
+	'ŧ': "t", 'Ŧ': "t",
+	'ı': "i", 'ſ': "s", 'ĸ': "k",
+}
+
 func slugify(text string) string {
 	var ascii strings.Builder
 	for _, r := range norm.NFKD.String(text) {
-		if r < 128 { // mirrors Python's .encode("ascii", "ignore")
+		switch {
+		case r < 128: // mirrors Python's .encode("ascii", "ignore")
 			ascii.WriteRune(r)
+		default:
+			ascii.WriteString(spelledOut[r]) // "" for a letter nothing spells
 		}
 	}
 	s := nonAlnumRe.ReplaceAllString(strings.ToLower(ascii.String()), "-")
 	return strings.Trim(dashesRe.ReplaceAllString(s, "-"), "-")
+}
+
+// slugRe is what a slug declared in the library must look like: the shape
+// slugify produces, so that a declared address and a generated one cannot be
+// told apart in a URL.
+var slugRe = regexp.MustCompile(`^[a-z0-9]+(?:-[a-z0-9]+)*$`)
+
+// slugFor is the address of one album, tag or place: the slug declared for it
+// in the library if there is one, otherwise the slug of its name (R-20). A
+// name in a script ASCII cannot carry has no slug of its own, and declaring
+// one is how its album or tag gets a page at all.
+func slugFor(kind, name, declared, where string) string {
+	if declared == "" {
+		return slugify(name)
+	}
+	if !slugRe.MatchString(declared) {
+		fail("%s: %q is not a slug for %s %q; use lower-case letters, digits and single dashes, as in %q",
+			where, declared, kind, name, slugify(declared))
+	}
+	return declared
 }
 
 func asStrings(v any) []string {
@@ -583,6 +630,14 @@ func validateContract(photo Photo) []string {
 	return problems
 }
 
+// declareSlug says, per kind of thing, where its address can be declared when
+// its name cannot produce one (R-20).
+var declareSlug = map[string]string{
+	"album":    "give it a 'slug:' in its album file",
+	"tag":      "give it a slug under 'tag_slugs:' in " + configFileName,
+	"location": "give it a 'slug:' in its location file",
+}
+
 // checkSlug fails the build on a name that cannot be an address: one with no
 // ASCII letter or digit in it, such as "東京", whose slug is empty, so that its
 // page would be written over the section's own index; or one whose slug an
@@ -592,7 +647,7 @@ func validateContract(photo Photo) []string {
 func checkSlug(kind, name, slug string, owners map[string]string) {
 	if slug == "" {
 		fail("%s %q has no letters or digits a URL can carry, so it has no address of its own; "+
-			"name it with at least one Latin letter or digit", kind, name)
+			"%s, or rename it with at least one Latin letter or digit", kind, name, declareSlug[kind])
 	}
 	if owners == nil {
 		return
@@ -604,10 +659,37 @@ func checkSlug(kind, name, slug string, owners map[string]string) {
 	owners[slug] = name
 }
 
-// checkTagSlugs applies checkSlug to the tags that get a page: those on
-// published photographs. Two tags with one slug would share a listing, and a tag
-// with none would be written over the tags index.
-func checkTagSlugs(photos []Photo) {
+// applyTagSlugs gives every tag the address the configuration declares for it
+// (R-20) and then checks the tags that get a page: those on published
+// photographs. Two tags with one slug would share a listing, and a tag with
+// none would be written over the tags index.
+//
+// A declared slug that names no tag in the library fails the build, as an
+// unused gear or tag description does (R-17, R-19): a setting that does
+// nothing is a typo, and a silent one is worse than a loud one.
+func applyTagSlugs(photos []Photo, declared map[string]string) {
+	used := map[string]bool{}
+	for i := range photos {
+		for j, tag := range photos[i].Tags {
+			name := strings.Join(tag.Path, "|")
+			if _, ok := declared[name]; ok {
+				used[name] = true
+			}
+			photos[i].Tags[j].Slug = slugFor("tag", name, declared[name], configFileName)
+		}
+	}
+	var unused []string
+	for name := range declared {
+		if !used[name] {
+			unused = append(unused, name)
+		}
+	}
+	if len(unused) > 0 {
+		sort.Strings(unused)
+		fail("%s: tag_slugs names no tag the library carries: %s",
+			configFileName, strings.Join(unused, ", "))
+	}
+
 	owners := map[string]string{}
 	for _, photo := range photos {
 		if !photo.Published {
@@ -748,6 +830,7 @@ func loadAlbums(library string, photos []Photo) []Album {
 
 	albums := make([]Album, 0, len(names))
 	slugOwner := map[string]string{}
+	slugByName := map[string]string{}
 	for _, name := range names {
 		meta, hasMeta := declared[name]
 		members := byTag[name]
@@ -771,13 +854,13 @@ func loadAlbums(library string, photos []Photo) []Album {
 		// the two disagree -- allg-u.yaml declaring Album|Allgäu, whose photos
 		// are slugged allgau -- and the album then had a count, an entry in the
 		// index and no page at all, with the build still passing.
-		slug := slugify(name)
+		slug := slugFor("album", name, meta.Slug, declaredFile[name])
 		if len(published) > 0 {
 			checkSlug("album", name, slug, slugOwner)
 		}
 		if hasMeta {
 			if base := filepath.Base(declaredFile[name]); base != slug+".yaml" {
-				fail("%s: an album file is named for the slug of its tag, so %q belongs in %s.yaml",
+				fail("%s: an album file is named for the album's slug, so %q belongs in %s.yaml",
 					declaredFile[name], meta.Tag, slug)
 			}
 		}
@@ -845,6 +928,7 @@ func loadAlbums(library string, photos []Photo) []Album {
 			intro = &trimmed
 		}
 
+		slugByName[name] = slug
 		albums = append(albums, Album{
 			Slug:       slug,
 			Tag:        albumNamespace + "|" + name,
@@ -857,6 +941,21 @@ func loadAlbums(library string, photos []Photo) []Album {
 			PhotoCount: len(published),
 			Unlisted:   hasMeta && meta.Unlisted,
 		})
+	}
+
+	// A photograph carries the slug of each album it belongs to, and an album
+	// may have had its address declared in its file rather than taken from its
+	// name (R-20). The two must be the one address, as R-3 says, so the slugs
+	// resolved here replace what the sidecar's name slugged to.
+	for i := range photos {
+		if len(photos[i].albumTags) == 0 {
+			continue
+		}
+		slugs := make([]string, 0, len(photos[i].albumTags))
+		for _, name := range photos[i].albumTags {
+			slugs = append(slugs, slugByName[name])
+		}
+		photos[i].Albums = slugs
 	}
 	return albums
 }
@@ -874,6 +973,7 @@ func loadLocations(library string, photos []Photo) []Location {
 	}
 
 	declared := map[string]locationMeta{}
+	declaredFile := map[string]string{}
 	readYAMLDir(filepath.Join(library, libraryData, "locations"), func(path string, data []byte) {
 		var meta locationMeta
 		if err := yaml.Unmarshal(data, &meta); err != nil {
@@ -887,6 +987,7 @@ func loadLocations(library string, photos []Photo) []Location {
 			parts[i] = strings.TrimSpace(parts[i])
 		}
 		declared[strings.Join(parts[1:], "\x00")] = meta
+		declaredFile[strings.Join(parts[1:], "\x00")] = path
 	})
 
 	var unknown []string
@@ -908,10 +1009,11 @@ func loadLocations(library string, photos []Photo) []Location {
 
 	locations := make([]Location, 0, len(keys))
 	seenSlugs := map[string]string{}
+	slugByKey := map[string]string{}
 	for _, node := range keys {
 		key := strings.Join(node, "\x00")
 		meta := declared[key]
-		slug := slugify(strings.Join(node, "-"))
+		slug := slugFor("location", strings.Join(node, "|"), meta.Slug, declaredFile[key])
 		if previous, clash := seenSlugs[slug]; clash {
 			fail("location slug '%s' is claimed by both %s and %s",
 				slug, previous, strings.Join(node, "|"))
@@ -948,6 +1050,7 @@ func loadLocations(library string, photos []Photo) []Location {
 			description = &trimmed
 		}
 
+		slugByKey[key] = slug
 		locations = append(locations, Location{
 			Slug:        slug,
 			Tag:         locationNamespace + "|" + strings.Join(node, "|"),
@@ -958,6 +1061,20 @@ func loadLocations(library string, photos []Photo) []Location {
 			Description: description,
 			PhotoCount:  count,
 		})
+	}
+
+	// As with an album, a place may have its address declared in its file
+	// (R-20), so a photograph's location slugs are the ones resolved here
+	// rather than what its tag's name slugged to.
+	for i := range photos {
+		if len(photos[i].locationPaths) == 0 {
+			continue
+		}
+		slugs := make([]string, 0, len(photos[i].locationPaths))
+		for _, path := range photos[i].locationPaths {
+			slugs = append(slugs, slugByKey[strings.Join(path, "\x00")])
+		}
+		photos[i].Locations = slugs
 	}
 	return locations
 }
@@ -1156,7 +1273,7 @@ func runIndex(args []string) {
 		byID[photo.ID] = photo.Source
 	}
 
-	checkTagSlugs(photos)
+	applyTagSlugs(photos, configFor(*library, *configPath).TagSlugs)
 	albums := loadAlbums(*library, photos)
 	locations := loadLocations(*library, photos)
 
