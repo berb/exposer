@@ -42,7 +42,7 @@ func TestSlugify(t *testing.T) {
 		{"OLYMPUS M.12-40mm F2.8", "olympus-m-12-40mm-f2-8"},
 		{"Black/White", "black-white"},
 		{"  spaced  out  ", "spaced-out"},
-		{"Ärger", "arger"},
+		{"Ärger", "aerger"},
 	} {
 		if got := slugify(c.in); got != c.want {
 			t.Errorf("slugify(%q) = %q, want %q", c.in, got, c.want)
@@ -300,14 +300,15 @@ func TestAlbumWithNoAddressFailsTheBuild(t *testing.T) {
 }
 
 func TestAlbumsSharingASlugFailTheBuild(t *testing.T) {
-	// slugify drops what ASCII cannot say, so these are one address.
+	// An umlaut and the ASCII spelling of it are one address: Allgäu is
+	// allgaeu, and so is Allgaeu.
 	message := catchFail(t, func() {
 		loadAlbums(t.TempDir(), []Photo{
 			publishedWithAlbums("a1", "Allgäu"),
-			publishedWithAlbums("a2", "Allgau"),
+			publishedWithAlbums("a2", "Allgaeu"),
 		})
 	})
-	for _, want := range []string{"Allgäu", "Allgau", `"allgau"`} {
+	for _, want := range []string{"Allgäu", "Allgaeu", `"allgaeu"`} {
 		if !strings.Contains(message, want) {
 			t.Errorf("failed with %q, want it to mention %s", message, want)
 		}
@@ -429,9 +430,10 @@ func TestAlbumCoverMustBePublished(t *testing.T) {
 }
 
 func TestSlugifySpellsOutALetterItCannotFold(t *testing.T) {
-	// R-20: a letter NFKD leaves without an ASCII form used to vanish, which
-	// loses a letter nobody is told about. A letter it does fold -- ä, ö, ü, å
-	// -- is left alone, so no slug a site has published moves.
+	// R-20: a letter NFKD leaves without an ASCII form used to vanish, and an
+	// umlaut folded to the bare vowel. Both are spelled out now, as German,
+	// Danish or Polish spells them with only ASCII to hand. A letter nothing
+	// spells is still folded (å is a) or dropped (東京 has no slug at all).
 	for name, want := range map[string]string{
 		"Weißbier":       "weissbier",
 		"Tromsø":         "tromsoe",
@@ -440,9 +442,12 @@ func TestSlugifySpellsOutALetterItCannotFold(t *testing.T) {
 		"Ænima":          "aenima",
 		"Þingvellir":     "thingvellir",
 		"Ngô Đình":       "ngo-dinh",
-		"Allgäu":         "allgau",
-		"Köln":           "koln",
-		"Zürich":         "zurich",
+		"Allgäu":         "allgaeu",
+		"Köln":           "koeln",
+		"Zürich":         "zuerich",
+		"Ulmer Münster":  "ulmer-muenster",
+		"ÄÖÜ":            "aeoeue",
+		"a\u0308":        "ae", // a sidecar may write the diaeresis apart
 		"Århus":          "arhus",
 		"Category|Mixed": "category-mixed",
 		"東京":             "",
