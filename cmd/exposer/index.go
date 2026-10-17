@@ -794,6 +794,12 @@ func loadAlbums(library string, photos []Photo) []Album {
 				fail("%s: cover '%s' matches %d photos in this album",
 					declaredFile[name], meta.Cover, len(matches))
 			}
+			// The cover is drawn on the album's pages and in its link previews,
+			// which only a published photograph has derivatives for.
+			if !matches[0].Published {
+				fail("%s: cover '%s' is in this album but is not published (rating %d is below the gate)",
+					declaredFile[name], meta.Cover, matches[0].Rating)
+			}
 			// Copy: photos is re-sorted later, which would move this value.
 			id := matches[0].ID
 			cover = &id
