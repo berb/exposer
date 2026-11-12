@@ -262,8 +262,12 @@ func slugFor(kind, name, declared, where string) string {
 		return slugify(name)
 	}
 	if !slugRe.MatchString(declared) {
-		fail("%s: %q is not a slug for %s %q; use lower-case letters, digits and single dashes, as in %q",
-			where, declared, kind, name, slugify(declared))
+		hint := ""
+		if suggestion := slugify(declared); suggestion != "" {
+			hint = fmt.Sprintf(", as in %q", suggestion)
+		}
+		fail("%s: %q is not a slug for %s %q; use lower-case letters, digits and single dashes%s",
+			where, declared, kind, name, hint)
 	}
 	return declared
 }
@@ -686,13 +690,23 @@ func checkSlug(kind, name, slug string, owners map[string]string) {
 func applyTagSlugs(photos []Photo, declared map[string]string) {
 	used := map[string]bool{}
 	for i := range photos {
-		for j, tag := range photos[i].Tags {
+		kept := make([]Tag, 0, len(photos[i].Tags))
+		for _, tag := range photos[i].Tags {
 			name := strings.Join(tag.Path, "|")
 			if _, ok := declared[name]; ok {
 				used[name] = true
 			}
-			photos[i].Tags[j].Slug = slugFor("tag", name, declared[name], configFileName)
+			tag.Slug = slugFor("tag", name, declared[name], configFileName)
+			// A tag with no address on an unpublished photograph gets no page
+			// and is left out of the index, which the schema holds to real
+			// slugs. It stays in the sidecar; publishing the photograph makes
+			// the check below ask for an address.
+			if tag.Slug == "" && !photos[i].Published {
+				continue
+			}
+			kept = append(kept, tag)
 		}
+		photos[i].Tags = kept
 	}
 	var unused []string
 	for name := range declared {
@@ -871,6 +885,19 @@ func loadAlbums(library string, photos []Photo) []Album {
 		// are slugged allgau -- and the album then had a count, an entry in the
 		// index and no page at all, with the build still passing.
 		slug := slugFor("album", name, meta.Slug, declaredFile[name])
+		if slug == "" {
+			// A described album must have an address, published or not --
+			// someone wrote a file for it. Without a file, an album nobody
+			// publishes gets no page, so it is left out of the index rather
+			// than carried with an address the schema refuses.
+			if hasMeta {
+				fail("%s: %q has no letters or digits a URL can carry; declare its address with 'slug:' in this file",
+					declaredFile[name], meta.Tag)
+			}
+			if len(published) == 0 {
+				continue
+			}
+		}
 		if len(published) > 0 {
 			checkSlug("album", name, slug, slugOwner)
 		}
@@ -969,7 +996,10 @@ func loadAlbums(library string, photos []Photo) []Album {
 		}
 		slugs := make([]string, 0, len(photos[i].albumTags))
 		for _, name := range photos[i].albumTags {
-			slugs = append(slugs, slugByName[name])
+			// An album left out of the index has no slug to carry.
+			if slug, ok := slugByName[name]; ok {
+				slugs = append(slugs, slug)
+			}
 		}
 		photos[i].Albums = slugs
 	}
@@ -1029,12 +1059,6 @@ func loadLocations(library string, photos []Photo) []Location {
 	for _, node := range keys {
 		key := strings.Join(node, "\x00")
 		meta := declared[key]
-		slug := slugFor("location", strings.Join(node, "|"), meta.Slug, declaredFile[key])
-		if previous, clash := seenSlugs[slug]; clash {
-			fail("location slug '%s' is claimed by both %s and %s",
-				slug, previous, strings.Join(node, "|"))
-		}
-		seenSlugs[slug] = strings.Join(node, "|")
 
 		// A photo tagged Germany|Ulm counts for Germany too (R-6).
 		count := 0
@@ -1050,9 +1074,27 @@ func loadLocations(library string, photos []Photo) []Location {
 			}
 		}
 
-		if count > 0 {
+		slug := slugFor("location", strings.Join(node, "|"), meta.Slug, declaredFile[key])
+		if slug == "" {
+			// A described place must have an address, published or not --
+			// someone wrote a file for it. Without one, a place no published
+			// photograph carries gets no page, so it is left out of the index
+			// rather than carried with an address the schema refuses. It never
+			// enters the clash check either: two such places share nothing.
+			if file, has := declaredFile[key]; has {
+				fail("%s: %q has no letters or digits a URL can carry; declare its address with 'slug:' in this file",
+					file, locationNamespace+"|"+strings.Join(node, "|"))
+			}
+			if count == 0 {
+				continue
+			}
 			checkSlug("location", strings.Join(node, "|"), slug, nil)
 		}
+		if previous, clash := seenSlugs[slug]; clash {
+			fail("location slug '%s' is claimed by both %s and %s",
+				slug, previous, strings.Join(node, "|"))
+		}
+		seenSlugs[slug] = strings.Join(node, "|")
 
 		// A place no file describes is named by its whole hierarchy, as it has
 		// always been written on the site (R-6); the title in its file (R-10)
@@ -1088,7 +1130,10 @@ func loadLocations(library string, photos []Photo) []Location {
 		}
 		slugs := make([]string, 0, len(photos[i].locationPaths))
 		for _, path := range photos[i].locationPaths {
-			slugs = append(slugs, slugByKey[strings.Join(path, "\x00")])
+			// A place left out of the index has no slug to carry.
+			if slug, ok := slugByKey[strings.Join(path, "\x00")]; ok {
+				slugs = append(slugs, slug)
+			}
 		}
 		photos[i].Locations = slugs
 	}
