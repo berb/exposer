@@ -4,6 +4,12 @@ All notable changes to exposer, newest first. The format follows [Keep a Changel
 
 ## [Unreleased]
 
+### Fixed
+
+- An album, tag or place whose name has no address and that only unpublished photographs carry is now left out of the index, instead of sitting in it with an empty address the index's own schema refuses. Two such names also no longer fail the build with "location slug '' is claimed by both" — neither gets a page, so there is nothing to claim.
+- An album or location file describing a name that cannot produce an address now fails saying what to do — declare the address with `slug:` in that file — instead of asking for a file named `.yaml`.
+- Declaring a slug that is not one, such as `slug: 東京`, no longer suggests the empty string as the fix.
+
 ## [0.3.2] - 2026-10-17
 
 ### Added

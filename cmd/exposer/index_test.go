@@ -604,3 +604,94 @@ func TestATagsAddressMayComeFromTheConfiguration(t *testing.T) {
 		t.Errorf("failed with %q, want the clash refused", message)
 	}
 }
+
+func TestNamesNobodyPublishesLeaveTheIndex(t *testing.T) {
+	// R-20: a name with no address on unpublished photographs only gets no
+	// page and no index entry -- the schema holds every slug in the index to
+	// ^[a-z0-9-]+$, so carrying "" would make a build that passes produce an
+	// index that does not validate.
+	library := t.TempDir()
+
+	// Two such places used to collide on the empty slug: "location slug '' is
+	// claimed by both Москва and 東京", though neither gets a page.
+	photos := []Photo{
+		{Published: false, locationPaths: [][]string{{"東京"}}},
+		{Published: false, locationPaths: [][]string{{"Москва"}}},
+		{Published: true, locationPaths: [][]string{{"Norway"}}},
+	}
+	var locations []Location
+	if message := catchFail(t, func() { locations = loadLocations(library, photos) }); message != "" {
+		t.Fatalf("unpublished places failed the build: %s", message)
+	}
+	if len(locations) != 1 || locations[0].Slug != "norway" {
+		t.Errorf("locations are %v, want norway alone", locations)
+	}
+	if len(photos[0].Locations) != 0 || len(photos[2].Locations) != 1 {
+		t.Errorf("photo locations are %v and %v, want none and [norway]",
+			photos[0].Locations, photos[2].Locations)
+	}
+
+	// The same for an album nobody publishes...
+	hidden := []Photo{{ID: "a1", Published: false, albumTags: []string{"東京"}, Albums: []string{""}}}
+	var albums []Album
+	if message := catchFail(t, func() { albums = loadAlbums(library, hidden) }); message != "" {
+		t.Fatalf("an unpublished album failed the build: %s", message)
+	}
+	if len(albums) != 0 || len(hidden[0].Albums) != 0 {
+		t.Errorf("albums are %v with photo albums %v, want neither", albums, hidden[0].Albums)
+	}
+
+	// ...and for a tag on an unpublished photograph, while its real tags stay.
+	tagged := []Photo{{Published: false, Tags: []Tag{
+		{Slug: "", Path: []string{"東京", "夜"}, Leaf: "夜"},
+		{Slug: "places-harbour", Path: []string{"Places", "Harbour"}, Leaf: "Harbour"},
+	}}}
+	if message := catchFail(t, func() { applyTagSlugs(tagged, nil) }); message != "" {
+		t.Fatalf("an unpublished tag failed the build: %s", message)
+	}
+	if len(tagged[0].Tags) != 1 || tagged[0].Tags[0].Slug != "places-harbour" {
+		t.Errorf("tags are %v, want places-harbour alone", tagged[0].Tags)
+	}
+}
+
+func TestADescribedNameMustHaveAnAddress(t *testing.T) {
+	// Someone wrote a file for it, so leaving it out silently is not an
+	// option, and the failure names the fix rather than asking for a file
+	// called ".yaml".
+	library := t.TempDir()
+	albums := filepath.Join(library, libraryData, "albums")
+	if err := os.MkdirAll(albums, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	write(t, filepath.Join(albums, "tokyo.yaml"), "tag: \"Album|東京\"\n")
+	message := catchFail(t, func() {
+		loadAlbums(library, []Photo{{ID: "a1", Published: false, albumTags: []string{"東京"}}})
+	})
+	if !strings.Contains(message, "tokyo.yaml") || !strings.Contains(message, "'slug:'") {
+		t.Errorf("failed with %q, want the file and 'slug:' named", message)
+	}
+
+	locations := filepath.Join(library, libraryData, "locations")
+	if err := os.MkdirAll(locations, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	write(t, filepath.Join(locations, "tokyo.yaml"), "tag: \"Location|東京\"\n")
+	message = catchFail(t, func() {
+		loadLocations(library, []Photo{{Published: false, locationPaths: [][]string{{"東京"}}}})
+	})
+	if !strings.Contains(message, "tokyo.yaml") || !strings.Contains(message, "'slug:'") {
+		t.Errorf("failed with %q, want the file and 'slug:' named", message)
+	}
+}
+
+func TestARejectedSlugSuggestsOnlyWhatExists(t *testing.T) {
+	// slugify("東京") is "", and `as in ""` helps nobody.
+	message := catchFail(t, func() { slugFor("album", "東京", "東京", "albums/tokyo.yaml") })
+	if strings.Contains(message, `as in`) {
+		t.Errorf("failed with %q, want no suggestion when nothing can be suggested", message)
+	}
+	message = catchFail(t, func() { slugFor("album", "東京", "Tokyo", "albums/tokyo.yaml") })
+	if !strings.Contains(message, `as in "tokyo"`) {
+		t.Errorf("failed with %q, want it to suggest tokyo", message)
+	}
+}
